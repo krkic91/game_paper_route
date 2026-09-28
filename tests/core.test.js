@@ -5,6 +5,7 @@ const {
   getTargetMailbox,
   spawnThrow,
   updateGame,
+  crashPlayer,
   constants,
 } = require('../core.js');
 
@@ -71,18 +72,25 @@ test('missed throws increment the miss counter when no valid mailbox target exis
   assert.equal(game.score, 0);
 });
 
-test('collision recovery prevents repeated life loss while overlapping an obstacle', () => {
+test('collision recovery prevents repeated life loss', () => {
   const game = createGameState({ skipBuild: true });
-  game.obstacles.push({ type: 'trash', x: 0, z: 0.7, r: 1 });
 
-  updateGame(game, 1 / 60, {});
+  assert.equal(crashPlayer(game), true);
   assert.equal(game.player.hearts, 2, 'first collision should remove one life');
-
-  stepGame(game, constants.COLLISION_RECOVERY_TIME * 0.5, {});
-  assert.equal(game.player.hearts, 2, 'recovery window should block extra life loss');
+  assert.equal(crashPlayer(game), false, 'another collision during recovery should be ignored');
+  assert.equal(game.player.hearts, 2);
 
   stepGame(game, constants.COLLISION_RECOVERY_TIME + 0.1, {});
-  game.player.z = 0;
+  assert.equal(crashPlayer(game), true);
+  assert.equal(game.player.hearts, 1, 'a collision after recovery should remove another life');
+});
+
+test('an obstacle disappears in the same update that the player passes it', () => {
+  const game = createGameState({ skipBuild: true });
+  game.obstacles.push({ type: 'trash', x: 0, z: 0.1, r: 1 });
+
   updateGame(game, 1 / 60, {});
-  assert.equal(game.player.hearts, 1, 'after recovery expires, a new collision can hurt again');
+
+  assert.equal(game.player.hearts, 2, 'collision should still register while passing the obstacle');
+  assert.equal(game.obstacles.length, 0, 'a passed obstacle should be removed immediately');
 });

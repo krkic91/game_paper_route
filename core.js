@@ -462,6 +462,10 @@
       obstacle.hitFlash = Math.max(0, (obstacle.hitFlash || 0) - dt);
     }
 
+    for (let i = game.obstacles.length - 1; i >= 0; i--) {
+      if (game.obstacles[i].z < player.z) game.obstacles.splice(i, 1);
+    }
+
     for (let i = game.particles.length - 1; i >= 0; i--) {
       const particle = game.particles[i];
       particle.life -= dt;

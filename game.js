@@ -44,6 +44,10 @@ const feedback = {
   color: '#ffffff',
   time: 0,
 };
+const onboarding = {
+  visible: true,
+  time: 3,
+};
 let activeAimPreview = null;
 let highlightedMailbox = null;
 let lastTime = 0;
@@ -57,6 +61,11 @@ function resize() {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 
+function dismissOnboarding() {
+  onboarding.visible = false;
+  onboarding.time = 0;
+}
+
 function resetGame() {
   resetGameState(game);
   feedback.text = '';
@@ -64,6 +73,8 @@ function resetGame() {
   feedback.time = 0;
   activeAimPreview = null;
   highlightedMailbox = null;
+  onboarding.visible = true;
+  onboarding.time = 3;
   mobile.pendingThrow = false;
   pendingKeyboardThrow.left = false;
   pendingKeyboardThrow.right = false;
@@ -82,6 +93,9 @@ resize();
 window.addEventListener('keydown', (event) => {
   const key = event.key.toLowerCase();
   keys.add(key);
+  if (['a', 'd', 'w', 's', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'j', 'k', ' '].includes(key) || event.code === 'Space') {
+    dismissOnboarding();
+  }
   if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key) || event.code === 'Space') {
     event.preventDefault();
   }
@@ -99,6 +113,7 @@ window.addEventListener('keyup', (event) => {
 
 canvas.addEventListener('pointerdown', (event) => {
   if (event.target === pedalButton) return;
+  dismissOnboarding();
   canvas.setPointerCapture?.(event.pointerId);
   mobile.gestures.set(event.pointerId, {
     startX: event.clientX,
@@ -171,6 +186,7 @@ function pedalPointerDown(event) {
     resetGame();
     return;
   }
+  dismissOnboarding();
   pedalButton.setPointerCapture?.(event.pointerId);
   mobile.pedalPointers.add(event.pointerId);
   updatePedalState();
@@ -844,7 +860,7 @@ function drawUI() {
   ctx.fillText('ĐÍCH', barX + barW, barY - 7);
   ctx.textAlign = 'left';
 
-  if (game.player.z < 35 && game.state === 'playing') {
+  if (onboarding.visible && game.state === 'playing') {
     if (compact) {
       const introW = Math.max(170, w - 132);
       const introX = 12;
@@ -988,6 +1004,10 @@ function frame(timestamp) {
   const previousMissed = game.missed;
   const previousCrashes = game.crashes;
   feedback.time = Math.max(0, feedback.time - dt);
+  if (onboarding.visible && game.state === 'playing') {
+    onboarding.time = Math.max(0, onboarding.time - dt);
+    if (onboarding.time <= 0) onboarding.visible = false;
+  }
 
   updateGame(game, dt, buildInput());
 
