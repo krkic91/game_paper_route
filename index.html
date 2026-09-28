@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Delivery Dash</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <canvas id="game"></canvas>
+      <aside class="hud" aria-label="Hướng dẫn chơi">
+        <div class="game-title"><span class="title-mark">✦</span> DELIVERY DASH</div>
+        <div class="mission">Giao báo • Né chướng ngại • Về đích an toàn</div>
+        <div class="control-grid">
+          <div><span><kbd>A</kbd><kbd>D</kbd> hoặc <kbd>←</kbd><kbd>→</kbd></span><b>Lái xe</b></div>
+          <div><span><kbd>W</kbd><kbd>S</kbd> hoặc <kbd>↑</kbd><kbd>↓</kbd></span><b>Tốc độ</b></div>
+          <div><span><kbd>SPACE</kbd></span><b>Ném vào mục tiêu</b></div>
+          <div><span><kbd>J</kbd> trái&nbsp; / &nbsp;<kbd>K</kbd> phải</span><b>Chọn phía ném</b></div>
+        </div>
+      </aside>
+      <div class="mobile-ui">
+        <button id="pedalButton" class="pedal-button" aria-label="Giữ để đạp xe">
+          <span>ĐẠP XE</span><small>GIỮ</small>
+        </button>
+      </div>
+    </div>
+    <script src="core.js"></script>
+    <script src="game.js"></script>
+  </body>
+</html>
