@@ -150,8 +150,8 @@
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = width * dpr;
     canvas.height = height * dpr;
-    const ctx = canvas.getContext('2d');
-    ctx.scale(dpr, dpr);
+    const ctx = options.renderer === '3d' ? null : canvas.getContext('2d');
+    ctx?.scale(dpr, dpr);
     function point(event) {
       const rect = canvas.getBoundingClientRect();
       return {

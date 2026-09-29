@@ -209,16 +209,20 @@
   let recent = Array.isArray(stored.recent)
     ? [...new Set(stored.recent.filter((id) => ids.has(id)))].slice(0, 10)
     : [];
-  const records = {};
-  for (const game of games)
-    if (Number.isFinite(stored.records?.[game.id]) && stored.records[game.id] >= 0)
-      records[game.id] = Math.min(1000000000, Math.floor(stored.records[game.id]));
+  const records = {}, records3d = {};
+  let libraryEdition = stored.edition === '3d' ? '3d' : '2d';
+  for (const game of games) {
+    for (const [source, destination] of [[stored.records, records], [stored.records3d, records3d]]) {
+      if (Number.isFinite(source?.[game.id]) && source[game.id] >= 0)
+        destination[game.id] = Math.min(1000000000, Math.floor(source[game.id]));
+    }
+  }
   let storageWarning = false;
   function save() {
     try {
       localStorage.setItem(
         storageKey,
-        JSON.stringify({ favorites: [...favorites], recent, records }),
+        JSON.stringify({ favorites: [...favorites], recent, records, records3d, edition: libraryEdition }),
       );
     } catch {
       if (!storageWarning) {
@@ -239,6 +243,8 @@
     filter = 'all',
     sort = 'featured',
     active = null,
+    activeEdition = null,
+    mountGeneration = 0,
     instance = null,
     paused = false,
     helpVisible = true,
@@ -301,7 +307,7 @@
     grid.innerHTML = visible
       .map(
         (game) =>
-          `<article class="game-card" data-game="${game.id}"><div class="game-cover"><button class="cover-play" data-play="${game.id}" aria-label="Chơi ${game.title}">${Art.cover(game.id)}<span class="cover-hover"><span>${Art.icon('play')}Chơi ngay</span></span></button>${game.badge ? `<span class="cover-label ${game.id === 'delivery' ? 'original' : ''}">${game.id === 'delivery' ? Art.icon('spark') : ''}${game.badge}</span>` : ''}${favoriteButton(game)}</div><div class="game-card-body"><button class="game-card-title" data-play="${game.id}">${game.title}${Art.icon('arrow-up-right')}</button><p class="game-card-description">${game.description}</p><div class="game-card-meta"><span class="category-tag" style="--tag:${categoryColors[game.category]}"><i></i>${categories[game.category]}</span><span class="players-label">${Art.icon('users')}${game.players}</span></div></div></article>`,
+          `<article class="game-card" data-game="${game.id}"><div class="game-cover"><button class="cover-play" data-play="${game.id}" aria-label="Chơi ${game.title}">${Art.cover(game.id)}<span class="cover-hover"><span>${Art.icon('play')}Chơi ngay</span></span></button>${game.badge ? `<span class="cover-label ${game.id === 'delivery' ? 'original' : ''}">${game.id === 'delivery' ? Art.icon('spark') : ''}${game.badge}</span>` : ''}${favoriteButton(game)}</div><div class="game-card-body"><button class="game-card-title" data-play="${game.id}">${game.title}${Art.icon('arrow-up-right')}</button><p class="game-card-description">${game.description}</p><div class="game-card-meta"><span class="category-tag" style="--tag:${categoryColors[game.category]}"><i></i>${categories[game.category]}</span><span class="players-label">${Art.icon('users')}${game.players}</span></div><div class="card-editions"><button data-play="${game.id}" data-edition="2d" class="${libraryEdition === '2d' ? 'selected' : ''}" aria-label="Chơi ${game.title} bản 2D">2D cổ điển</button><button data-play="${game.id}" data-edition="3d" class="${libraryEdition === '3d' ? 'selected' : ''}" aria-label="Chơi ${game.title} bản 3D">${Art.icon('cube', 13)}Chơi 3D</button></div></div></article>`,
       )
       .join('');
     $('#favorite-count').textContent = favorites.size;
@@ -335,6 +341,10 @@
     $('.welcome').hidden = !exploring;
     $('.highlights').hidden = !exploring;
     $('.surprise-banner').hidden = !exploring;
+    $('.dimension-banner').hidden = !exploring;
+    document.body.classList.toggle('library-is-3d', libraryEdition === '3d');
+    document.querySelectorAll('.edition-switch [data-library-edition]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.libraryEdition === libraryEdition)));
+    $('#edition-library-note').textContent = libraryEdition === '3d' ? '10 game · Mô hình 3D thật · WebGL 2' : '10 game · Giữ trọn bản nguyên bản';
     document.querySelectorAll('[data-view]').forEach((button) => {
       const selected = button.dataset.view === view;
       button.classList.toggle('active', selected);
@@ -377,7 +387,9 @@
       ).focus({ preventScroll: true });
   }
   function renderHelp(game) {
-    help.innerHTML = `<div class="help-cover">${Art.cover(game.id)}</div><h3>Một chút về trò chơi</h3><p>${game.intro}</p><div class="help-label">CHƠI THẾ NÀO?</div><ol>${game.instructions.map((text) => `<li>${text}</li>`).join('')}</ol><p class="help-variant">${game.variant}</p><div class="help-record">${Art.icon('trophy', 28)}<div><small>Kỷ lục trên thiết bị này</small><strong id="game-best">${(records[game.id] || 0).toLocaleString('vi-VN')}</strong><span class="record-unit">điểm</span></div></div><button class="button button-secondary help-favorite" data-help-favorite></button>`;
+    const currentRecords = activeEdition === '3d' ? records3d : records;
+    const is3d = activeEdition === '3d';
+    help.innerHTML = `<div class="help-cover">${Art.cover(game.id)}</div>${is3d ? '<div class="help-3d-note"><strong>Không gian 3D · WebGL 2</strong><p>Chạm trực tiếp mô hình để chơi. Đổi góc với nút camera; chọn Nhẹ nếu máy chạy chậm. Với bàn cờ / bida: Shift + kéo hoặc chuột phải để xoay.</p><small>Đổi 2D / 3D bắt đầu ván mới. Hai phiên bản lưu kỷ lục riêng.</small></div>' : ''}<h3>Một chút về trò chơi</h3><p>${game.intro}</p><div class="help-label">CHƠI THẾ NÀO?</div><ol>${game.instructions.map((text) => `<li>${text}</li>`).join('')}</ol><p class="help-variant">${game.variant}</p><div class="help-record">${Art.icon('trophy', 28)}<div><small>Kỷ lục ${is3d ? '3D' : '2D'} trên thiết bị này</small><strong id="game-best">${(currentRecords[game.id] || 0).toLocaleString('vi-VN')}</strong><span class="record-unit">điểm</span></div></div><button class="button button-secondary help-favorite" data-help-favorite></button>`;
     updateHelpFavorite();
   }
   function setHelp(value) {
@@ -412,12 +424,16 @@
     else stage.querySelector('.game-workspace')?.focus({ preventScroll: true });
   }
   function restartGame() {
-    if (!instance) return;
+    if (!instance) {
+      if (active && activeEdition === '3d') mountGame(active, '3d', true);
+      return;
+    }
     helpPaused = false;
     setPaused(false);
     instance.restart();
     (
       stage.querySelector('[data-start]') ||
+      stage.querySelector('.three-canvas') ||
       stage.querySelector('.game-workspace') ||
       stage.querySelector('iframe')
     )?.focus({ preventScroll: true });
@@ -428,83 +444,81 @@
       location.protocol === 'file:' ? '*' : location.origin,
     );
   }
-  function mountGame(game) {
-    if (active?.id === game.id && dialog.open) return;
-    if (instance) instance.destroy();
+  function show3DError(message) {
+    if (!active) return;
+    stage.innerHTML = `<div class="three-unavailable"><span class="three-error-icon">${Art.icon('cube', 38)}</span><span class="eyebrow">BẢN 2D VẪN SẴN SÀNG</span><h3>Chưa thể mở không gian 3D</h3><p></p><div><button class="button button-primary" data-play="${active.id}" data-edition="2d">Chơi bản 2D</button><button class="button button-secondary" data-retry-3d>Thử lại 3D</button></div></div>`;
+    stage.querySelector('.three-unavailable p').textContent = message;
+    $('#pause-game').disabled = true; $('#restart-game').disabled = false;
+    stage.querySelector('button').focus({ preventScroll: true });
+  }
+  async function mountGame(game, edition = '2d', force = false) {
+    if (!force && active?.id === game.id && activeEdition === edition && dialog.open) return;
+    const token = ++mountGeneration;
+    const switching = active?.id === game.id && activeEdition !== edition;
+    instance?.destroy();
     if (!dialog.open) opener = document.activeElement;
-    active = game;
-    instance = null;
-    paused = false;
-    helpPaused = false;
-    pauseFocus = null;
-    stage.innerHTML = '';
-    stage.inert = false;
+    active = game; activeEdition = edition; instance = null;
+    paused = false; helpPaused = false; pauseFocus = null;
+    stage.innerHTML = ''; stage.inert = false; stage.dataset.edition = edition;
     $('#pause-screen').hidden = true;
     $('#pause-game').innerHTML = Art.icon('pause');
     $('#pause-game').setAttribute('aria-label', 'Tạm dừng game');
     $('#pause-game').title = 'Tạm dừng (P)';
-    $('#player-title').textContent = game.title;
+    $('#pause-game').disabled = edition === '3d'; $('#restart-game').disabled = edition === '3d';
+    $('#player-title').textContent = `${game.title}${edition === '3d' ? ' 3D' : ''}`;
     $('#player-category').textContent = `${categories[game.category]} · ${game.players}`;
-    $('#player-footnote').textContent =
-      game.id === 'delivery'
-        ? 'Delivery Dash · Game nguyên bản của bạn'
-        : 'Chơi tại chỗ · Kỷ lục lưu trên thiết bị';
+    $('#player-footnote').textContent = edition === '3d' ? 'WebGL 2 · Kỷ lục 3D riêng · Đổi phiên bản = ván mới' : game.id === 'delivery' ? 'Delivery Dash · Game nguyên bản của bạn' : 'Chơi tại chỗ · Kỷ lục lưu trên thiết bị';
+    document.querySelectorAll('[data-player-edition]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.playerEdition === edition)));
     renderHelp(game);
     helpVisible = window.innerWidth > 800;
-    shell.classList.toggle('show-help', helpVisible);
-    shell.classList.toggle('help-hidden', !helpVisible);
+    shell.classList.toggle('show-help', helpVisible); shell.classList.toggle('help-hidden', !helpVisible);
     $('#help-game').setAttribute('aria-expanded', helpVisible);
     if (!dialog.open) dialog.showModal();
     document.body.classList.add('modal-open');
-    const onScore = (score) => {
-      if (!Number.isFinite(score) || score < 0 || active?.id !== game.id) return;
+    const currentRecords = edition === '3d' ? records3d : records;
+    const onScore = score => {
+      if (!Number.isFinite(score) || score < 0 || token !== mountGeneration || activeEdition !== edition) return;
       score = Math.floor(score);
-      if (score > (records[game.id] || 0)) {
-        records[game.id] = score;
-        save();
-        const record = $('#game-best');
-        if (record) record.textContent = score.toLocaleString('vi-VN');
+      if (score > (currentRecords[game.id] || 0)) {
+        currentRecords[game.id] = score; save();
+        const record = $('#game-best'); if (record) record.textContent = score.toLocaleString('vi-VN');
       }
     };
-    if (game.id === 'delivery') {
+    if (edition === '3d') {
+      stage.innerHTML = `<div class="three-loading" role="status"><div class="loading-cube">${Art.icon('cube', 52)}</div><span class="eyebrow">THÊM MỘT CHIỀU VUI</span><h3>Đang dựng không gian 3D…</h3><p>Tải mô hình và bộ dựng hình từ dự án của bạn.</p><button class="button button-secondary" data-play="${game.id}" data-edition="2d">Chơi 2D thay thế</button></div>`;
+      try {
+        await window.Arcade3D.load();
+        if (token !== mountGeneration || !dialog.open) return;
+        stage.innerHTML = '';
+        const settings = { renderer: '3d', best: currentRecords[game.id] || 0, onScore };
+        instance = game.id === 'delivery' ? window.Arcade3D.mountDelivery(stage, settings) : window.ArcadeGames[game.id](stage, settings);
+        $('#pause-game').disabled = false; $('#restart-game').disabled = false;
+        (stage.querySelector('[data-start]') || stage.querySelector('.three-canvas'))?.focus({ preventScroll: true });
+        if (switching) notify('Đã mở bản 3D — ván mới, kỷ lục riêng.');
+        if (document.hidden) setPaused(true);
+      } catch (error) {
+        if (token !== mountGeneration || !dialog.open) return;
+        instance?.destroy(); instance = null;
+        show3DError(error.message || 'Không thể khởi tạo đồ họa 3D. Bạn có thể chơi bản 2D.');
+      }
+    } else if (game.id === 'delivery') {
       const frame = document.createElement('iframe');
-      frame.title = 'Delivery Dash — game giao báo nguyên bản';
-      frame.src = 'delivery.html';
-      frame.allow = 'fullscreen';
-      stage.append(frame);
-      frame.addEventListener(
-        'load',
-        () => {
-          if (active?.id === 'delivery') iframeControl(frame, 'pause', paused);
-        },
-        { once: true },
-      );
-      instance = {
-        frame,
-        onScore,
-        restart: () => iframeControl(frame, 'restart'),
-        setPaused: (value) => iframeControl(frame, 'pause', value),
-        destroy: () => frame.remove(),
-      };
+      frame.title = 'Delivery Dash — game giao báo nguyên bản'; frame.src = 'delivery.html'; frame.allow = 'fullscreen'; stage.append(frame);
+      frame.addEventListener('load', () => { if (token === mountGeneration) iframeControl(frame, 'pause', paused); }, { once: true });
+      instance = { frame, onScore, restart: () => iframeControl(frame, 'restart'), setPaused: value => iframeControl(frame, 'pause', value), destroy: () => frame.remove() };
       frame.focus({ preventScroll: true });
     } else {
       try {
-        instance = window.ArcadeGames[game.id](stage, { best: records[game.id] || 0, onScore });
-        (
-          stage.querySelector('[data-start]') ||
-          stage.querySelector('[tabindex="0"]') ||
-          stage.querySelector('.game-workspace')
-        )?.focus({ preventScroll: true });
+        instance = window.ArcadeGames[game.id](stage, { best: currentRecords[game.id] || 0, onScore });
+        (stage.querySelector('[data-start]') || stage.querySelector('[tabindex="0"]') || stage.querySelector('.game-workspace'))?.focus({ preventScroll: true });
       } catch (error) {
         console.error('Không thể mở game:', error);
-        stage.innerHTML =
-          '<div class="empty-state"><h3>Chưa mở được game</h3><p>Hãy tải lại trang và thử lại nhé.</p></div>';
+        stage.innerHTML = '<div class="empty-state"><h3>Chưa mở được game</h3><p>Hãy tải lại trang và thử lại nhé.</p></div>';
         notify('Có lỗi khi mở game. Vui lòng tải lại trang.');
       }
     }
-    recent = [game.id, ...recent.filter((id) => id !== game.id)].slice(0, 10);
-    save();
-    renderLibrary();
+    if (token !== mountGeneration) return;
+    recent = [game.id, ...recent.filter(id => id !== game.id)].slice(0, 10); save(); renderLibrary();
   }
   function clearGameHash() {
     if (location.hash.startsWith('#play/'))
@@ -514,9 +528,12 @@
     if (!active && !dialog.open) return;
     if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
     const closingId = active?.id;
+    mountGeneration++;
     instance?.destroy();
     instance = null;
     active = null;
+    activeEdition = null;
+    delete stage.dataset.edition;
     paused = false;
     helpPaused = false;
     stage.inert = false;
@@ -532,10 +549,12 @@
         grid.querySelector(`[data-game="${closingId}"] .cover-play`) || $('[data-play="delivery"]')
       ).focus({ preventScroll: true });
   }
-  function playGame(id) {
+  function playGame(id, edition = libraryEdition, replace = false) {
     if (!ids.has(id)) return;
-    const hash = `#play/${id}`;
-    if (location.hash === hash) mountGame(games.find((game) => game.id === id));
+    edition = edition === '3d' ? '3d' : '2d';
+    const hash = `#play/${id}${edition === '3d' ? '/3d' : ''}`;
+    if (replace) { history.replaceState(null, '', hash); syncRoute(); }
+    else if (location.hash === hash) mountGame(games.find((game) => game.id === id), edition);
     else location.hash = hash;
   }
   function syncRoute() {
@@ -543,9 +562,10 @@
       closeGame(false);
       return;
     }
-    const id = location.hash.slice(6);
+    const route = /^#play\/([^/]+)(?:\/(2d|3d))?$/.exec(location.hash);
+    const id = route?.[1], edition = route?.[2] || '2d';
     const game = games.find((game) => game.id === id);
-    if (game) mountGame(game);
+    if (game) mountGame(game, edition);
     else {
       closeGame(false);
       clearGameHash();
@@ -572,9 +592,22 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
+    const librarySwitch = event.target.closest('[data-library-edition]');
+    if (librarySwitch) {
+      libraryEdition = librarySwitch.dataset.libraryEdition === '3d' ? '3d' : '2d';
+      save(); renderLibrary();
+      if (librarySwitch.closest('.dimension-banner')) $('#library').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    const playerSwitch = event.target.closest('[data-player-edition]');
+    if (playerSwitch && active) {
+      if (playerSwitch.dataset.playerEdition !== activeEdition) playGame(active.id, playerSwitch.dataset.playerEdition, true);
+      return;
+    }
+    if (event.target.closest('[data-retry-3d]') && active) { mountGame(active, '3d', true); return; }
     const play = event.target.closest('[data-play]');
     if (play) {
-      playGame(play.dataset.play);
+      playGame(play.dataset.play, play.dataset.edition || libraryEdition);
       return;
     }
     const favorite = event.target.closest('[data-favorite]');
@@ -645,6 +678,12 @@
     } catch {
       notify('Trình duyệt chưa cho phép toàn màn hình. Bạn vẫn có thể chơi ở cửa sổ này.');
     }
+  });
+  stage.addEventListener('arcade:3d-lost', () => {
+    if (activeEdition !== '3d') return;
+    instance?.destroy(); instance = null; paused = false;
+    stage.inert = false; $('#pause-screen').hidden = true;
+    show3DError('Kết nối với GPU đã bị gián đoạn. Bạn có thể mở lại bản 3D (ván mới) hoặc chuyển sang 2D.');
   });
   window.addEventListener('hashchange', syncRoute);
   window.addEventListener('keydown', (event) => {

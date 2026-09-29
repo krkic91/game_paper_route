@@ -2,6 +2,7 @@
 (function () {
   'use strict';
   const paths = {
+    cube: '<path d="m12 2 9 5v10l-9 5-9-5V7l9-5Z"/><path d="m3 7 9 5 9-5M12 12v10m-4.5-17.5 9 5"/>',
     gamepad:
       '<path d="M6 7h12a4 4 0 0 1 3.9 4.9l-1.2 5a2.5 2.5 0 0 1-4.2 1.2L14 16h-4l-2.5 2.1a2.5 2.5 0 0 1-4.2-1.2l-1.2-5A4 4 0 0 1 6 7Z"/><path d="M7 10v5m-2.5-2.5h5M16 11h.01M19 14h.01M9 7V5h6"/>',
     grid: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',

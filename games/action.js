@@ -10,6 +10,7 @@
     const scope = S.createScope();
     const ui = S.canvasUI(host, 900, 550, {
       className: 'race-workspace',
+      renderer: options.renderer,
       label: 'Đua xe đạp 1 km. Lái bằng phím trái, phải; giữ Space để nước rút.',
       toolbar:
         S.stat('VỊ TRÍ', 'place', '4 / 4') +
@@ -19,6 +20,7 @@
       controls: `<button class="control-button steering-button" data-hold="left" aria-label="Giữ để lái trái">${icon('arrow-left')}</button><button class="control-button sprint-button" data-hold="sprint">${icon('bolt')}<span>Giữ để nước rút<span class="sprint-meter"><i></i></span></span></button><button class="control-button steering-button" data-hold="right" aria-label="Giữ để lái phải">${icon('arrow-right')}</button>`,
     });
     const { ctx } = ui;
+    const visual = options.renderer === '3d' ? window.Arcade3D.createView('race', ui, scope) : null;
     const input = S.heldInput(scope, ui, {
       left: ['a', 'arrowleft'],
       right: ['d', 'arrowright'],
@@ -116,6 +118,7 @@
       ctx.restore();
     }
     function draw() {
+      if (visual) return visual.draw(state, { lean: ((input.active('right') ? 1 : 0) - (input.active('left') ? 1 : 0)) * -.1 });
       const sky = ctx.createLinearGradient(0, 0, 0, 230);
       sky.addColorStop(0, '#b7d6d0');
       sky.addColorStop(1, '#e2e7bc');
@@ -345,6 +348,7 @@
     const scope = S.createScope();
     const ui = S.canvasUI(host, 480, 480, {
       className: 'snake-workspace',
+      renderer: options.renderer,
       label: 'Rắn săn mồi. Dùng các phím mũi tên, vuốt hoặc nút điều hướng.',
       toolbar:
         S.stat('ĐIỂM', 'score', 0) +
@@ -353,6 +357,7 @@
       controls: S.directionPad(),
     });
     const { ctx } = ui;
+    const visual = options.renderer === '3d' ? window.Arcade3D.createView('snake', ui, scope) : null;
     let state,
       started = false,
       accumulator = 0,
@@ -368,6 +373,7 @@
       ui.canvas,
     );
     function draw(time = 0) {
+      if (visual) return visual.draw(state, { time });
       ctx.fillStyle = '#203a31';
       ctx.fillRect(0, 0, 480, 480);
       for (let y = 0; y < 20; y++)
@@ -488,6 +494,7 @@
     const scope = S.createScope();
     const ui = S.canvasUI(host, 900, 500, {
       className: 'pool-workspace',
+      renderer: options.renderer,
       label: 'Bàn bida 6 lỗ. Chạm để chọn hướng, chỉnh lực, rồi nhấn Đánh bi.',
       toolbar:
         S.stat('BI ĐÃ VÀO LỖ', 'potted', '0 / 15') +
@@ -499,6 +506,7 @@
       power = ui.controls.querySelector('input'),
       output = ui.controls.querySelector('output'),
       shootButton = ui.controls.querySelector('[data-shoot]');
+    const visual = options.renderer === '3d' ? window.Arcade3D.createView('pool', ui, scope) : null;
     let state,
       angle = 0,
       finished = false;
@@ -521,6 +529,7 @@
       '#aa6e77',
     ];
     function draw() {
+      if (visual) return visual.draw(state, { angle, power: Number(power.value) });
       ctx.fillStyle = '#21372b';
       ctx.fillRect(0, 0, 900, 500);
       S.roundRect(ctx, 14, 14, 872, 472, 36, '#7e6950', '#bda77b');
@@ -681,12 +690,14 @@
     }
     function aim(event) {
       if (state.status !== 'ready' || finished) return;
-      const p = ui.point(event),
-        cue = state.balls[0];
+      const p = visual ? visual.point(event) : ui.point(event);
+      if (!p) return;
+      const cue = state.balls[0];
       if (Math.hypot(p.x - cue.x, p.y - cue.y) > 8) angle = Math.atan2(p.y - cue.y, p.x - cue.x);
     }
     scope.on(ui.canvas, 'pointermove', aim);
     scope.on(ui.canvas, 'pointerdown', (event) => {
+      if (event.button !== 0) return;
       event.preventDefault();
       ui.canvas.setPointerCapture(event.pointerId);
       aim(event);
@@ -760,6 +771,7 @@
     const scope = S.createScope();
     const ui = S.canvasUI(host, 800, 500, {
       className: 'breakout-workspace',
+      renderer: options.renderer,
       label: 'Phá gạch. Di chuyển chuột, chạm kéo hoặc dùng mũi tên để đỡ bóng.',
       toolbar:
         S.stat('ĐIỂM', 'score', 0) +
@@ -770,6 +782,7 @@
     const { ctx } = ui,
       input = S.heldInput(scope, ui, { left: ['a', 'arrowleft'], right: ['d', 'arrowright'] });
     const launch = ui.controls.querySelector('[data-launch]');
+    const visual = options.renderer === '3d' ? window.Arcade3D.createView('breakout', ui, scope) : null;
     let state,
       started,
       ended,
@@ -788,16 +801,19 @@
       }
     });
     const move = (event) => {
-      if (started && !ended) state.paddle.x = ui.point(event).x;
+      const point = visual ? visual.point(event) : ui.point(event);
+      if (started && !ended && point) state.paddle.x = point.x;
     };
     scope.on(ui.canvas, 'pointermove', move);
     scope.on(ui.canvas, 'pointerdown', (event) => {
+      if (event.button !== 0) return;
       event.preventDefault();
       ui.canvas.setPointerCapture(event.pointerId);
       move(event);
       fire();
     });
     function draw() {
+      if (visual) return visual.draw(state);
       const bg = ctx.createLinearGradient(0, 0, 0, 500);
       bg.addColorStop(0, '#263749');
       bg.addColorStop(1, '#233e3c');

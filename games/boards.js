@@ -7,6 +7,7 @@
 
   Games.caro = function (host, options) {
     const scope = S.createScope();
+    let visual = null;
     const ui = S.buildUI(host, {
       className: 'caro-workspace',
       toolbar:
@@ -63,6 +64,7 @@
         state.ended ? (state.winner ? name(state.winner) : 'Hòa') : name(state.turn),
       );
       ui.setStat('moves', state.moves);
+      visual?.sync(state);
     }
     function announceTurn() {
       ui.message(
@@ -131,81 +133,12 @@
       announceTurn();
     }
     scope.on(mode, 'change', restart);
+    if (options.renderer === '3d') visual = window.Arcade3D.createView('caro', ui, scope);
     restart();
     return S.handle(scope, restart);
   };
 
-  const LUDO_PATH = [
-    [6, 13],
-    [6, 12],
-    [6, 11],
-    [6, 10],
-    [6, 9],
-    [5, 8],
-    [4, 8],
-    [3, 8],
-    [2, 8],
-    [1, 8],
-    [0, 8],
-    [0, 7],
-    [0, 6],
-    [1, 6],
-    [2, 6],
-    [3, 6],
-    [4, 6],
-    [5, 6],
-    [6, 5],
-    [6, 4],
-    [6, 3],
-    [6, 2],
-    [6, 1],
-    [6, 0],
-    [7, 0],
-    [8, 0],
-    [8, 1],
-    [8, 2],
-    [8, 3],
-    [8, 4],
-    [8, 5],
-    [9, 6],
-    [10, 6],
-    [11, 6],
-    [12, 6],
-    [13, 6],
-    [14, 6],
-    [14, 7],
-    [14, 8],
-    [13, 8],
-    [12, 8],
-    [11, 8],
-    [10, 8],
-    [9, 8],
-    [8, 9],
-    [8, 10],
-    [8, 11],
-    [8, 12],
-    [8, 13],
-    [8, 14],
-    [7, 14],
-    [6, 14],
-  ];
-  const LUDO_COLORS = ['#85bc8b', '#e98d7c', '#80add6', '#e8c675'];
-  const LUDO_NAMES = ['Xanh lá', 'Đỏ', 'Xanh dương', 'Vàng'];
-  const LUDO_YARDS = [
-    [1.6, 10.6],
-    [1.6, 1.6],
-    [10.6, 1.6],
-    [10.6, 10.6],
-  ];
-  function homePosition(player, progress) {
-    const p = progress - 52;
-    return [
-      [7, 13 - p],
-      [1 + p, 7],
-      [7, 1 + p],
-      [13 - p, 7],
-    ][player];
-  }
+  const { LUDO_PATH, LUDO_COLORS, LUDO_NAMES, LUDO_YARDS, homePosition } = window.ArcadeLayouts;
   function ludoSVG() {
     let svg =
       '<svg viewBox="0 0 450 450" aria-hidden="true"><rect width="450" height="450" rx="17" fill="#e9e8d4"/>';
@@ -270,6 +203,7 @@
   }
   Games.ludo = function (host, options) {
     const scope = S.createScope();
+    let visual = null;
     const ui = S.buildUI(host, {
       className: 'ludo-workspace',
       toolbar:
@@ -332,6 +266,7 @@
       );
       ui.setStat('home', `${state.tokens[current].filter((p) => p === 57).length} / 4`);
       ui.toolbar.querySelector('[data-stat="turn"]').style.color = LUDO_COLORS[current];
+      visual?.sync(state, { lastDie });
     }
     function beginTurn() {
       busy = false;
@@ -417,12 +352,14 @@
       beginTurn();
     }
     scope.on(mode, 'change', restart);
+    if (options.renderer === '3d') visual = window.Arcade3D.createView('ludo', ui, scope);
     restart();
     return S.handle(scope, restart);
   };
 
   Games.quan = function (host, options) {
     const scope = S.createScope();
+    let visual = null;
     const ui = S.buildUI(host, {
       className: 'quan-workspace',
       toolbar:
@@ -492,6 +429,7 @@
         `${playerName(1)} · Hàng trên${state.turn === 1 && !state.ended ? ' · Đến lượt' : ''}`;
       ui.area.querySelector('.bottom-player').textContent =
         `${playerName(0)} · Hàng dưới${state.turn === 0 && !state.ended ? ' · Đến lượt' : ''}`;
+      visual?.sync(state, { selected });
     }
     function play(pit, direction) {
       const move = L.moveQuan(state, pit, direction);
@@ -551,12 +489,14 @@
       ui.message('Chọn một ô dân ở hàng dưới, rồi chọn hướng rải. Quan = 10 điểm, dân = 1 điểm.');
     }
     scope.on(mode, 'change', restart);
+    if (options.renderer === '3d') visual = window.Arcade3D.createView('quan', ui, scope);
     restart();
     return S.handle(scope, restart);
   };
 
   Games['2048'] = function (host, options) {
     const scope = S.createScope();
+    let visual = null;
     const ui = S.buildUI(host, {
       className: 'puzzle-workspace',
       toolbar:
@@ -602,6 +542,7 @@
       ui.setStat('score', score.toLocaleString('vi-VN'));
       ui.setStat('moves', moves);
       ui.setStat('best', best.toLocaleString('vi-VN'));
+      visual?.sync(values);
     }
     function move(direction) {
       if (ended) return;
@@ -637,7 +578,8 @@
         );
       }
     }
-    S.bindDirections(scope, ui, move, board);
+    if (options.renderer === '3d') visual = window.Arcade3D.createView('2048', ui, scope);
+    S.bindDirections(scope, ui, move, visual?.canvas || board);
     function restart() {
       scope.clearTimers();
       S.clearOverlays(ui);
@@ -655,6 +597,7 @@
 
   Games.memory = function (host, options) {
     const scope = S.createScope();
+    let visual = null;
     const symbols = ['🍋', '🍒', '🥝', '🍇', '🍓', '🍊', '🍉', '🥥'];
     const names = ['chanh', 'anh đào', 'kiwi', 'nho', 'dâu tây', 'cam', 'dưa hấu', 'dừa'];
     const ui = S.buildUI(host, {
@@ -688,6 +631,7 @@
       });
       ui.setStat('moves', state.moves);
       ui.setStat('pairs', `${state.matched.filter(Boolean).length / 2} / 8`);
+      visual?.sync(state);
     }
     scope.on(board, 'click', (event) => {
       const card = event.target.closest('[data-card]');
@@ -737,6 +681,7 @@
         'Chọn hai thẻ để tìm một cặp giống nhau. Đồng hồ bắt đầu khi bạn lật thẻ đầu tiên.',
       );
     }
+    if (options.renderer === '3d') visual = window.Arcade3D.createView('memory', ui, scope);
     restart();
     return S.handle(scope, restart);
   };

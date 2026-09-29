@@ -12,11 +12,14 @@
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="games/games.css" />
+    <link rel="stylesheet" href="games/3d/three.css" />
     <script src="art.js" defer></script>
     <script src="games/logic.js" defer></script>
+    <script src="games/layouts.js" defer></script>
     <script src="games/shared.js" defer></script>
     <script src="games/boards.js" defer></script>
     <script src="games/action.js" defer></script>
+    <script src="games/3d/loader.js" defer></script>
     <script src="arcade.js" defer></script>
   </head>
   <body>
@@ -94,7 +97,7 @@
             </h1>
           </div>
           <div class="free-note">
-            <span class="connection-dot"></span>10 trò chơi. Hoàn toàn miễn phí.
+            <span class="connection-dot"></span>10 trò chơi · 2D &amp; 3D · Miễn phí
           </div>
         </section>
 
@@ -109,6 +112,7 @@
                   data-icon="arrow-right"
                 ></span>
               </button>
+              <button class="hero-3d-link" data-play="delivery" data-edition="3d"><span data-icon="cube"></span>Khám phá con phố 3D<span data-icon="arrow-up-right"></span></button>
               <div class="hero-meta">
                 <span><span data-icon="users"></span>1 người chơi</span
                 ><span class="meta-dot">·</span><span>Arcade</span><span class="meta-dot">·</span
@@ -131,6 +135,11 @@
           </article>
         </section>
 
+        <section class="dimension-banner" aria-label="Phiên bản 3D mới">
+          <div class="dimension-symbol" aria-hidden="true"><span data-icon="cube"></span></div>
+          <div><span class="eyebrow">MỚI · MỞ THÊM MỘT CHIỀU VUI</span><h2>Game quen. Góc nhìn hoàn toàn mới.</h2><p>Cả 10 game, nay có thêm không gian 3D. Vẫn luật quen, thêm chiều sâu.</p></div>
+          <button class="button button-secondary" data-library-edition="3d">Khám phá 3D<span data-icon="arrow-up-right"></span></button>
+        </section>
         <section id="library" class="library" aria-labelledby="library-title">
           <div class="section-heading">
             <div class="section-heading-title">
@@ -147,6 +156,7 @@
               </select></label
             >
           </div>
+          <div class="library-edition-row"><span>CHỌN KHÔNG GIAN CHƠI</span><div class="edition-switch" role="group" aria-label="Phiên bản game trong thư viện"><button data-library-edition="2d" aria-pressed="true">2D <span>Cổ điển</span></button><button data-library-edition="3d" aria-pressed="false"><span data-icon="cube"></span>3D <span>Không gian mới</span></button></div><small id="edition-library-note">10 game · Giữ trọn bản nguyên bản</small></div>
           <div class="filter-row">
             <div class="category-filters" role="group" aria-label="Lọc theo thể loại">
               <button class="filter-chip active" data-filter="all" aria-pressed="true">
@@ -208,6 +218,7 @@
             <span id="player-category" class="eyebrow">ARCADE</span>
             <h2 id="player-title">Delivery Dash</h2>
           </div>
+          <div class="player-edition-switch edition-switch" role="group" aria-label="Đổi phiên bản, bắt đầu ván mới"><button data-player-edition="2d" aria-pressed="true" title="Bản 2D — đổi bản sẽ bắt đầu ván mới">2D</button><button data-player-edition="3d" aria-pressed="false" title="Bản 3D — đổi bản sẽ bắt đầu ván mới"><span data-icon="cube"></span>3D</button></div>
           <div class="player-actions">
             <button
               id="pause-game"
