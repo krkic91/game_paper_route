@@ -51,6 +51,39 @@ const onboarding = {
 let activeAimPreview = null;
 let highlightedMailbox = null;
 let lastTime = 0;
+let arcadePaused = false;
+
+function postToArcade(type, data = {}) {
+  if (window.parent !== window) {
+    window.parent.postMessage({ type, ...data }, location.protocol === 'file:' ? '*' : location.origin);
+  }
+}
+
+function clearHeldControls() {
+  keys.clear();
+  mobile.pedalPointers.clear();
+  mobile.gestures.clear();
+  mobile.pedal = false;
+  mobile.steering = 0;
+  mobile.steerReleased = true;
+  mobile.activeSteerId = null;
+  mobile.pendingThrow = false;
+  pendingKeyboardThrow.left = false;
+  pendingKeyboardThrow.right = false;
+  pendingKeyboardThrow.auto = false;
+}
+
+window.addEventListener('blur', clearHeldControls);
+window.addEventListener('message', (event) => {
+  const sameOrigin = event.origin === location.origin || (location.protocol === 'file:' && event.origin === 'null');
+  if (event.source !== window.parent || !sameOrigin || event.data?.type !== 'tramchoi:control') return;
+  if (event.data.action === 'pause') {
+    arcadePaused = Boolean(event.data.value);
+    clearHeldControls();
+    lastTime = 0;
+  }
+  if (event.data.action === 'restart') resetGame();
+});
 
 function resize() {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -67,6 +100,7 @@ function dismissOnboarding() {
 }
 
 function resetGame() {
+  keys.clear();
   resetGameState(game);
   feedback.text = '';
   feedback.detail = '';
@@ -92,6 +126,12 @@ resize();
 
 window.addEventListener('keydown', (event) => {
   const key = event.key.toLowerCase();
+  if (window.parent !== window && ['p', 'r', 'escape'].includes(key)) {
+    event.preventDefault();
+    if (!event.repeat) postToArcade('tramchoi:shortcut', { action: { p: 'pause', r: 'restart', escape: 'close' }[key] });
+    return;
+  }
+  if (arcadePaused) return;
   keys.add(key);
   if (['a', 'd', 'w', 's', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'j', 'k', ' '].includes(key) || event.code === 'Space') {
     dismissOnboarding();
@@ -996,6 +1036,11 @@ function render() {
 }
 
 function frame(timestamp) {
+  if (arcadePaused || document.hidden) {
+    lastTime = timestamp;
+    requestAnimationFrame(frame);
+    return;
+  }
   const dt = Math.min(0.033, (timestamp - lastTime) / 1000 || 0.016);
   lastTime = timestamp;
 
@@ -1003,6 +1048,7 @@ function frame(timestamp) {
   const previousDelivered = game.delivered;
   const previousMissed = game.missed;
   const previousCrashes = game.crashes;
+  const previousScore = game.score;
   feedback.time = Math.max(0, feedback.time - dt);
   if (onboarding.visible && game.state === 'playing') {
     onboarding.time = Math.max(0, onboarding.time - dt);
@@ -1021,6 +1067,7 @@ function frame(timestamp) {
     showFeedback('CHẶNG CHƯỚNG NGẠI', 'Tập trung né cọc tiêu, rào chắn và chó', '#ffad42');
   }
 
+  if (game.score !== previousScore) postToArcade('tramchoi:score', { score: game.score });
   render();
   requestAnimationFrame(frame);
 }

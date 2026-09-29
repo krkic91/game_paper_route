@@ -1,0 +1,200 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: #11161d;
+  overflow: hidden;
+}
+
+.shell {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(#7cc8ff 0%, #bfe8ff 45%, #7dcf69 45%, #61b555 100%);
+  touch-action: none;
+}
+
+.hud {
+  position: absolute;
+  left: 18px;
+  top: 18px;
+  width: min(340px, calc(100vw - 36px));
+  padding: 15px 16px 16px;
+  box-sizing: border-box;
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(7, 18, 31, 0.92), rgba(18, 40, 57, 0.84));
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.2);
+  color: #f4f9ff;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+}
+
+.game-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.title-mark {
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  border-radius: 8px;
+  background: #ffd84d;
+  color: #27303a;
+  font-size: 15px;
+}
+
+.mission {
+  margin: 8px 0 12px;
+  color: #b9d8eb;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.control-grid {
+  display: grid;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.control-grid > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 24px;
+  color: #dcebf5;
+  font-size: 11px;
+}
+
+.control-grid b {
+  color: #ffffff;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+kbd {
+  display: inline-block;
+  min-width: 17px;
+  margin-right: 3px;
+  padding: 2px 5px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font: 700 10px/1.2 inherit;
+  text-align: center;
+}
+
+.mobile-ui {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.pedal-button {
+  position: absolute;
+  right: 22px;
+  bottom: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 116px;
+  height: 116px;
+  border: 3px solid rgba(255, 255, 255, 0.7);
+  border-radius: 999px;
+  background: linear-gradient(145deg, #ffe66a, #f0b928);
+  color: #252a30;
+  font-weight: 950;
+  letter-spacing: 0.06em;
+  box-shadow: 0 10px 0 rgba(123, 84, 5, 0.34), 0 16px 34px rgba(0, 0, 0, 0.3);
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+}
+
+.pedal-button span {
+  font-size: 16px;
+}
+
+.pedal-button small {
+  margin-top: 3px;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  opacity: 0.68;
+}
+
+.pedal-button:active {
+  transform: translateY(5px) scale(0.98);
+  box-shadow: 0 5px 0 rgba(123, 84, 5, 0.34), 0 10px 24px rgba(0, 0, 0, 0.26);
+}
+
+@media (max-width: 700px) {
+  .hud {
+    left: 10px;
+    top: 10px;
+    width: auto;
+    max-width: calc(100vw - 210px);
+    min-width: 118px;
+    padding: 10px 11px;
+  }
+
+  .game-title {
+    font-size: 12px;
+    letter-spacing: 0.04em;
+  }
+
+  .title-mark {
+    width: 20px;
+    height: 20px;
+    font-size: 11px;
+  }
+
+  .mission {
+    margin: 6px 0 0;
+    font-size: 10px;
+    line-height: 1.35;
+  }
+
+  .control-grid {
+    display: none;
+  }
+
+  .pedal-button {
+    right: 14px;
+    bottom: 42px;
+    width: 94px;
+    height: 94px;
+  }
+
+  .pedal-button span {
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 900px) and (pointer: fine) {
+  .pedal-button {
+    opacity: 0.42;
+  }
+}
