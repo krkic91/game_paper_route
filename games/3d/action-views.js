@@ -1,3 +1,4 @@
+// version v1.0
 (function () {
   'use strict';
   const A=window.Arcade3D,M=A.models,L=window.ArcadeLayouts;

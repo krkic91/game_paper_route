@@ -1,3 +1,4 @@
+// version v1.0
 /* Shared board coordinates. Logic stays on a plane; 2D and 3D use the same layout. */
 (function (root, factory) {
   const api = factory();

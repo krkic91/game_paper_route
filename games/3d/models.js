@@ -1,3 +1,4 @@
+// version v1.0
 /* Procedural, locally generated 3D models. All geometry belongs to its scene. */
 (function () {
   'use strict';

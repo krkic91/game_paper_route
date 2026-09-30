@@ -1,3 +1,4 @@
+// version v1.0
 /* Tiny, dependency-free development server. Run with npm start. */
 'use strict';
 const http = require('node:http');

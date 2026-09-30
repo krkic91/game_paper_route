@@ -1,3 +1,4 @@
+// version v1.0
 // Source for the checked-in browser bundle. Three.js is pinned to 0.180.0 (MIT).
 // The app loads the bundle locally only when a 3D game is requested.
 export {

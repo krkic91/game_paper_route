@@ -1,3 +1,4 @@
+// version v1.0
 /* Local SVG illustrations: no remote fonts, images, libraries, or trackers. */
 (function () {
   'use strict';

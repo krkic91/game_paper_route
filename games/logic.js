@@ -1,3 +1,4 @@
+// version v1.0
 /* Shared, DOM-free game rules. Also exported to Node for regression tests. */
 (function (root, factory) {
   const api = factory();

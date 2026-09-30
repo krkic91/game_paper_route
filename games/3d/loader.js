@@ -1,3 +1,4 @@
+// version v1.0
 /* Lazy local scripts work over HTTP and file://. No CDN dependency at runtime. */
 (function () {
   'use strict';

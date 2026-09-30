@@ -1,3 +1,4 @@
+// version v1.0
 (function () {
   'use strict';
   const L = window.ArcadeLogic,

@@ -1,3 +1,4 @@
+// version v1.0
 /* 3D adapters reuse the existing board controllers, turns, AI and validation. */
 (function () {
   'use strict';

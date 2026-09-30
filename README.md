@@ -1,3 +1,4 @@
+<!-- version v1.0 -->
 # Trạm Chơi
 
 **Một trang, 10 game chơi được ngay.** Cổng mini game tiếng Việt, giữ nguyên **Delivery Dash** và bổ sung game thể thao, bàn cờ, arcade, trí tuệ. Không có tài khoản, quảng cáo, backend hay bước build.

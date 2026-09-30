@@ -1,3 +1,4 @@
+// version v1.0
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');

@@ -1,3 +1,4 @@
+// version v1.0
 /* Optional end-to-end checks. Requires Playwright and a running npm start server. */
 'use strict';
 const assert = require('node:assert/strict');

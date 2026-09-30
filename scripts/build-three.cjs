@@ -1,3 +1,4 @@
+// version v1.0
 /* Optional maintainer task; the checked-in bundle is all the app needs. */
 'use strict';
 const { join, dirname, resolve } = require('node:path');

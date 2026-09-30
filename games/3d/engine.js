@@ -1,3 +1,4 @@
+// version v1.0
 /* Real WebGL scene lifecycle, camera, picking and GPU resource ownership. */
 (function () {
   'use strict';

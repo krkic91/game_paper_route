@@ -1,3 +1,4 @@
+// version v1.0
 /* Real WebGL integration checks. Optional: requires Playwright and npm start. */
 'use strict';
 const assert=require('node:assert/strict');

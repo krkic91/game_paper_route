@@ -1,3 +1,4 @@
+// version v1.0
 /* Delivery Dash 3D uses the untouched original GameCore rules. */
 (function () {
   'use strict';

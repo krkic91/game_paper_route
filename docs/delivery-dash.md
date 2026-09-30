@@ -1,3 +1,4 @@
+<!-- version v1.0 -->
 # Delivery Dash
 
 **Delivery Dash** là game arcade giao báo bằng xe đạp. Người chơi điều khiển xe trên một con đường dọc, giao báo vào các hộp thư, né chướng ngại vật và cố gắng về đích với số điểm cao nhất.
