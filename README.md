@@ -138,3 +138,12 @@ npm run test:browser
 ```
 
 Trên Windows, script tự dùng Edge nếu có. Có thể chỉ định `BROWSER_PATH` (đường dẫn executable) và `TEST_URL` nếu cần. Kiểm thử mở cả 10 game, chơi các lượt mẫu, kiểm tra AI, tìm kiếm không dấu, yêu thích, lưu kỷ lục, tạm dừng/chơi lại, màn hình điện thoại và mở trực tiếp `file://`. Ảnh chụp lưu trong thư mục tạm `tram-choi-screenshots`, hoặc đường dẫn do biến `SCREENSHOTS` chỉ định.
+
+Kiểm tra riêng đường kẻ Caro trên WebKit và Chromium ở kích thước iPhone/iPad, gồm chạm ô, bàn phím, chơi lại và máy đáp lượt:
+
+```bash
+npx playwright install webkit chromium
+node tests/browser-caro.cjs
+```
+
+Script kiểm tra vị trí, kích thước của cả 225 ô và khoảng cách đường kẻ trước/sau mỗi nước đi. Có thể đặt `CARO_BROWSERS=webkit` hoặc `CARO_BROWSERS=chromium` để chạy riêng một trình duyệt; `TEST_URL` và `BROWSER_PATH` dùng như trên (`BROWSER_PATH` chỉ áp dụng cho Chromium). Đây là mô phỏng trình duyệt, không thay thế kiểm tra trên thiết bị Apple thật.

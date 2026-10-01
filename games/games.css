@@ -344,20 +344,22 @@
 .caro-board {
   display: grid;
   grid-template-columns: repeat(15, minmax(0, 1fr));
+  /* Keep X/O glyphs from resizing rows; the gaps draw each gridline once. */
+  grid-template-rows: repeat(15, minmax(0, 1fr));
   border: 1px solid #8eab82;
   aspect-ratio: 1;
-  background: #e8e9c9;
+  background: #aebf94;
   gap: 1px;
   overflow: hidden;
   border-radius: 3px;
 }
 .caro-cell {
+  -webkit-appearance: none;
+  appearance: none;
   padding: 0;
   border: 0;
   border-radius: 0;
   background: #e4e8c9;
-  box-shadow: 0 0 0 1px #aebf94;
-  aspect-ratio: 1;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -367,6 +369,7 @@
   color: #4a6952;
   position: relative;
   min-width: 0;
+  min-height: 0;
 }
 .caro-cell:hover[aria-disabled='false'] {
   background: #c6d9a2;
