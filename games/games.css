@@ -343,23 +343,34 @@
 }
 .caro-board {
   display: grid;
-  grid-template-columns: repeat(15, minmax(0, 1fr));
-  /* Keep X/O glyphs from resizing rows; the gaps draw each gridline once. */
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: repeat(15, minmax(0, 1fr));
-  border: 1px solid #8eab82;
+  /* Each edge is painted once: the board owns top/left, cells own bottom/right. */
+  border: solid #aebf94;
+  border-width: 1px 0 0 1px;
   aspect-ratio: 1;
   background: #aebf94;
-  gap: 1px;
   overflow: hidden;
   border-radius: 3px;
+}
+.caro-board > .board-row {
+  /* Give Safari real row boxes instead of repainting display: contents children. */
+  display: grid;
+  grid-template-columns: repeat(15, minmax(0, 1fr));
+  min-width: 0;
+  min-height: 0;
 }
 .caro-cell {
   -webkit-appearance: none;
   appearance: none;
   padding: 0;
-  border: 0;
+  border: solid #aebf94;
+  border-width: 0 1px 1px 0;
   border-radius: 0;
-  background: #e4e8c9;
+  background-color: #e4e8c9;
+  background-clip: padding-box;
+  overflow: hidden;
+  transition: none;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -372,7 +383,7 @@
   min-height: 0;
 }
 .caro-cell:hover[aria-disabled='false'] {
-  background: #c6d9a2;
+  background-color: #c6d9a2;
 }
 .caro-cell.mark-x {
   color: #527962;
@@ -383,7 +394,7 @@
   font-size: 24px;
 }
 .caro-cell.last-move {
-  background: #c8dba7;
+  background-color: #c8dba7;
 }
 .caro-cell.last-move:after {
   content: '';
@@ -396,12 +407,12 @@
   background: #a8905a;
 }
 .caro-cell.winning-cell {
-  background: #a7c982;
+  background-color: #a7c982;
   color: #285731;
 }
 .caro-cell:focus-visible {
   outline: 2px solid #537d3d;
-  outline-offset: -2px;
+  outline-offset: -3px;
   z-index: 1;
 }
 .caro-cell[aria-disabled='true'] {

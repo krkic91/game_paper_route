@@ -147,3 +147,12 @@ node tests/browser-caro.cjs
 ```
 
 Script kiểm tra vị trí, kích thước của cả 225 ô và khoảng cách đường kẻ trước/sau mỗi nước đi. Có thể đặt `CARO_BROWSERS=webkit` hoặc `CARO_BROWSERS=chromium` để chạy riêng một trình duyệt; `TEST_URL` và `BROWSER_PATH` dùng như trên (`BROWSER_PATH` chỉ áp dụng cho Chromium). Đây là mô phỏng trình duyệt, không thay thế kiểm tra trên thiết bị Apple thật.
+
+Kiểm tra thêm màu đường kẻ trong ảnh chụp ở kích thước iPad mini/Pro, với hiệu ứng chuyển động mặc định, thao tác chạm/click và đổi ngang/dọc ngay trong ván:
+
+```bash
+npm install --no-save --package-lock=false playwright pngjs
+node tests/browser-caro-borders.cjs
+```
+
+Script lấy mẫu 2.100 vị trí trên đường kẻ trong mỗi ảnh, chạy WebKit và Chromium với DPR 2, cùng cấu hình trang di động và desktop. Ảnh và kết quả JSON được lưu tại `test-results/caro-borders` (hoặc `CARO_BORDER_OUTPUT`). Có thể chọn kích thước bằng `CARO_WIDTHS=744,834,1024`; `CARO_CSS_FILE` cho phép đối chiếu một bản CSS cũ. User-agent iPad/Safari trong test chỉ mô phỏng thông tin trình duyệt, không chạy iPadOS hay Safari trên thiết bị thật.

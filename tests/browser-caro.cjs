@@ -28,11 +28,15 @@ async function geometry(page) {
       height: bounds.height,
       cells: [...board.querySelectorAll('.caro-cell')].map((cell) => {
         const rect = cell.getBoundingClientRect();
+        const style = getComputedStyle(cell);
+        const left = parseFloat(style.borderLeftWidth);
+        const top = parseFloat(style.borderTopWidth);
+        // Measure the playable face; a real cell border occupies the gridline.
         return {
-          x: rect.x - bounds.x,
-          y: rect.y - bounds.y,
-          width: rect.width,
-          height: rect.height,
+          x: rect.x - bounds.x + left,
+          y: rect.y - bounds.y + top,
+          width: rect.width - left - parseFloat(style.borderRightWidth),
+          height: rect.height - top - parseFloat(style.borderBottomWidth),
         };
       }),
     };
@@ -81,7 +85,7 @@ async function checkProfile(browser, engine, profile) {
     deviceScaleFactor: profile.dpr,
     isMobile: true,
     hasTouch: true,
-    reducedMotion: 'reduce',
+    reducedMotion: 'no-preference',
   });
   try {
     const page = await context.newPage();
