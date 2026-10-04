@@ -418,6 +418,145 @@
 .caro-cell[aria-disabled='true'] {
   cursor: default;
 }
+.caro-cell.pending-move {
+  background-color: #d5dfb6;
+}
+.caro-cell.pending-move::before {
+  content: '·';
+  color: #537d3d;
+}
+.caro-workspace.is-online {
+  flex: 0 0 auto;
+}
+.caro-workspace.is-online .game-board-area {
+  flex: 0 0 auto;
+  min-height: 0;
+}
+.caro-workspace.is-online .game-stat > strong {
+  display: block;
+  max-width: 210px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.caro-online-panel {
+  width: 100%;
+  max-width: 680px;
+  padding: 14px;
+  border: 1px solid #465d38;
+  border-radius: 10px;
+  background: #1c2b20;
+  flex-shrink: 0;
+}
+.online-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  font-size: 11px;
+  color: #b8cba8;
+}
+.online-field input,
+.online-invite input {
+  width: 100%;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid #617754;
+  border-radius: 6px;
+  background: #15221a;
+  color: #eef3e5;
+  font-size: 16px;
+}
+.online-lobby-actions,
+.online-room-actions,
+.online-invite,
+.online-room-top {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 10px;
+}
+.online-lobby-actions {
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+.online-code-field {
+  flex: 1;
+  min-width: 110px;
+}
+.online-code-field input {
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+.caro-online-panel .button {
+  min-height: 40px;
+  padding: 9px 12px;
+  font-size: 12px;
+}
+.online-room-top {
+  justify-content: space-between;
+  margin-top: 0;
+  font-size: 11px;
+  flex-wrap: wrap;
+  color: #b6c9a5;
+}
+[data-online-room-code] {
+  font-size: 18px;
+  letter-spacing: 2px;
+  color: #d8f4b4;
+}
+.online-players {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 10px;
+}
+.online-player {
+  padding: 8px;
+  border-radius: 7px;
+  border: 1px solid #3f5439;
+  min-width: 0;
+}
+.online-player.is-you {
+  border-color: #87a963;
+  background: #273c24;
+}
+.online-player strong,
+.online-player span {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.online-player strong {
+  font-size: 13px;
+}
+.online-player span {
+  margin-top: 3px;
+  font-size: 11px;
+  color: #b3c69f;
+}
+.online-invite .button {
+  flex-shrink: 0;
+}
+.online-invite input {
+  font-size: 12px;
+}
+.online-room-actions {
+  flex-wrap: wrap;
+}
+.online-message {
+  margin: 10px 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #c7d9b4;
+  overflow-wrap: anywhere;
+}
+.online-game .player-edition-switch:after {
+  content: 'Giữ nguyên ván online';
+}
+@media (max-width: 600px) {
+  .caro-online-panel { padding: 10px; }
+  .caro-workspace.is-online .game-stat > strong { max-width: 140px; }
+  .online-invite input { font-size: 16px; }
+}
 .ludo-board {
   width: min(100%, 425px);
   position: relative;

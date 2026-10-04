@@ -1,16 +1,20 @@
 {
   "name": "tram-choi",
   "version": "2.0.0",
-  "description": "Cổng 10 mini game tiếng Việt, giữ nguyên Delivery Dash. Không cần build hay dependency.",
+  "description": "Cổng 10 mini game tiếng Việt, Caro online hai người và Delivery Dash. Không cần bước build.",
   "private": true,
   "scripts": {
     "start": "node scripts/serve.js",
     "dev": "node scripts/serve.js",
-    "test": "node --test tests/core.test.js tests/arcade.test.js tests/lifecycle.test.js",
+    "test": "node --test tests/core.test.js tests/arcade.test.js tests/lifecycle.test.js tests/online-server.test.cjs tests/online-client.test.cjs",
+    "test:online": "node tests/browser-online.cjs",
     "test:browser": "node tests/browser-smoke.cjs",
     "check": "node scripts/check.js"
   },
   "engines": {
     "node": ">=18"
+  },
+  "dependencies": {
+    "ws": "^8.22.0"
   }
 }

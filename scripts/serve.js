@@ -1,9 +1,10 @@
 // version v1.0
-/* Tiny, dependency-free development server. Run with npm start. */
+/* Static website and authoritative Caro WebSocket server. Run with npm start. */
 'use strict';
 const http = require('node:http');
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const { attachCaroOnline } = require('../server/caro-online.cjs');
 const root = path.resolve(__dirname, '..');
 const port = Number(process.env.PORT || process.argv[2] || 4173);
 const host = process.env.HOST || '127.0.0.1';
@@ -25,7 +26,11 @@ const server = http.createServer(async (req, res) => {
   }
   try {
     const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
-    if (pathname.split(/[\\/]/).some((part) => part.startsWith('.'))) {
+    const parts = pathname.split(/[\\/]/).filter(Boolean);
+    if (parts.some((part) => part.startsWith('.')) ||
+        ['server', 'scripts', 'tests', 'node_modules', 'test-results', 'docs'].includes((parts[0] || '').toLowerCase()) ||
+        ['package.json', 'package-lock.json'].includes(pathname.slice(1).toLowerCase()) ||
+        pathname.includes(':')) {
       res.writeHead(403);
       res.end('Forbidden');
       return;
@@ -56,6 +61,7 @@ const server = http.createServer(async (req, res) => {
     res.end(status === 404 ? 'Không tìm thấy trang.' : 'Không thể xử lý yêu cầu.');
   }
 });
+const online = attachCaroOnline(server);
 server.on('error', (error) => {
   console.error(`Không thể mở cổng ${port}: ${error.message}`);
   process.exitCode = 1;
@@ -64,3 +70,9 @@ server.listen(port, host, () => {
   console.log(`Trạm Chơi đang chạy tại http://${host}:${port}`);
   console.log('Nhấn Ctrl+C để dừng.');
 });
+async function shutdown() {
+  await online.close();
+  server.close();
+}
+process.once('SIGINT', shutdown);
+process.once('SIGTERM', shutdown);

@@ -58,10 +58,12 @@
       intro:
         'Một bàn cờ, hai ký hiệu và vô số chiến thuật. Tìm nước thắng trước khi đối thủ nhận ra!',
       instructions: [
-        'Chọn Đấu với máy hoặc 2 người cùng máy. X luôn đi trước.',
+        'Chọn Đấu với máy, 2 người cùng máy hoặc Chơi online. X luôn đi trước.',
+        'Online: tạo phòng rồi gửi mã hoặc link mời. Cả hai chọn Sẵn sàng để bắt đầu.',
         'Nhấn một ô trống để đặt quân. Có thể dùng mũi tên trên bàn và Enter để đánh.',
         'Nối từ 5 quân cùng loại liên tiếp theo hàng ngang, dọc hoặc chéo để thắng.',
         'Ván đấu hòa khi bàn kín mà không bên nào thắng.',
+        'Online tự kết nối lại và giữ chỗ 90 giây. Sau ván, cả hai chọn Chơi tiếp để đổi X/O.',
       ],
       variant:
         'Caro tự do 15 × 15: từ 5 quân là thắng, kể cả bị chặn hai đầu. Không áp dụng luật cấm của Renju.',
@@ -398,7 +400,7 @@
     shell.classList.toggle('show-help', value);
     shell.classList.toggle('help-hidden', !value);
     $('#help-game').setAttribute('aria-expanded', value);
-    if (window.innerWidth <= 800) {
+    if (window.innerWidth <= 800 && !instance?.online) {
       if (value && !paused) {
         helpPaused = true;
         setPaused(true);
@@ -410,6 +412,7 @@
   }
   function setPaused(value) {
     if (!instance) return;
+    if (instance.online && value) return;
     const next = Boolean(value);
     if (next && !paused) pauseFocus = document.activeElement;
     paused = next;
@@ -445,6 +448,38 @@
       location.protocol === 'file:' ? '*' : location.origin,
     );
   }
+  function onlineActive() {
+    return active?.id === 'caro' &&
+      (instance?.online || Boolean(window.CaroOnline.getState().session));
+  }
+  function restoreActiveRoute() {
+    if (!active) return;
+    const code = active.id === 'caro' ? window.CaroOnline.getState().session?.code : null;
+    history.replaceState(null, '', `#play/${active.id}${activeEdition === '3d' ? '/3d' : ''}${code ? `?room=${code}` : ''}`);
+  }
+  function mayLeaveGame() {
+    if (!onlineActive() || window.CaroOnlineUI.confirmLeave()) return true;
+    restoreActiveRoute();
+    return false;
+  }
+  function updateOnlineControls() {
+    const online = active?.id === 'caro' &&
+      stage.querySelector('.game-mode select')?.value === 'online';
+    const loading = !instance && activeEdition === '3d';
+    shell.classList.toggle('online-game', online);
+    $('#pause-game').disabled = online || loading;
+    $('#restart-game').disabled = online ? window.CaroOnline.getState().room?.status !== 'finished' : loading;
+    $('#restart-game').title = online ? 'Yêu cầu chơi tiếp (R)' : 'Chơi lại (R)';
+    $('#restart-game').setAttribute('aria-label', online ? 'Yêu cầu chơi tiếp' : 'Chơi lại game');
+    if (online) {
+      $('#player-footnote').textContent = 'Phòng online · Đổi 2D/3D giữ nguyên ván';
+    } else if (active) {
+      $('#player-footnote').textContent = activeEdition === '3d' ? 'WebGL 2 · Kỷ lục 3D riêng · Đổi phiên bản = ván mới' :
+        active.id === 'delivery' ? 'Delivery Dash · Game nguyên bản của bạn' : 'Chơi tại chỗ · Kỷ lục lưu trên thiết bị';
+    }
+    const note = help.querySelector('.help-3d-note small');
+    if (note) note.textContent = online ? 'Đổi 2D / 3D giữ nguyên phòng và ván online.' : 'Đổi 2D / 3D bắt đầu ván mới. Hai phiên bản lưu kỷ lục riêng.';
+  }
   function show3DError(message) {
     if (!active) return;
     stage.innerHTML = `<div class="three-unavailable"><span class="three-error-icon">${Art.icon('cube', 38)}</span><span class="eyebrow">BẢN 2D VẪN SẴN SÀNG</span><h3>Chưa thể mở không gian 3D</h3><p></p><div><button class="button button-primary" data-play="${active.id}" data-edition="2d">Chơi bản 2D</button><button class="button button-secondary" data-retry-3d>Thử lại 3D</button></div></div>`;
@@ -454,9 +489,12 @@
   }
   async function mountGame(game, edition = '2d', force = false) {
     if (!force && active?.id === game.id && activeEdition === edition && dialog.open) return;
+    if (active?.id !== game.id && !mayLeaveGame()) return;
     const token = ++mountGeneration;
     const switching = active?.id === game.id && activeEdition !== edition;
-    instance?.destroy();
+    const preserveOnline = active?.id === 'caro' && game.id === 'caro';
+    instance?.destroy({ preserveOnline });
+    if (!preserveOnline && active?.id === 'caro') window.CaroOnline.leave();
     if (!dialog.open) opener = document.activeElement;
     active = game; activeEdition = edition; instance = null;
     paused = false; helpPaused = false; pauseFocus = null;
@@ -495,11 +533,11 @@
         instance = game.id === 'delivery' ? window.Arcade3D.mountDelivery(stage, settings) : window.ArcadeGames[game.id](stage, settings);
         $('#pause-game').disabled = false; $('#restart-game').disabled = false;
         (stage.querySelector('[data-start]') || stage.querySelector('.three-canvas'))?.focus({ preventScroll: true });
-        if (switching) notify('Đã mở bản 3D — ván mới, kỷ lục riêng.');
+        if (switching) notify(instance?.online ? 'Đã mở bản 3D. Ván online được giữ nguyên.' : 'Đã mở bản 3D — ván mới, kỷ lục riêng.');
         if (document.hidden) setPaused(true);
       } catch (error) {
         if (token !== mountGeneration || !dialog.open) return;
-        instance?.destroy(); instance = null;
+        instance?.destroy({ preserveOnline: game.id === 'caro' }); instance = null;
         show3DError(error.message || 'Không thể khởi tạo đồ họa 3D. Bạn có thể chơi bản 2D.');
       }
     } else if (game.id === 'delivery') {
@@ -519,6 +557,7 @@
       }
     }
     if (token !== mountGeneration) return;
+    updateOnlineControls();
     recent = [game.id, ...recent.filter(id => id !== game.id)].slice(0, 10); save(); renderLibrary();
   }
   function clearGameHash() {
@@ -527,10 +566,12 @@
   }
   function closeGame(updateHash = true) {
     if (!active && !dialog.open) return;
+    if (!mayLeaveGame()) return false;
     if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
     const closingId = active?.id;
     mountGeneration++;
     instance?.destroy();
+    if (closingId === 'caro') window.CaroOnline.leave();
     instance = null;
     active = null;
     activeEdition = null;
@@ -542,6 +583,7 @@
     $('#pause-screen').hidden = true;
     if (dialog.open) dialog.close();
     document.body.classList.remove('modal-open');
+    shell.classList.remove('online-game');
     document.body.append(toast);
     if (updateHash) clearGameHash();
     if (opener?.isConnected && opener !== document.body) opener.focus({ preventScroll: true });
@@ -549,11 +591,14 @@
       (
         grid.querySelector(`[data-game="${closingId}"] .cover-play`) || $('[data-play="delivery"]')
       ).focus({ preventScroll: true });
+    return true;
   }
   function playGame(id, edition = libraryEdition, replace = false) {
     if (!ids.has(id)) return;
     edition = edition === '3d' ? '3d' : '2d';
-    const hash = `#play/${id}${edition === '3d' ? '/3d' : ''}`;
+    const code = id === 'caro' && active?.id === 'caro' ?
+      (window.CaroOnline.getState().session?.code || window.CaroOnline.getInviteCode()) : '';
+    const hash = `#play/${id}${edition === '3d' ? '/3d' : ''}${code ? `?room=${encodeURIComponent(code)}` : ''}`;
     if (replace) { history.replaceState(null, '', hash); syncRoute(); }
     else if (location.hash === hash) mountGame(games.find((game) => game.id === id), edition);
     else location.hash = hash;
@@ -563,12 +608,26 @@
       closeGame(false);
       return;
     }
-    const route = /^#play\/([^/]+)(?:\/(2d|3d))?$/.exec(location.hash);
+    const route = /^#play\/([^/?]+)(?:\/(2d|3d))?(?:\?.*)?$/.exec(location.hash);
     const id = route?.[1], edition = route?.[2] || '2d';
     const game = games.find((game) => game.id === id);
-    if (game) mountGame(game, edition);
+    if (game) {
+      // Changing only the invite hash keeps the same document alive. Apply the
+      // new invitation before mountGame's same-game/edition shortcut can skip it.
+      const invite = game.id === 'caro' ? window.CaroOnline.getInviteCode() : '';
+      const session = window.CaroOnline.getState().session;
+      const newInvite = invite && active?.id === 'caro' && dialog.open &&
+        (session ? session.code !== invite : !instance?.online ||
+          stage.querySelector('[data-online-code]')?.value.trim().toUpperCase() !== invite);
+      if (newInvite) {
+        if (!mayLeaveGame()) return;
+        // Also cancel an in-flight create/join whose seat has not arrived yet.
+        window.CaroOnline.leave();
+      }
+      mountGame(game, edition, Boolean(newInvite));
+    }
     else {
-      closeGame(false);
+      if (closeGame(false) === false) return;
       clearGameHash();
       notify('Game này chưa có trong thư viện. Hãy chọn một trò khác nhé.');
     }
@@ -583,7 +642,7 @@
   document.addEventListener('click', (event) => {
     if (event.target.closest('.brand,.mobile-brand')) {
       event.preventDefault();
-      closeGame();
+      if (closeGame() === false) return;
       view = 'all';
       filter = 'all';
       search.value = '';
@@ -682,10 +741,13 @@
   });
   stage.addEventListener('arcade:3d-lost', () => {
     if (activeEdition !== '3d') return;
-    instance?.destroy(); instance = null; paused = false;
+    instance?.destroy({ preserveOnline: active?.id === 'caro' }); instance = null; paused = false;
     stage.inert = false; $('#pause-screen').hidden = true;
-    show3DError('Kết nối với GPU đã bị gián đoạn. Bạn có thể mở lại bản 3D (ván mới) hoặc chuyển sang 2D.');
+    show3DError(window.CaroOnline.getState().session && active?.id === 'caro' ?
+      'Kết nối với GPU bị gián đoạn. Mở lại 3D hoặc chuyển sang 2D để tiếp tục ván online.' :
+      'Kết nối với GPU đã bị gián đoạn. Bạn có thể mở lại bản 3D (ván mới) hoặc chuyển sang 2D.');
   });
+  stage.addEventListener('arcade:online-mode', updateOnlineControls);
   window.addEventListener('hashchange', syncRoute);
   window.addEventListener('keydown', (event) => {
     const key = event.key.toLowerCase();

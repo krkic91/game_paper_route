@@ -8,6 +8,8 @@
 
   Games.caro = function (host, options) {
     const scope = S.createScope();
+    const online = window.CaroOnline;
+    const onlineUI = window.CaroOnlineUI;
     let visual = null;
     const ui = S.buildUI(host, {
       className: 'caro-workspace',
@@ -17,15 +19,29 @@
         S.modeSelect([
           ['bot', 'Đấu với máy'],
           ['local', '2 người cùng máy'],
+          ['online', 'Chơi online'],
         ]),
       board:
         '<div class="caro-frame"><div class="caro-board" role="grid" aria-label="Bàn caro 15 hàng, 15 cột. Dùng mũi tên để chọn ô, Enter để đánh."></div></div>',
     });
     const board = ui.area.querySelector('.caro-board'),
       mode = ui.toolbar.querySelector('select');
-    let state,
+    const panel = onlineUI.mount(ui, scope);
+    let state = L.createCaro(),
       busy = false,
       focusIndex = 112;
+    let network = online.getState();
+    if (network.session || online.getInviteCode()) mode.value = 'online';
+    let previousMode = mode.value;
+    const isOnline = () => mode.value === 'online';
+    const canPlayOnline = () => Boolean(
+      network.room?.status === 'playing' && network.connection === 'connected' &&
+      !network.pending && network.room.players.every((player) => player?.connected && !player.left) &&
+      network.room.game.turn === network.you?.mark,
+    );
+    const signalMode = () => host.dispatchEvent(new CustomEvent('arcade:online-mode', {
+      bubbles: true, detail: { online: isOnline() },
+    }));
     const rows = Array.from({ length: 15 }, () => {
       const row = document.createElement('div');
       row.className = 'board-row';
@@ -43,6 +59,10 @@
       return button;
     });
     function name(player) {
+      if (isOnline()) {
+        const person = network.room?.players.find((item) => item?.mark === player);
+        return `${player === network.you?.mark ? 'Bạn' : person?.name || 'Đối thủ'} · ${player === 1 ? 'X' : 'O'}`;
+      }
       return mode.value === 'bot'
         ? player === 1
           ? 'Bạn · X'
@@ -52,8 +72,10 @@
     function render() {
       cells.forEach((cell, i) => {
         const value = state.board[i];
-        cell.className = `caro-cell ${value === 1 ? 'mark-x' : value === 2 ? 'mark-o' : ''}${state.line.includes(i) ? ' winning-cell' : ''}${i === state.last ? ' last-move' : ''}`;
-        cell.textContent = value === 1 ? '×' : value === 2 ? '○' : '';
+        const className = `caro-cell ${value === 1 ? 'mark-x' : value === 2 ? 'mark-o' : ''}${state.line.includes(i) ? ' winning-cell' : ''}${i === state.last ? ' last-move' : ''}${isOnline() && network.pendingIndex === i ? ' pending-move' : ''}`;
+        if (cell.className !== className) cell.className = className;
+        const mark = value === 1 ? '×' : value === 2 ? '○' : '';
+        if (cell.textContent !== mark) cell.textContent = mark;
         cell.setAttribute(
           'aria-label',
           `Hàng ${Math.floor(i / 15) + 1}, cột ${(i % 15) + 1}: ${value === 1 ? 'X' : value === 2 ? 'O' : 'trống'}`,
@@ -62,17 +84,24 @@
       });
       ui.setStat(
         'turn',
-        state.ended ? (state.winner ? name(state.winner) : 'Hòa') : name(state.turn),
+        isOnline() && network.room?.status !== 'playing' && !state.ended ? 'Chờ sẵn sàng' :
+          state.ended ? (state.winner ? name(state.winner) : 'Hòa') : name(state.turn),
       );
       ui.setStat('moves', state.moves);
       visual?.sync(state);
     }
     function announceTurn() {
+      if (isOnline()) { ui.message(onlineUI.status(network)); return; }
       ui.message(
         busy ? 'Máy đang suy nghĩ…' : `Lượt ${name(state.turn)}. Nối 5 quân liên tiếp để thắng.`,
       );
     }
     function play(index) {
+      if (isOnline()) {
+        if (canPlayOnline() && !state.board[index])
+          online.move(index).catch((error) => ui.message(error.message));
+        return;
+      }
       if (!L.moveCaro(state, index)) return;
       render();
       if (state.ended) {
@@ -126,6 +155,11 @@
       cells[focusIndex].focus({ preventScroll: true });
     });
     function restart() {
+      if (isOnline()) {
+        if (network.room?.status === 'finished') online.rematch().catch((error) => ui.message(error.message));
+        else ui.message('Chỉ có thể chơi tiếp sau khi ván hiện tại kết thúc.');
+        return;
+      }
       scope.clearTimers();
       S.clearOverlays(ui);
       state = L.createCaro();
@@ -133,10 +167,49 @@
       render();
       announceTurn();
     }
-    scope.on(mode, 'change', restart);
+    scope.on(mode, 'change', () => {
+      if (previousMode === 'online' && !isOnline()) {
+        if (!onlineUI.confirmLeave()) { mode.value = 'online'; return; }
+        onlineUI.clearInvite();
+        online.leave();
+      }
+      previousMode = mode.value;
+      scope.clearTimers();
+      scope.setPaused(false);
+      S.clearOverlays(ui);
+      panel.setVisible(isOnline());
+      if (isOnline()) {
+        updateOnline(online.getState());
+        online.resumeSaved();
+      } else restart();
+      signalMode();
+    });
+    function updateOnline(snapshot) {
+      network = snapshot;
+      panel.render(snapshot);
+      if (!isOnline()) return;
+      state = snapshot.room?.game || L.createCaro();
+      busy = !canPlayOnline();
+      S.clearOverlays(ui);
+      render();
+      announceTurn();
+      signalMode();
+    }
     if (options.renderer === '3d') visual = window.Arcade3D.createView('caro', ui, scope);
-    restart();
-    return S.handle(scope, restart);
+    panel.setVisible(isOnline());
+    scope.cleanup(online.subscribe(updateOnline));
+    if (isOnline()) online.resumeSaved();
+    else restart();
+    return {
+      ...S.handle(scope, restart),
+      get online() { return isOnline(); },
+      confirmLeave: () => !isOnline() || onlineUI.confirmLeave(),
+      setPaused: (value) => scope.setPaused(isOnline() ? false : value),
+      destroy({ preserveOnline = false } = {}) {
+        scope.destroy();
+        if (isOnline() && !preserveOnline) online.leave();
+      },
+    };
   };
 
   const { LUDO_PATH, LUDO_COLORS, LUDO_NAMES, LUDO_YARDS, homePosition } = window.ArcadeLayouts;

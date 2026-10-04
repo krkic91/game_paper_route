@@ -1,17 +1,18 @@
 <!-- version v1.0 -->
 # Trạm Chơi
 
-**Một trang, 10 game chơi được ngay.** Cổng mini game tiếng Việt, giữ nguyên **Delivery Dash** và bổ sung game thể thao, bàn cờ, arcade, trí tuệ. Không có tài khoản, quảng cáo, backend hay bước build.
+**Một trang, 10 game chơi được ngay.** Cổng mini game tiếng Việt, giữ nguyên **Delivery Dash** và bổ sung game thể thao, bàn cờ, arcade, trí tuệ. Caro có chế độ online hai người khác thiết bị qua máy chủ Node.js. Không có tài khoản, quảng cáo hay bước build.
 
 ## Chạy dự án
 
-Cần **Node.js 18 trở lên** nếu dùng server và kiểm thử:
+Cần **Node.js 18 trở lên**. Cài dependency rồi chạy máy chủ giao diện và Caro online:
 
 ```bash
+npm ci
 npm start
 ```
 
-Mở **http://127.0.0.1:4173**. Không cần chạy `npm install` để chơi.
+Mở **http://127.0.0.1:4173**. Dependency chạy máy chủ là `ws`; trình duyệt dùng WebSocket có sẵn.
 
 Các cách khác:
 
@@ -21,7 +22,9 @@ node scripts/serve.js 8080
 python -m http.server 4173
 ```
 
-Hoặc mở trực tiếp **`index.html`** bằng trình duyệt hiện đại. Tất cả script và hình minh họa SVG đều nằm trong dự án, không tải thư viện, font hoặc ảnh từ bên ngoài. Một số trình duyệt có thể hạn chế lưu dữ liệu ở chế độ `file://`; dùng server cục bộ để ổn định hơn.
+`npm run dev` và `node scripts/serve.js 8080` cũng chạy được online. Máy chủ tĩnh như `python -m http.server 4173` hoặc mở trực tiếp **`index.html`** chỉ phục vụ các chế độ chơi offline. Tất cả script và hình minh họa SVG đều nằm trong dự án, không tải thư viện, font hoặc ảnh từ bên ngoài. Một số trình duyệt có thể hạn chế lưu dữ liệu ở chế độ `file://`; dùng server cục bộ để ổn định hơn.
+
+Để chơi Caro trên hai thiết bị, xem [hướng dẫn Caro online, LAN và triển khai](docs/caro-online.md). [Kế hoạch triển khai](docs/caro-online-plan.md) lưu kiến trúc và phạm vi đã thống nhất.
 
 ## Danh sách game
 
@@ -29,7 +32,7 @@ Hoặc mở trực tiếp **`index.html`** bằng trình duyệt hiện đại. 
 | ------------------- | --------------------------------------------- | ----------------------------------------------------------------- |
 | **Delivery Dash**   | 1 người                                       | Lái xe giao báo, né chướng ngại, hoàn thành tuyến đường gốc.      |
 | **Đua xe đạp**      | Bạn đấu 3 đối thủ máy                         | Đua 1 km; quản lý năng lượng, nước rút, né cọc tiêu và vũng nước. |
-| **Caro**            | Đấu máy / 2 người cùng thiết bị               | Bàn 15 × 15, nối từ 5 quân theo hàng ngang, dọc hoặc chéo.        |
+| **Caro**            | Đấu máy / 2 người cùng thiết bị / online       | Bàn 15 × 15, nối từ 5 quân theo hàng ngang, dọc hoặc chéo.        |
 | **Cờ cá ngựa**      | Bạn + 3 máy / 2 người / 4 người cùng thiết bị | Tung xúc xắc, xuất chuồng, đá ngựa và đưa đủ 4 ngựa về đích.      |
 | **Ô ăn quan**       | Đấu máy / 2 người cùng thiết bị               | Chọn ô dân và hướng rải, ăn quân, tính điểm quan/dân.             |
 | **Bida bỏ túi**     | Luyện tập 1 người                             | Ngắm từ bi trắng, chọn lực, đánh đủ 15 bi màu vào 6 lỗ.           |
@@ -44,7 +47,8 @@ Hoặc mở trực tiếp **`index.html`** bằng trình duyệt hiện đại. 
 - **Cờ cá ngựa kiểu Ludo rút gọn:** ra 6 mới xuất chuồng và được thêm lượt; điểm sao an toàn; cần đúng số bước vào đích. Có thể xếp chồng quân, không chặn đường và không phạt ba lần ra 6. Ngựa đi một vòng 52 ô rồi vào 6 ô đường về màu riêng.
 - **Ô ăn quan cơ bản:** 50 dân, 2 quan, mỗi quan 10 điểm. Có rải tiếp và ăn liên hoàn. Hàng sắp đi trống sẽ rải lại 5 dân và trừ 5 điểm, có thể ghi nợ bằng điểm âm. Ván kết thúc khi hai ô quan hoàn toàn trống, rồi thu dân còn lại ở hàng mình. Không áp dụng luật “quan non”.
 - **Bida luyện tập:** có va chạm, bật băng, ma sát, vào lỗ và đặt lại bi trắng. Không dùng luật đấu 8-ball; bi đen có thể vào lỗ ở bất kỳ lượt nào. Mỗi bi màu +100, mỗi cú đánh −5, lỗi bi trắng −50, dọn bàn +500.
-- Các chế độ nhiều người là **chơi chung thiết bị**, không phải multiplayer qua mạng.
+- **Caro online:** tạo phòng riêng, chia sẻ mã/link, cả hai sẵn sàng rồi chơi trên hai thiết bị. Máy chủ xác nhận lượt và kết quả. Chơi tiếp cần cả hai đồng ý và đổi X/O; chuyển 2D/3D giữ nguyên ván.
+- Các chế độ nhiều người của **Cờ cá ngựa** và **Ô ăn quan** là chơi chung thiết bị.
 
 Luật và điều khiển chi tiết luôn có trong nút **ⓘ Hướng dẫn** của mỗi game.
 
@@ -56,7 +60,7 @@ Luật và điều khiển chi tiết luôn có trong nút **ⓘ Hướng dẫn*
 - Đánh dấu **yêu thích**, danh sách **chơi gần đây**, **kỷ lục riêng cho từng game**.
 - Chơi ngẫu nhiên trong danh sách đang lọc; nếu danh sách trống, chọn từ toàn bộ thư viện.
 - Game mở ngay trong trang; có tạm dừng, chơi lại, hướng dẫn, toàn màn hình (nếu trình duyệt hỗ trợ) và quay lại thư viện.
-- Tự tạm dừng khi chuyển sang tab khác. Khi thoát, game giải phóng vòng lặp, bộ hẹn giờ và sự kiện điều khiển.
+- Game offline tự tạm dừng khi chuyển sang tab khác. Caro online tiếp tục nhận trạng thái từ máy chủ; không có tạm dừng chung. Khi thoát, game giải phóng vòng lặp, bộ hẹn giờ và sự kiện điều khiển.
 - URL trực tiếp, ví dụ **`/#play/caro`**, **`/#play/pool`**, **`/#play/delivery`**.
 
 ### Phím tắt
@@ -68,11 +72,13 @@ Luật và điều khiển chi tiết luôn có trong nút **ⓘ Hướng dẫn*
 | `R`                     | Chơi lại game hiện tại                                     |
 | `Esc`                   | Quay lại thư viện (thoát toàn màn hình trước nếu đang bật) |
 
-Game hành động có nút cảm ứng. Rắn và 2048 hỗ trợ vuốt. Bàn cờ hỗ trợ chạm/click; caro còn hỗ trợ mũi tên và Enter. Chế độ chơi đang chọn được giữ khi bấm Chơi lại.
+Game hành động có nút cảm ứng. Rắn và 2048 hỗ trợ vuốt. Bàn cờ hỗ trợ chạm/click; caro còn hỗ trợ mũi tên và Enter. Chế độ chơi đang chọn được giữ khi bấm Chơi lại. Trong Caro online, phím `P` không tạm dừng ván; `R` gửi yêu cầu chơi tiếp khi ván đã kết thúc. Rời phòng trong ván có xác nhận và tính là bỏ cuộc.
 
 ### Dữ liệu
 
-Yêu thích, lịch sử và kỷ lục nằm trong `localStorage` với khóa **`tramchoi.library.v1`**. Dữ liệu chỉ có trên trình duyệt/thiết bị hiện tại, không gửi lên máy chủ. Nếu lưu trữ bị chặn, game vẫn chơi được nhưng dữ liệu chỉ tồn tại trong phiên hiện tại. Tạm dừng không mất lượt máy hoặc thời gian lật thẻ; tải lại trang sẽ bắt đầu một ván mới.
+Yêu thích, lịch sử và kỷ lục nằm trong `localStorage` với khóa **`tramchoi.library.v1`**. Các dữ liệu này chỉ có trên trình duyệt/thiết bị hiện tại, không gửi lên máy chủ. Nếu lưu trữ bị chặn, dữ liệu chỉ tồn tại trong phiên hiện tại. Ở chế độ offline, tạm dừng không mất lượt máy hoặc thời gian lật thẻ; tải lại trang bắt đầu một ván mới.
+
+Caro online gửi tên hiển thị và thao tác chơi đến máy chủ, lưu phòng trong RAM của một tiến trình. Token riêng để khôi phục chỗ ngồi nằm trong `sessionStorage`, không có trong link mời và không được chia sẻ. Tải lại cùng tab có thể trở lại ván trong thời hạn giữ chỗ **90 giây**. Phòng không hoạt động được dọn sau **30 phút**; khởi động lại máy chủ làm mất toàn bộ phòng.
 
 ## Delivery Dash nguyên bản
 
@@ -95,6 +101,8 @@ games/
   logic.js              Luật game và vật lý độc lập với DOM, xuất được cho Node
   shared.js             Vòng đời, pause, timer, input, canvas và UI dùng chung
   boards.js             Caro, cá ngựa, ô ăn quan, 2048, lật thẻ
+  online.js             Kết nối Caro online, phiên và khôi phục kết nối
+  caro-online-ui.js     Giao diện phòng, sẵn sàng và chơi tiếp
   action.js             Đua xe đạp, bida, rắn, phá gạch
   games.css             Giao diện các màn chơi
 
@@ -103,41 +111,50 @@ delivery.css            CSS riêng cho Delivery Dash
 core.js                 Logic Delivery Dash gốc
 game.js                 Canvas Delivery Dash + kết nối với cổng game
 
-scripts/serve.js         Server cục bộ bằng thư viện chuẩn Node
+server/caro-online.cjs   Máy chủ WebSocket xác nhận luật, lượt và trạng thái phòng
+scripts/serve.js         Máy chủ HTTP và WebSocket Caro
 scripts/check.js         Kiểm tra cú pháp JavaScript
 tests/core.test.js       Kiểm thử hồi quy Delivery Dash
 tests/arcade.test.js     Luật game, AI, vật lý, kết thúc ván
 tests/lifecycle.test.js  Pause, hủy timer, gỡ input và giải phóng game
+tests/online-server.test.cjs  Phòng, lượt, kết nối lại và hết hạn
+tests/online-client.test.cjs  Phiên, yêu cầu và phục hồi client
+tests/browser-online.cjs     Hai người chơi trong browser context độc lập
 tests/browser-smoke.cjs  Kiểm tra trình duyệt tùy chọn
 ```
 
 ## Kiểm thử
 
-Không cần cài dependency:
+Sau khi chạy `npm ci`:
 
 ```bash
 npm run check
 npm test
 ```
 
-Bộ kiểm thử kiểm tra thắng/thua, luật di chuyển, AI, va chạm, bảo toàn điểm ô ăn quan, sinh ô mới, lật thẻ, pause và giải phóng tài nguyên. Các bài kiểm thử Delivery Dash ban đầu vẫn được giữ lại.
+Bộ kiểm thử kiểm tra thắng/thua, luật di chuyển, AI, va chạm, bảo toàn điểm ô ăn quan, sinh ô mới, lật thẻ, pause và giải phóng tài nguyên; đồng thời kiểm tra máy chủ và client Caro online. Các bài kiểm thử Delivery Dash ban đầu vẫn được giữ lại. Lần kiểm tra triển khai online ngày 04/10/2026: **64 bài kiểm thử đạt**.
 
 ### Kiểm tra trình duyệt (tùy chọn)
 
 Cài Playwright **chỉ để chạy kiểm thử**, không phải dependency của trang:
 
 ```bash
-npm install --no-save --package-lock=false playwright
-npx playwright install chromium
+npm install --no-save --package-lock=false playwright pngjs
+npx playwright install chromium webkit
 ```
 
 Chạy `npm start` ở một terminal, rồi ở terminal khác:
 
 ```bash
 npm run test:browser
+npm run test:online
 ```
 
 Trên Windows, script tự dùng Edge nếu có. Có thể chỉ định `BROWSER_PATH` (đường dẫn executable) và `TEST_URL` nếu cần. Kiểm thử mở cả 10 game, chơi các lượt mẫu, kiểm tra AI, tìm kiếm không dấu, yêu thích, lưu kỷ lục, tạm dừng/chơi lại, màn hình điện thoại và mở trực tiếp `file://`. Ảnh chụp lưu trong thư mục tạm `tram-choi-screenshots`, hoặc đường dẫn do biến `SCREENSHOTS` chỉ định.
+
+`test:online` kiểm tra hai người chơi bằng browser context độc lập: mã/link mời, phòng đầy, sẵn sàng, đồng bộ nước đi, tải lại trang, mất/kết nối mạng, thắng, chơi tiếp và bỏ cuộc. Có thể chọn `ONLINE_BROWSER=webkit` hoặc `chromium`, đặt `ONLINE_WIDTH`/`ONLINE_HEIGHT` cho viewport của người thứ hai và `ONLINE_TEST_3D=1` để kiểm tra thêm đổi 2D/3D. Xem các lệnh PowerShell cụ thể trong [hướng dẫn kiểm thử online](docs/caro-online.md#kiểm-thử). Ảnh mặc định ở `test-results/online/<browser>-<width>`.
+
+Các bài kiểm thử này chạy trình duyệt headless trên Windows với viewport, DPR và thao tác cảm ứng mô phỏng. Chúng không tạo máy ảo iPadOS và không chạy trên iPhone/iPad thật; vẫn cần kiểm tra thiết bị thật trước khi xác nhận tương thích phần cứng.
 
 Kiểm tra riêng đường kẻ Caro trên WebKit và Chromium ở kích thước iPhone/iPad, gồm chạm ô, bàn phím, chơi lại và máy đáp lượt:
 
