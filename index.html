@@ -8,20 +8,23 @@
     <meta name="caro-websocket-url" content="" />
     <meta
       name="description"
-      content="Trạm Chơi — 10 game nhỏ, cả kho niềm vui. Chơi Delivery Dash, đua xe đạp, caro, cờ cá ngựa, ô ăn quan, bida và nhiều hơn nữa. Miễn phí, không cần tài khoản."
+      content="Trạm Chơi — 11 game nhỏ, cả kho niềm vui. Chơi Delivery Dash, đua xe đạp, caro, cờ cá ngựa, ô ăn quan, bida, sudoku và nhiều hơn nữa. Miễn phí, không cần tài khoản."
     />
     <title>Trạm Chơi — Góc nhỏ, vui lớn.</title>
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="games/games.css" />
+    <link rel="stylesheet" href="games/sudoku.css" />
     <link rel="stylesheet" href="games/3d/three.css" />
     <script src="art.js" defer></script>
     <script src="games/logic.js" defer></script>
+    <script src="games/sudoku-logic.js" defer></script>
     <script src="games/layouts.js" defer></script>
     <script src="games/shared.js" defer></script>
     <script src="games/online.js" defer></script>
     <script src="games/caro-online-ui.js" defer></script>
     <script src="games/boards.js" defer></script>
+    <script src="games/sudoku.js" defer></script>
     <script src="games/action.js" defer></script>
     <script src="games/3d/loader.js" defer></script>
     <script src="arcade.js" defer></script>
@@ -37,7 +40,7 @@
       <nav class="main-nav">
         <button class="nav-item active" data-view="all" aria-current="page">
           <span data-icon="grid"></span><span class="nav-text">Khám phá</span
-          ><span class="nav-count">10</span>
+          ><span class="nav-count">11</span>
         </button>
         <button class="nav-item" data-view="favorites">
           <span data-icon="heart"></span><span class="nav-text">Yêu thích</span
@@ -101,7 +104,7 @@
             </h1>
           </div>
           <div class="free-note">
-            <span class="connection-dot"></span>10 trò chơi · 2D &amp; 3D · Miễn phí
+            <span class="connection-dot"></span>11 trò chơi · 2D &amp; 3D · Miễn phí
           </div>
         </section>
 
@@ -124,7 +127,7 @@
               </div>
             </div>
             <div id="hero-art" class="hero-art" aria-hidden="true"></div>
-            <span class="hero-number" aria-hidden="true">01 / 10</span>
+            <span class="hero-number" aria-hidden="true">01 / 11</span>
           </article>
           <article class="together-card">
             <div class="together-top">
@@ -141,7 +144,7 @@
 
         <section class="dimension-banner" aria-label="Phiên bản 3D mới">
           <div class="dimension-symbol" aria-hidden="true"><span data-icon="cube"></span></div>
-          <div><span class="eyebrow">MỚI · MỞ THÊM MỘT CHIỀU VUI</span><h2>Game quen. Góc nhìn hoàn toàn mới.</h2><p>Cả 10 game, nay có thêm không gian 3D. Vẫn luật quen, thêm chiều sâu.</p></div>
+          <div><span class="eyebrow">MỚI · MỞ THÊM MỘT CHIỀU VUI</span><h2>Game quen. Góc nhìn hoàn toàn mới.</h2><p>Khám phá 10 game trong không gian 3D. Vẫn luật quen, thêm chiều sâu.</p></div>
           <button class="button button-secondary" data-library-edition="3d">Khám phá 3D<span data-icon="arrow-up-right"></span></button>
         </section>
         <section id="library" class="library" aria-labelledby="library-title">
@@ -149,7 +152,7 @@
             <div class="section-heading-title">
               <span class="section-icon" data-icon="gamepad"></span>
               <h2 id="library-title">Tất cả trò chơi</h2>
-              <span id="result-count" class="count-badge">10</span>
+              <span id="result-count" class="count-badge">11</span>
             </div>
             <label class="sort-control"
               ><span data-icon="sort"></span
@@ -160,11 +163,11 @@
               </select></label
             >
           </div>
-          <div class="library-edition-row"><span>CHỌN KHÔNG GIAN CHƠI</span><div class="edition-switch" role="group" aria-label="Phiên bản game trong thư viện"><button data-library-edition="2d" aria-pressed="true">2D <span>Cổ điển</span></button><button data-library-edition="3d" aria-pressed="false"><span data-icon="cube"></span>3D <span>Không gian mới</span></button></div><small id="edition-library-note">10 game · Giữ trọn bản nguyên bản</small></div>
+          <div class="library-edition-row"><span>CHỌN KHÔNG GIAN CHƠI</span><div class="edition-switch" role="group" aria-label="Phiên bản game trong thư viện"><button data-library-edition="2d" aria-pressed="true">2D <span>Cổ điển</span></button><button data-library-edition="3d" aria-pressed="false"><span data-icon="cube"></span>3D <span>Không gian mới</span></button></div><small id="edition-library-note">11 game · Giữ trọn bản nguyên bản</small></div>
           <div class="filter-row">
             <div class="category-filters" role="group" aria-label="Lọc theo thể loại">
               <button class="filter-chip active" data-filter="all" aria-pressed="true">
-                Tất cả<span>10</span></button
+                Tất cả<span>11</span></button
               ><button class="filter-chip" data-filter="arcade" aria-pressed="false">
                 <span data-icon="bolt"></span>Arcade</button
               ><button class="filter-chip" data-filter="sport" aria-pressed="false">

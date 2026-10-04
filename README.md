@@ -1,7 +1,7 @@
 <!-- version v1.0 -->
 # Trạm Chơi
 
-**Một trang, 10 game chơi được ngay.** Cổng mini game tiếng Việt, giữ nguyên **Delivery Dash** và bổ sung game thể thao, bàn cờ, arcade, trí tuệ. Caro có chế độ online hai người khác thiết bị qua máy chủ Node.js. Không có tài khoản, quảng cáo hay bước build.
+**Một trang, 11 game chơi được ngay.** Cổng mini game tiếng Việt, giữ nguyên **Delivery Dash** và bổ sung game thể thao, bàn cờ, arcade, trí tuệ. Caro có chế độ online hai người khác thiết bị qua máy chủ Node.js. Không có tài khoản, quảng cáo hay bước build.
 
 ## Chạy dự án
 
@@ -38,6 +38,7 @@ python -m http.server 4173
 | **Bida bỏ túi**     | Luyện tập 1 người                             | Ngắm từ bi trắng, chọn lực, đánh đủ 15 bi màu vào 6 lỗ.           |
 | **Rắn săn mồi**     | 1 người                                       | Ăn trái cây, tránh tường và thân mình trên bàn 20 × 20.           |
 | **2048**            | 1 người                                       | Trượt và gộp số; đạt 2048 có thể chơi tiếp.                       |
+| **Sudoku**          | 1 người · 2D · Dễ / Vừa / Khó                  | Điền số 1–9 vào bàn 9 × 9, không trùng hàng, cột và khối 3 × 3.    |
 | **Lật thẻ trí nhớ** | 1 người                                       | Tìm 8 cặp trái cây trên 16 thẻ với ít lần lật nhất.               |
 | **Phá gạch**        | 1 người                                       | Đỡ bóng, phá 50 viên gạch với 3 mạng.                             |
 
@@ -54,7 +55,7 @@ Luật và điều khiển chi tiết luôn có trong nút **ⓘ Hướng dẫn*
 
 ## Tính năng trang
 
-- Thư viện 10 game với hình minh họa riêng, bố cục tương thích máy tính và điện thoại.
+- Thư viện 11 game với hình minh họa riêng, bố cục tương thích máy tính và điện thoại; 10 game có thêm bản 3D, Sudoku dùng bản 2D.
 - Tìm kiếm tiếng Việt có dấu hoặc không dấu; lọc theo Arcade, Thể thao, Bàn cờ, Trí tuệ.
 - Sắp xếp theo đề xuất, tên hoặc game mới chơi.
 - Đánh dấu **yêu thích**, danh sách **chơi gần đây**, **kỷ lục riêng cho từng game**.
@@ -76,9 +77,32 @@ Game hành động có nút cảm ứng. Rắn và 2048 hỗ trợ vuốt. Bàn 
 
 ### Dữ liệu
 
-Yêu thích, lịch sử và kỷ lục nằm trong `localStorage` với khóa **`tramchoi.library.v1`**. Các dữ liệu này chỉ có trên trình duyệt/thiết bị hiện tại, không gửi lên máy chủ. Nếu lưu trữ bị chặn, dữ liệu chỉ tồn tại trong phiên hiện tại. Ở chế độ offline, tạm dừng không mất lượt máy hoặc thời gian lật thẻ; tải lại trang bắt đầu một ván mới.
+Yêu thích, lịch sử và kỷ lục nằm trong `localStorage` với khóa **`tramchoi.library.v1`**. Các dữ liệu này chỉ có trên trình duyệt/thiết bị hiện tại, không gửi lên máy chủ. Nếu lưu trữ bị chặn, dữ liệu chỉ tồn tại trong phiên hiện tại. Ở chế độ offline, tạm dừng không mất lượt máy hoặc thời gian lật thẻ; tải lại trang bắt đầu một ván mới, riêng Sudoku khôi phục ván đã lưu.
 
 Caro online gửi tên hiển thị và thao tác chơi đến máy chủ, lưu phòng trong RAM của một tiến trình. Token riêng để khôi phục chỗ ngồi nằm trong `sessionStorage`, không có trong link mời và không được chia sẻ. Tải lại cùng tab có thể trở lại ván trong thời hạn giữ chỗ **90 giây**. Phòng không hoạt động được dọn sau **30 phút**; khởi động lại máy chủ làm mất toàn bộ phòng.
+
+## Sudoku
+
+Mở **Sudoku** trong mục **Trí tuệ**, hoặc truy cập `/#play/sudoku`. Chơi được
+offline, bằng bàn phím hoặc chạm màn hình, không cần backend riêng.
+
+- Ba mức Dễ / Vừa / Khó, với mục tiêu khoảng 42 / 34 / 28 ô cho sẵn. Độ khó dựa
+  trên mật độ gợi ý; mỗi đề được kiểm tra để chỉ có một đáp án.
+- Chọn ô rồi nhập số 1–9. Dùng mũi tên để di chuyển, Delete / Backspace để xóa,
+  phím **N** bật/tắt ghi chú. Các công cụ cũng có nút cảm ứng.
+- Số trùng hàng/cột/khối được đánh dấu. **Kiểm tra** chỉ ra số điền chưa đúng;
+  **Gợi ý** điền đúng ô đang chọn, hoặc một ô chưa giải nếu ô đang chọn đã đúng.
+- Hoàn tác tối đa 200 thao tác trong phiên chơi, bao gồm ghi chú tự xóa khi điền
+  một số liên quan. Hoàn tác không hoàn lại số lần dùng gợi ý/kiểm tra.
+- Đồng hồ bắt đầu khi nhập số, ghi chú hoặc dùng hỗ trợ; dừng khi tạm dừng,
+  chuyển tab hoặc hoàn thành. Chơi lại/đổi độ khó tạo đề mới, có xác nhận nếu đang
+  có tiến độ chưa hoàn thành.
+- Tự lưu một ván vào `localStorage` với khóa **`tram-choi.sudoku.v1`**: bàn, ghi chú,
+  thời gian và độ khó. Đóng game/tải lại trang có thể chơi tiếp; lịch sử hoàn tác
+  không được lưu qua lần mở lại. Nếu trình duyệt chặn lưu trữ, vẫn chơi được trong
+  phiên hiện tại.
+- Điểm cơ bản 1.000 / 1.500 / 2.000 theo độ khó, trừ 100 mỗi gợi ý, 25 mỗi lần
+  kiểm tra và 1 mỗi 10 giây chơi; tối thiểu 100. Hoàn thành ghi kỷ lục trên thiết bị.
 
 ## Delivery Dash nguyên bản
 
@@ -101,6 +125,9 @@ games/
   logic.js              Luật game và vật lý độc lập với DOM, xuất được cho Node
   shared.js             Vòng đời, pause, timer, input, canvas và UI dùng chung
   boards.js             Caro, cá ngựa, ô ăn quan, 2048, lật thẻ
+  sudoku-logic.js        Sinh đề một đáp án, luật, ghi chú và kiểm tra bản lưu
+  sudoku.js             Điều khiển Sudoku, đồng hồ và lưu ván
+  sudoku.css            Bàn 9 × 9 và giao diện Sudoku responsive
   online.js             Kết nối Caro online, phiên và khôi phục kết nối
   caro-online-ui.js     Giao diện phòng, sẵn sàng và chơi tiếp
   action.js             Đua xe đạp, bida, rắn, phá gạch
@@ -132,7 +159,7 @@ npm run check
 npm test
 ```
 
-Bộ kiểm thử kiểm tra thắng/thua, luật di chuyển, AI, va chạm, bảo toàn điểm ô ăn quan, sinh ô mới, lật thẻ, pause và giải phóng tài nguyên; đồng thời kiểm tra máy chủ và client Caro online. Các bài kiểm thử Delivery Dash ban đầu vẫn được giữ lại. Lần kiểm tra triển khai online ngày 04/10/2026: **64 bài kiểm thử đạt**.
+Bộ kiểm thử kiểm tra thắng/thua, luật di chuyển, AI, va chạm, bảo toàn điểm ô ăn quan, sinh ô mới, lật thẻ, pause và giải phóng tài nguyên; đồng thời kiểm tra máy chủ/client Caro online và logic Sudoku. Các bài kiểm thử Delivery Dash ban đầu vẫn được giữ lại. Sau khi bổ sung Sudoku ngày 04/10/2026: **75 bài kiểm thử đạt**.
 
 ### Kiểm tra trình duyệt (tùy chọn)
 
@@ -148,9 +175,16 @@ Chạy `npm start` ở một terminal, rồi ở terminal khác:
 ```bash
 npm run test:browser
 npm run test:online
+npm run test:sudoku
 ```
 
-Trên Windows, script tự dùng Edge nếu có. Có thể chỉ định `BROWSER_PATH` (đường dẫn executable) và `TEST_URL` nếu cần. Kiểm thử mở cả 10 game, chơi các lượt mẫu, kiểm tra AI, tìm kiếm không dấu, yêu thích, lưu kỷ lục, tạm dừng/chơi lại, màn hình điện thoại và mở trực tiếp `file://`. Ảnh chụp lưu trong thư mục tạm `tram-choi-screenshots`, hoặc đường dẫn do biến `SCREENSHOTS` chỉ định.
+Trên Windows, script tự dùng Edge nếu có. Có thể chỉ định `BROWSER_PATH` (đường dẫn executable) và `TEST_URL` nếu cần. Kiểm thử mở cả 11 game, chơi các lượt mẫu, kiểm tra AI, tìm kiếm không dấu, yêu thích, lưu kỷ lục, tạm dừng/chơi lại, màn hình điện thoại và mở trực tiếp `file://`. Ảnh chụp lưu trong thư mục tạm `tram-choi-screenshots`, hoặc đường dẫn do biến `SCREENSHOTS` chỉ định.
+
+`test:sudoku` chạy Chromium và WebKit: kiểm tra đề có một đáp án bằng bộ giải độc lập,
+nhập số/ghi chú, hoàn tác, hỗ trợ, lưu/khôi phục ván, tạm dừng, hoàn thành và các viewport
+320 × 740, 390 × 844, 744 × 1133, 1024 × 1366. Có thể đặt `SUDOKU_BROWSERS=webkit`
+hoặc `chromium`; ảnh nằm trong `test-results/sudoku`. `npm test` bao gồm kiểm thử
+logic Sudoku, dữ liệu lưu hỏng và tính duy nhất trên 60 đề sinh theo seed.
 
 `test:online` kiểm tra hai người chơi bằng browser context độc lập: mã/link mời, phòng đầy, sẵn sàng, đồng bộ nước đi, tải lại trang, mất/kết nối mạng, thắng, chơi tiếp và bỏ cuộc. Có thể chọn `ONLINE_BROWSER=webkit` hoặc `chromium`, đặt `ONLINE_WIDTH`/`ONLINE_HEIGHT` cho viewport của người thứ hai và `ONLINE_TEST_3D=1` để kiểm tra thêm đổi 2D/3D. Xem các lệnh PowerShell cụ thể trong [hướng dẫn kiểm thử online](docs/caro-online.md#kiểm-thử). Ảnh mặc định ở `test-results/online/<browser>-<width>`.
 

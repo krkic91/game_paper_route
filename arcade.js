@@ -160,6 +160,25 @@
       variant: 'Bàn 4 × 4 cổ điển. Mẹo nhỏ: giữ ô lớn nhất ở một góc và dành chỗ cho những ô mới.',
     },
     {
+      id: 'sudoku',
+      title: 'Sudoku',
+      category: 'puzzle',
+      players: '1 người',
+      supports3d: false,
+      badge: 'MỚI',
+      description: 'Chín con số, một khoảng lặng để suy nghĩ.',
+      keywords: 'sudoku giải đố số logic 9x9 ghi chú',
+      intro: 'Điền những ô còn thiếu, tìm trật tự trong từng hàng và tận hưởng cảm giác giải được một đề khó.',
+      instructions: [
+        'Mỗi hàng, cột và khối 3 × 3 phải có đủ số 1 đến 9, không lặp lại. Các số cho sẵn không thể sửa.',
+        'Chạm ô rồi chọn số bên dưới, hoặc dùng phím 1–9. Mũi tên di chuyển; Delete / Backspace xóa số.',
+        'Bật Ghi chú hoặc nhấn N để đánh dấu các số có thể điền. Hoàn tác quay lại thao tác trước.',
+        'Kiểm tra đánh dấu số chưa đúng. Gợi ý điền một ô theo đáp án; dùng hỗ trợ sẽ giảm điểm cuối ván.',
+        'Chọn Dễ, Vừa hoặc Khó. Tiến độ tự lưu trên trình duyệt; Chơi lại tạo đề mới ở mức đang chọn.',
+      ],
+      variant: 'Sudoku cổ điển 9 × 9, mỗi đề có một đáp án. Độ khó thay đổi theo số ô cho sẵn. Điểm cơ bản 1.000 / 1.500 / 2.000, trừ 100 mỗi gợi ý, 25 mỗi lần kiểm tra và 1 mỗi 10 giây; tối thiểu 100.',
+    },
+    {
       id: 'memory',
       title: 'Lật thẻ trí nhớ',
       category: 'puzzle',
@@ -305,12 +324,19 @@
     const saved = favorites.has(game.id);
     return `<button class="favorite-button ${saved ? 'is-favorite' : ''}" data-favorite="${game.id}" aria-label="${saved ? 'Bỏ' : 'Thêm'} ${game.title} ${saved ? 'khỏi' : 'vào'} yêu thích" aria-pressed="${saved}" title="${saved ? 'Bỏ yêu thích' : 'Thêm yêu thích'}">${Art.icon('heart')}</button>`;
   }
+  function editionFor(game, requested) {
+    return requested === '3d' && game.supports3d !== false ? '3d' : '2d';
+  }
+  function editionButtons(game) {
+    const selected = editionFor(game, libraryEdition);
+    return `<div class="card-editions"><button data-play="${game.id}" data-edition="2d" class="${selected === '2d' ? 'selected' : ''}" aria-label="Chơi ${game.title} bản 2D">2D cổ điển</button>${game.supports3d === false ? '' : `<button data-play="${game.id}" data-edition="3d" class="${selected === '3d' ? 'selected' : ''}" aria-label="Chơi ${game.title} bản 3D">${Art.icon('cube', 13)}Chơi 3D</button>`}</div>`;
+  }
   function renderLibrary() {
     const visible = filteredGames();
     grid.innerHTML = visible
       .map(
         (game) =>
-          `<article class="game-card" data-game="${game.id}"><div class="game-cover"><button class="cover-play" data-play="${game.id}" aria-label="Chơi ${game.title}">${Art.cover(game.id)}<span class="cover-hover"><span>${Art.icon('play')}Chơi ngay</span></span></button>${game.badge ? `<span class="cover-label ${game.id === 'delivery' ? 'original' : ''}">${game.id === 'delivery' ? Art.icon('spark') : ''}${game.badge}</span>` : ''}${favoriteButton(game)}</div><div class="game-card-body"><button class="game-card-title" data-play="${game.id}">${game.title}${Art.icon('arrow-up-right')}</button><p class="game-card-description">${game.description}</p><div class="game-card-meta"><span class="category-tag" style="--tag:${categoryColors[game.category]}"><i></i>${categories[game.category]}</span><span class="players-label">${Art.icon('users')}${game.players}</span></div><div class="card-editions"><button data-play="${game.id}" data-edition="2d" class="${libraryEdition === '2d' ? 'selected' : ''}" aria-label="Chơi ${game.title} bản 2D">2D cổ điển</button><button data-play="${game.id}" data-edition="3d" class="${libraryEdition === '3d' ? 'selected' : ''}" aria-label="Chơi ${game.title} bản 3D">${Art.icon('cube', 13)}Chơi 3D</button></div></div></article>`,
+          `<article class="game-card" data-game="${game.id}"><div class="game-cover"><button class="cover-play" data-play="${game.id}" aria-label="Chơi ${game.title}">${Art.cover(game.id)}<span class="cover-hover"><span>${Art.icon('play')}Chơi ngay</span></span></button>${game.badge ? `<span class="cover-label ${game.id === 'delivery' ? 'original' : ''}">${game.id === 'delivery' ? Art.icon('spark') : ''}${game.badge}</span>` : ''}${favoriteButton(game)}</div><div class="game-card-body"><button class="game-card-title" data-play="${game.id}">${game.title}${Art.icon('arrow-up-right')}</button><p class="game-card-description">${game.description}</p><div class="game-card-meta"><span class="category-tag" style="--tag:${categoryColors[game.category]}"><i></i>${categories[game.category]}</span><span class="players-label">${Art.icon('users')}${game.players}</span></div>${editionButtons(game)}</div></article>`,
       )
       .join('');
     $('#favorite-count').textContent = favorites.size;
@@ -347,7 +373,7 @@
     $('.dimension-banner').hidden = !exploring;
     document.body.classList.toggle('library-is-3d', libraryEdition === '3d');
     document.querySelectorAll('.edition-switch [data-library-edition]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.libraryEdition === libraryEdition)));
-    $('#edition-library-note').textContent = libraryEdition === '3d' ? '10 game · Mô hình 3D thật · WebGL 2' : '10 game · Giữ trọn bản nguyên bản';
+    $('#edition-library-note').textContent = libraryEdition === '3d' ? `${games.filter(game => game.supports3d !== false).length} game có bản 3D · Sudoku chơi 2D` : `${games.length} game · Giữ trọn bản nguyên bản`;
     document.querySelectorAll('[data-view]').forEach((button) => {
       const selected = button.dataset.view === view;
       button.classList.toggle('active', selected);
@@ -432,9 +458,9 @@
       if (active && activeEdition === '3d') mountGame(active, '3d', true);
       return;
     }
+    if (instance.restart() === false) return;
     helpPaused = false;
     setPaused(false);
-    instance.restart();
     (
       stage.querySelector('[data-start]') ||
       stage.querySelector('.three-canvas') ||
@@ -488,6 +514,7 @@
     stage.querySelector('button').focus({ preventScroll: true });
   }
   async function mountGame(game, edition = '2d', force = false) {
+    edition = editionFor(game, edition);
     if (!force && active?.id === game.id && activeEdition === edition && dialog.open) return;
     if (active?.id !== game.id && !mayLeaveGame()) return;
     const token = ++mountGeneration;
@@ -508,6 +535,7 @@
     $('#player-category').textContent = `${categories[game.category]} · ${game.players}`;
     $('#player-footnote').textContent = edition === '3d' ? 'WebGL 2 · Kỷ lục 3D riêng · Đổi phiên bản = ván mới' : game.id === 'delivery' ? 'Delivery Dash · Game nguyên bản của bạn' : 'Chơi tại chỗ · Kỷ lục lưu trên thiết bị';
     document.querySelectorAll('[data-player-edition]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.playerEdition === edition)));
+    $('.player-edition-switch').hidden = game.supports3d === false;
     renderHelp(game);
     helpVisible = window.innerWidth > 800;
     shell.classList.toggle('show-help', helpVisible); shell.classList.toggle('help-hidden', !helpVisible);
@@ -595,7 +623,7 @@
   }
   function playGame(id, edition = libraryEdition, replace = false) {
     if (!ids.has(id)) return;
-    edition = edition === '3d' ? '3d' : '2d';
+    edition = editionFor(games.find(game => game.id === id), edition);
     const code = id === 'caro' && active?.id === 'caro' ?
       (window.CaroOnline.getState().session?.code || window.CaroOnline.getInviteCode()) : '';
     const hash = `#play/${id}${edition === '3d' ? '/3d' : ''}${code ? `?room=${encodeURIComponent(code)}` : ''}`;
@@ -624,7 +652,9 @@
         // Also cancel an in-flight create/join whose seat has not arrived yet.
         window.CaroOnline.leave();
       }
-      mountGame(game, edition, Boolean(newInvite));
+      const supported = editionFor(game, edition);
+      if (supported !== edition) history.replaceState(null, '', `#play/${id}`);
+      mountGame(game, supported, Boolean(newInvite));
     }
     else {
       if (closeGame(false) === false) return;

@@ -220,6 +220,20 @@
         '<circle cx="363" cy="36" r="90" fill="#b9a5c0"/><circle cx="44" cy="243" r="83" fill="#9588a4"/>',
       );
     }
+    if (id === 'sudoku') {
+      const givens = '530070000600195000098000060800060003400803001700020006060000280000419005000080079';
+      let grid = '', numbers = '';
+      for (let n = 1; n < 9; n++)
+        grid += `<path d="M${n * 20} 0v180M0 ${n * 20}h180" stroke="${n % 3 ? '#b9c4a6' : '#658369'}" stroke-width="${n % 3 ? 0.8 : 2}"/>`;
+      [...givens].forEach((value, index) => {
+        if (value !== '0') numbers += `<text x="${(index % 9) * 20 + 10}" y="${Math.floor(index / 9) * 20 + 14}" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="13" font-weight="600" fill="#385444">${value}</text>`;
+      });
+      return scene(
+        `<g transform="translate(101 27) rotate(-7 90 90)"><rect x="-9" y="-9" width="198" height="198" rx="11" fill="#d3dcbc"/><rect width="180" height="180" rx="2" fill="#f3f1dc"/><rect x="60" y="60" width="60" height="60" fill="#d5e6bb"/>${grid}${numbers}<text x="50" y="14" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="13" fill="#4f8171">4</text></g><g transform="translate(314 62) rotate(19)"><rect width="12" height="135" rx="3" fill="#e6b461"/><path d="M3 5v125" stroke="#f4d492" stroke-width="3"/><path d="m0 133 6 18 6-18" fill="#f2e5c5"/><path d="m4 145 2 6 2-6" fill="#455e4b"/><rect width="12" height="15" rx="3" fill="#c18772"/></g>`,
+        '#b4c7ba',
+        '<circle cx="27" cy="219" r="103" fill="#9db4a2"/><circle cx="356" cy="17" r="81" fill="#d1ddc8"/>',
+      );
+    }
     if (id === 'memory') {
       let cards = '';
       [

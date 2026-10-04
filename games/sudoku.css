@@ -1,0 +1,264 @@
+/* version v1.0 */
+.sudoku-workspace {
+  flex: 0 0 auto;
+  gap: 12px;
+}
+.sudoku-workspace .game-toolbar {
+  gap: clamp(12px, 3vw, 30px);
+}
+.sudoku-workspace .game-board-area {
+  flex: 0 0 auto;
+}
+.sudoku-difficulty select {
+  font-size: 16px;
+  min-width: 82px;
+}
+.sudoku-frame {
+  width: min(100%, 400px);
+  padding: 7px;
+  border: 1px solid #60724a;
+  border-radius: 10px;
+  background: #34432c;
+  box-shadow: 0 12px 28px #0003;
+}
+.sudoku-board {
+  display: grid;
+  grid-template-rows: repeat(9, minmax(0, 1fr));
+  aspect-ratio: 1;
+  width: 100%;
+  border: 2px solid #45543a;
+  background: #f4f1dc;
+  overflow: hidden;
+  isolation: isolate;
+}
+.sudoku-row {
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  min-height: 0;
+  min-width: 0;
+}
+.sudoku-cell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-right: 1px solid #b0b69b;
+  border-bottom: 1px solid #b0b69b;
+  border-radius: 0;
+  background: #f4f1dc;
+  background-clip: padding-box;
+  color: #327646;
+  font: 500 clamp(19px, 4.5vw, 26px) / 1 "Segoe UI", sans-serif;
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  cursor: pointer;
+  overflow: hidden;
+  transition: none;
+}
+.sudoku-cell:nth-child(3n):not(:last-child) {
+  border-right: 2px solid #45543a;
+}
+.sudoku-row:nth-child(3n):not(:last-child) .sudoku-cell {
+  border-bottom: 2px solid #45543a;
+}
+.sudoku-cell:last-child {
+  border-right: 0;
+}
+.sudoku-row:last-child .sudoku-cell {
+  border-bottom: 0;
+}
+.sudoku-cell.is-given {
+  color: #293c2b;
+  font-weight: 700;
+}
+.sudoku-cell.is-peer {
+  background-color: #e7ebd2;
+}
+.sudoku-cell.is-same {
+  background-color: #cdddba;
+}
+.sudoku-cell.is-selected {
+  background-color: #c2dba8;
+  box-shadow: inset 0 0 0 2px #577740;
+}
+.sudoku-cell.is-error {
+  color: #9f302e;
+  background-color: #f7d8c4;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.sudoku-cell.is-error.is-selected {
+  box-shadow: inset 0 0 0 2px #a7533c;
+}
+.sudoku-cell:focus {
+  outline: none;
+}
+.sudoku-cell:focus-visible {
+  outline: 2px solid #243e22;
+  outline-offset: -4px;
+}
+.sudoku-value {
+  pointer-events: none;
+}
+.sudoku-notes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  position: absolute;
+  inset: 2px;
+  color: #526849;
+  font-size: clamp(7px, 1.8vw, 10px);
+  line-height: 1;
+  font-weight: 500;
+  pointer-events: none;
+  text-decoration: none;
+}
+.sudoku-notes > span {
+  display: grid;
+  place-items: center;
+}
+.sudoku-workspace .game-controls {
+  flex-direction: column;
+  max-width: 400px;
+  gap: 10px;
+}
+.sudoku-keypad {
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  width: 100%;
+  gap: 5px;
+}
+.sudoku-key {
+  min-width: 0;
+  min-height: 44px;
+  padding: 4px 0;
+  border: 1px solid #617c49;
+  border-radius: 6px;
+  background: #2d4125;
+  color: #e0edc5;
+  font-size: 21px;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.sudoku-key small {
+  display: block;
+  font-size: 8px;
+  line-height: 1;
+  margin-top: 4px;
+  color: #a7bf8c;
+}
+.sudoku-key.is-used {
+  color: #8a9d78;
+  background: #273422;
+}
+.sudoku-key:hover,
+.sudoku-key:active {
+  background: #4a6336;
+  color: #f0f5da;
+}
+.sudoku-tools {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+}
+.sudoku-tools .control-button {
+  flex: 1 0 auto;
+  padding: 8px 9px;
+  min-height: 38px;
+  font-size: 11px;
+  white-space: nowrap;
+  touch-action: manipulation;
+}
+.sudoku-tools kbd {
+  font: inherit;
+  font-size: 9px;
+  opacity: 0.65;
+}
+.sudoku-tools [aria-pressed="true"] {
+  border-color: #bddb89;
+  background: #566e39;
+  color: #f4f7d6;
+}
+.sudoku-workspace.is-note-mode .sudoku-keypad {
+  outline: 1px dashed #8eaf66;
+  outline-offset: 3px;
+  border-radius: 5px;
+}
+.sudoku-workspace button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.sudoku-workspace .game-status {
+  max-width: 450px;
+  min-height: 36px;
+}
+@media (max-width: 480px) {
+  .sudoku-workspace {
+    padding: 13px 10px 10px;
+    gap: 11px;
+  }
+  .sudoku-workspace .game-toolbar {
+    gap: 11px;
+    padding-bottom: 11px;
+  }
+  .sudoku-workspace .game-stat > small {
+    font-size: 7px;
+    letter-spacing: 0.4px;
+  }
+  .sudoku-workspace .game-stat > strong {
+    font-size: 17px;
+  }
+  .sudoku-difficulty select {
+    font-size: 16px;
+    min-width: 68px;
+    max-width: 78px;
+    padding: 5px;
+  }
+  .sudoku-frame {
+    padding: 5px;
+  }
+  .sudoku-keypad {
+    gap: 4px;
+  }
+  .sudoku-key {
+    font-size: 20px;
+    min-height: 44px;
+  }
+  .sudoku-tools .control-button {
+    min-height: 42px;
+  }
+}
+@media (max-width: 350px) {
+  .sudoku-workspace .game-toolbar {
+    gap: 8px;
+  }
+  .sudoku-workspace .game-stat > strong {
+    font-size: 15px;
+  }
+  .sudoku-tools .control-button {
+    padding: 8px;
+    font-size: 10px;
+  }
+}
+@media (max-height: 760px) and (min-width: 801px) {
+  .sudoku-frame,
+  .sudoku-workspace .game-controls {
+    max-width: 320px;
+  }
+  .sudoku-workspace {
+    gap: 9px;
+  }
+}

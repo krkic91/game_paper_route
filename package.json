@@ -1,15 +1,16 @@
 {
   "name": "tram-choi",
   "version": "2.0.0",
-  "description": "Cổng 10 mini game tiếng Việt, Caro online hai người và Delivery Dash. Không cần bước build.",
+  "description": "Cổng 11 mini game tiếng Việt, Caro online hai người và Delivery Dash. Không cần bước build.",
   "private": true,
   "scripts": {
     "start": "node scripts/serve.js",
     "dev": "node scripts/serve.js",
-    "test": "node --test tests/core.test.js tests/arcade.test.js tests/lifecycle.test.js tests/online-server.test.cjs tests/online-client.test.cjs",
+    "test": "node --test tests/core.test.js tests/arcade.test.js tests/lifecycle.test.js tests/online-server.test.cjs tests/online-client.test.cjs tests/sudoku.test.cjs",
     "test:online": "node tests/browser-online.cjs",
     "test:browser": "node tests/browser-smoke.cjs",
-    "check": "node scripts/check.js"
+    "check": "node scripts/check.js",
+    "test:sudoku": "node tests/browser-sudoku.cjs"
   },
   "engines": {
     "node": ">=18"
