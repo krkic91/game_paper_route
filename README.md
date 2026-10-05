@@ -1,7 +1,7 @@
 <!-- version v1.0 -->
 # Trạm Chơi
 
-**Một trang, 11 game chơi được ngay.** Cổng mini game tiếng Việt, giữ nguyên **Delivery Dash** và bổ sung game thể thao, bàn cờ, arcade, trí tuệ. Caro có chế độ online hai người khác thiết bị qua máy chủ Node.js. Không có tài khoản, quảng cáo hay bước build.
+**Một trang, 12 game chơi được ngay.** Cổng mini game tiếng Việt, giữ nguyên **Delivery Dash** và bổ sung game thể thao, bàn cờ, arcade, trí tuệ. Caro có chế độ online hai người khác thiết bị qua máy chủ Node.js. Không có tài khoản, quảng cáo hay bước build.
 
 ## Chạy dự án
 
@@ -39,6 +39,7 @@ python -m http.server 4173
 | **Rắn săn mồi**     | 1 người                                       | Ăn trái cây, tránh tường và thân mình trên bàn 20 × 20.           |
 | **2048**            | 1 người                                       | Trượt và gộp số; đạt 2048 có thể chơi tiếp.                       |
 | **Sudoku**          | 1 người · 2D · Dễ / Vừa / Khó                  | Điền số 1–9 vào bàn 9 × 9, không trùng hàng, cột và khối 3 × 3.    |
+| **Xếp cún**         | 1 người · 2D · 24 màn                         | Mỗi hàng, cột và vùng màu có một cún; các cún không chạm nhau.    |
 | **Lật thẻ trí nhớ** | 1 người                                       | Tìm 8 cặp trái cây trên 16 thẻ với ít lần lật nhất.               |
 | **Phá gạch**        | 1 người                                       | Đỡ bóng, phá 50 viên gạch với 3 mạng.                             |
 
@@ -55,7 +56,7 @@ Luật và điều khiển chi tiết luôn có trong nút **ⓘ Hướng dẫn*
 
 ## Tính năng trang
 
-- Thư viện 11 game với hình minh họa riêng, bố cục tương thích máy tính và điện thoại; 10 game có thêm bản 3D, Sudoku dùng bản 2D.
+- Thư viện 12 game với hình minh họa riêng, bố cục tương thích máy tính và điện thoại; 10 game có thêm bản 3D, Sudoku và Xếp cún dùng bản 2D.
 - Tìm kiếm tiếng Việt có dấu hoặc không dấu; lọc theo Arcade, Thể thao, Bàn cờ, Trí tuệ.
 - Sắp xếp theo đề xuất, tên hoặc game mới chơi.
 - Đánh dấu **yêu thích**, danh sách **chơi gần đây**, **kỷ lục riêng cho từng game**.
@@ -77,7 +78,7 @@ Game hành động có nút cảm ứng. Rắn và 2048 hỗ trợ vuốt. Bàn 
 
 ### Dữ liệu
 
-Yêu thích, lịch sử và kỷ lục nằm trong `localStorage` với khóa **`tramchoi.library.v1`**. Các dữ liệu này chỉ có trên trình duyệt/thiết bị hiện tại, không gửi lên máy chủ. Nếu lưu trữ bị chặn, dữ liệu chỉ tồn tại trong phiên hiện tại. Ở chế độ offline, tạm dừng không mất lượt máy hoặc thời gian lật thẻ; tải lại trang bắt đầu một ván mới, riêng Sudoku khôi phục ván đã lưu.
+Yêu thích, lịch sử và kỷ lục nằm trong `localStorage` với khóa **`tramchoi.library.v1`**. Các dữ liệu này chỉ có trên trình duyệt/thiết bị hiện tại, không gửi lên máy chủ. Nếu lưu trữ bị chặn, dữ liệu chỉ tồn tại trong phiên hiện tại. Ở chế độ offline, tạm dừng không mất lượt máy hoặc thời gian lật thẻ; tải lại trang bắt đầu một ván mới, riêng Sudoku và Xếp cún khôi phục ván đã lưu.
 
 Caro online gửi tên hiển thị và thao tác chơi đến máy chủ, lưu phòng trong RAM của một tiến trình. Token riêng để khôi phục chỗ ngồi nằm trong `sessionStorage`, không có trong link mời và không được chia sẻ. Tải lại cùng tab có thể trở lại ván trong thời hạn giữ chỗ **90 giây**. Phòng không hoạt động được dọn sau **30 phút**; khởi động lại máy chủ làm mất toàn bộ phòng.
 
@@ -104,6 +105,25 @@ offline, bằng bàn phím hoặc chạm màn hình, không cần backend riêng
 - Điểm cơ bản 1.000 / 1.500 / 2.000 theo độ khó, trừ 100 mỗi gợi ý, 25 mỗi lần
   kiểm tra và 1 mỗi 10 giây chơi; tối thiểu 100. Hoàn thành ghi kỷ lục trên thiết bị.
 
+## Xếp cún
+
+Mở **Xếp cún** trong mục **Trí tuệ**, hoặc truy cập `/#play/puppies`. Game lấy cảm
+hứng từ bàn cún nhiều vùng màu: mỗi hàng, cột và vùng phải có đúng một cún; hai
+cún không được chạm nhau theo tám hướng. Cùng đường chéo nhưng cách xa vẫn hợp lệ.
+
+- 24 màn có một đáp án: màn 1–6 dùng bàn 5 × 5, màn 7–12 dùng 6 × 6, màn 13–18
+  dùng 7 × 7 và màn 19–24 dùng 8 × 8. Mỗi vùng màu là một nhóm ô liền nhau.
+- Chọn **Đặt cún** hoặc **Đánh dấu ×**, rồi chạm/click ô. Đặt đúng cún tự hiện ×
+  ở các ô bị loại trừ. Lấy cún ra sẽ gỡ các dấu tự động không còn cần thiết.
+- Đặt sai đáp án mất một trong ba chiếc xương. Đánh dấu × hoặc chạm ô đã bị loại
+  trừ tự động không mất xương. Hết xương có thể chơi lại cùng đề.
+- Có gợi ý, hoàn tác và ký hiệu A–H giúp phân biệt vùng ngoài màu sắc. Hoàn tác
+  không hoàn lại xương hoặc số lần gợi ý đã sử dụng.
+- Dùng mũi tên để chọn ô, Enter để thao tác và phím X để đổi chế độ. Nút tạm dừng
+  và các điều khiển chung hoạt động như những game khác.
+- Tiến độ và lựa chọn ký hiệu vùng được lưu trên trình duyệt. Giải xong có thể
+  sang màn tiếp theo; game chạy offline và không cần backend riêng.
+
 ## Delivery Dash nguyên bản
 
 - **`core.js`** giữ nguyên logic game gốc.
@@ -128,6 +148,9 @@ games/
   sudoku-logic.js        Sinh đề một đáp án, luật, ghi chú và kiểm tra bản lưu
   sudoku.js             Điều khiển Sudoku, đồng hồ và lưu ván
   sudoku.css            Bàn 9 × 9 và giao diện Sudoku responsive
+  puppies-logic.js       Bộ màn, luật vùng màu, mạng chơi và khôi phục ván
+  puppies.js            Điều khiển Xếp cún, gợi ý, lưu ván và chuyển màn
+  puppies.css           Bàn nhiều màu và giao diện Xếp cún responsive
   online.js             Kết nối Caro online, phiên và khôi phục kết nối
   caro-online-ui.js     Giao diện phòng, sẵn sàng và chơi tiếp
   action.js             Đua xe đạp, bida, rắn, phá gạch
@@ -148,6 +171,8 @@ tests/online-server.test.cjs  Phòng, lượt, kết nối lại và hết hạn
 tests/online-client.test.cjs  Phiên, yêu cầu và phục hồi client
 tests/browser-online.cjs     Hai người chơi trong browser context độc lập
 tests/browser-smoke.cjs  Kiểm tra trình duyệt tùy chọn
+tests/puppies.test.cjs   Luật Xếp cún, 24 lời giải độc lập và khôi phục ván
+tests/browser-puppies.cjs  Xếp cún trên Chromium/WebKit và màn hình cảm ứng
 ```
 
 ## Kiểm thử
@@ -159,7 +184,7 @@ npm run check
 npm test
 ```
 
-Bộ kiểm thử kiểm tra thắng/thua, luật di chuyển, AI, va chạm, bảo toàn điểm ô ăn quan, sinh ô mới, lật thẻ, pause và giải phóng tài nguyên; đồng thời kiểm tra máy chủ/client Caro online và logic Sudoku. Các bài kiểm thử Delivery Dash ban đầu vẫn được giữ lại. Sau khi bổ sung Sudoku ngày 04/10/2026: **75 bài kiểm thử đạt**.
+Bộ kiểm thử kiểm tra thắng/thua, luật di chuyển, AI, va chạm, bảo toàn điểm ô ăn quan, sinh ô mới, lật thẻ, pause và giải phóng tài nguyên; đồng thời kiểm tra máy chủ/client Caro online, logic Sudoku và Xếp cún. Các bài kiểm thử Delivery Dash ban đầu vẫn được giữ lại. Sau khi bổ sung Xếp cún ngày 05/10/2026: **89 bài kiểm thử đạt**.
 
 ### Kiểm tra trình duyệt (tùy chọn)
 
@@ -176,15 +201,24 @@ Chạy `npm start` ở một terminal, rồi ở terminal khác:
 npm run test:browser
 npm run test:online
 npm run test:sudoku
+npm run test:puppies
 ```
 
-Trên Windows, script tự dùng Edge nếu có. Có thể chỉ định `BROWSER_PATH` (đường dẫn executable) và `TEST_URL` nếu cần. Kiểm thử mở cả 11 game, chơi các lượt mẫu, kiểm tra AI, tìm kiếm không dấu, yêu thích, lưu kỷ lục, tạm dừng/chơi lại, màn hình điện thoại và mở trực tiếp `file://`. Ảnh chụp lưu trong thư mục tạm `tram-choi-screenshots`, hoặc đường dẫn do biến `SCREENSHOTS` chỉ định.
+Trên Windows, script tự dùng Edge nếu có. Có thể chỉ định `BROWSER_PATH` (đường dẫn executable) và `TEST_URL` nếu cần. Kiểm thử mở cả 12 game, chơi các lượt mẫu, kiểm tra AI, tìm kiếm không dấu, yêu thích, lưu kỷ lục, tạm dừng/chơi lại, màn hình điện thoại và mở trực tiếp `file://`. Ảnh chụp lưu trong thư mục tạm `tram-choi-screenshots`, hoặc đường dẫn do biến `SCREENSHOTS` chỉ định.
 
 `test:sudoku` chạy Chromium và WebKit: kiểm tra đề có một đáp án bằng bộ giải độc lập,
 nhập số/ghi chú, hoàn tác, hỗ trợ, lưu/khôi phục ván, tạm dừng, hoàn thành và các viewport
 320 × 740, 390 × 844, 744 × 1133, 1024 × 1366. Có thể đặt `SUDOKU_BROWSERS=webkit`
 hoặc `chromium`; ảnh nằm trong `test-results/sudoku`. `npm test` bao gồm kiểm thử
 logic Sudoku, dữ liệu lưu hỏng và tính duy nhất trên 60 đề sinh theo seed.
+
+`test:puppies` giải cả 24 màn từ các vùng màu hiển thị bằng bộ giải độc lập trên
+Chromium và WebKit. Script kiểm tra đặt cún/đánh dấu, mất xương, hoàn tác, gợi ý,
+bàn phím, tạm dừng, thắng/thua, chuyển cấp, lưu/khôi phục và lưu trữ bị chặn.
+Bàn 8 × 8 được kiểm tra cảm ứng, ô vuông không đổi kích thước và tràn ngang ở
+320 × 740, 390 × 844, 744 × 1133, 1024 × 1366, 1180 × 820 và 844 × 390, DPR 2–3.
+Có thể đặt `PUPPIES_BROWSERS=webkit` hoặc `chromium`. Ảnh và báo cáo `results.json`
+nằm trong `test-results/puppies`, hoặc thư mục do `SCREENSHOTS` chỉ định.
 
 `test:online` kiểm tra hai người chơi bằng browser context độc lập: mã/link mời, phòng đầy, sẵn sàng, đồng bộ nước đi, tải lại trang, mất/kết nối mạng, thắng, chơi tiếp và bỏ cuộc. Có thể chọn `ONLINE_BROWSER=webkit` hoặc `chromium`, đặt `ONLINE_WIDTH`/`ONLINE_HEIGHT` cho viewport của người thứ hai và `ONLINE_TEST_3D=1` để kiểm tra thêm đổi 2D/3D. Xem các lệnh PowerShell cụ thể trong [hướng dẫn kiểm thử online](docs/caro-online.md#kiểm-thử). Ảnh mặc định ở `test-results/online/<browser>-<width>`.
 

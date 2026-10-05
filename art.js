@@ -43,6 +43,9 @@
   function icon(name, size = 20) {
     return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || paths.spark}</svg>`;
   }
+  function puppy() {
+    return '<svg class="puppy-art" width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 27 9 7q12 0 18 12M39 19Q48 7 56 9l-4 22" fill="#cc893c" stroke="#a66d33" stroke-width="2" stroke-linejoin="round"/><path d="m13 12 3 11 6-4m28-5-8 7 8 4" fill="#f3be97"/><path d="M9 36C9 19 20 15 32 15s24 6 24 23c0 14-11 21-24 21S9 52 9 36" fill="#f1bf63" stroke="#bd8740" stroke-width="1.5"/><path d="M11 38q8-7 18 1h7q10-9 19-1c-1 15-11 20-23 20S12 52 11 38" fill="#fff1cd"/><path d="M19 30q4-4 7 0m12 0q4-4 7 0" fill="none" stroke="#fff1cd" stroke-width="4" stroke-linecap="round"/><ellipse cx="22" cy="35" rx="3.1" ry="3.5" fill="#374333"/><ellipse cx="42" cy="35" rx="3.1" ry="3.5" fill="#374333"/><circle cx="21" cy="34" r="1" fill="#fff"/><circle cx="41" cy="34" r="1" fill="#fff"/><path d="M27 42q5-4 10 0c0 4-3 6-5 6s-5-2-5-6" fill="#374333"/><path d="M32 47v3m-7-2q7 9 14 0" fill="none" stroke="#374333" stroke-width="2" stroke-linecap="round"/><path d="M29 52h6q0 6-3 6t-3-6" fill="#e88f85"/><ellipse cx="17" cy="43" rx="4" ry="2" fill="#e59a78" opacity=".55"/><ellipse cx="47" cy="43" rx="4" ry="2" fill="#e59a78" opacity=".55"/></svg>';
+  }
   let sequence = 0;
   function scene(body, bg, decor = '') {
     const id = `art${++sequence}`;
@@ -234,6 +237,17 @@
         '<circle cx="27" cy="219" r="103" fill="#9db4a2"/><circle cx="356" cy="17" r="81" fill="#d1ddc8"/>',
       );
     }
+    if (id === 'puppies') {
+      const colors = ['#90cf70', '#62b7cb', '#b8845e', '#f4d97b', '#a491cf', '#68acd2'];
+      const regions = [0,0,1,1,1,2,0,0,0,1,2,2,0,0,3,3,2,2,5,5,3,3,4,4,5,5,5,4,4,4,5,5,5,4,4,4];
+      const dogs = [1, 9, 17, 20, 24, 34];
+      const cells = regions.map((region, index) => {
+        const x = (index % 6) * 29, y = Math.floor(index / 6) * 29;
+        const dog = dogs.includes(index);
+        return `<g transform="translate(${x} ${y})"><rect width="26" height="26" rx="5" fill="${colors[region]}"/>${dog ? `<g transform="translate(1 1) scale(.375)">${puppy()}</g>` : [0, 4, 11, 18, 28, 35].includes(index) ? '<path d="m8 8 10 10m0-10L8 18" stroke="#fffaf0" stroke-width="4" stroke-linecap="round"/>' : ''}</g>`;
+      }).join('');
+      return scene(`<g transform="translate(101 31) rotate(-5 87 87)"><rect x="-10" y="-10" width="191" height="191" rx="18" fill="#fffaf0"/>${cells}</g><g transform="translate(283 118) rotate(14) scale(1.2)">${puppy()}</g>`, '#f3e9ce', '<circle cx="355" cy="30" r="79" fill="#dce8b7"/><circle cx="32" cy="215" r="91" fill="#c9e1dc"/>');
+    }
     if (id === 'memory') {
       let cards = '';
       [
@@ -266,5 +280,5 @@
     }
     return scene('', '#7a9475');
   }
-  window.ArcadeArt = { icon, cover, hero, ludoBoard };
+  window.ArcadeArt = { icon, cover, hero, ludoBoard, puppy };
 })();

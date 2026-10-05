@@ -179,6 +179,26 @@
       variant: 'Sudoku cổ điển 9 × 9, mỗi đề có một đáp án. Độ khó thay đổi theo số ô cho sẵn. Điểm cơ bản 1.000 / 1.500 / 2.000, trừ 100 mỗi gợi ý, 25 mỗi lần kiểm tra và 1 mỗi 10 giây; tối thiểu 100.',
     },
     {
+      id: 'puppies',
+      title: 'Xếp cún',
+      category: 'puzzle',
+      players: '1 người',
+      supports3d: false,
+      badge: 'MỚI',
+      description: 'Mỗi vùng một cún, tìm đúng chỗ cho cả đàn.',
+      keywords: 'xếp cún chó puppy dog queens vùng màu giải đố logic',
+      intro: 'Những chú cún đang tìm chỗ trong khu vườn nhiều màu. Quan sát các vùng, đánh dấu ô loại trừ và tìm vị trí cho cả đàn.',
+      instructions: [
+        'Mỗi hàng, mỗi cột và mỗi vùng màu phải có đúng một cún.',
+        'Hai cún không được nằm sát nhau, kể cả chéo góc. Cún có thể cùng đường chéo nếu cách xa nhau.',
+        'Chọn Đặt cún hoặc Đánh dấu × rồi chạm một ô. Chạm cún đã đặt để lấy lại; các ô bị loại trừ tự hiện ×.',
+        'Có 3 chiếc xương mỗi màn. Đặt cún sai đáp án mất 1 xương; đánh dấu × không mất xương.',
+        'Dùng Hoàn tác, Gợi ý hoặc bật Ký hiệu vùng để phân biệt màu. Mũi tên chọn ô, Enter đặt, phím X đổi chế độ.',
+        'Giải xong để sang màn tiếp theo. Ván chơi và lựa chọn ký hiệu vùng được tự lưu trên trình duyệt.',
+      ],
+      variant: '24 màn từ bàn 5 × 5 đến 8 × 8. Mỗi vùng màu liền nhau và mỗi màn có đúng một đáp án. Chơi lại giữ nguyên đề và hồi 3 xương; hoàn tác không hoàn lại xương hoặc lượt gợi ý đã dùng.',
+    },
+    {
       id: 'memory',
       title: 'Lật thẻ trí nhớ',
       category: 'puzzle',
@@ -373,7 +393,7 @@
     $('.dimension-banner').hidden = !exploring;
     document.body.classList.toggle('library-is-3d', libraryEdition === '3d');
     document.querySelectorAll('.edition-switch [data-library-edition]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.libraryEdition === libraryEdition)));
-    $('#edition-library-note').textContent = libraryEdition === '3d' ? `${games.filter(game => game.supports3d !== false).length} game có bản 3D · Sudoku chơi 2D` : `${games.length} game · Giữ trọn bản nguyên bản`;
+    $('#edition-library-note').textContent = libraryEdition === '3d' ? `${games.filter(game => game.supports3d !== false).length} game có bản 3D · ${games.filter(game => game.supports3d === false).map(game => game.title).join(', ')} chơi 2D` : `${games.length} game · Giữ trọn bản nguyên bản`;
     document.querySelectorAll('[data-view]').forEach((button) => {
       const selected = button.dataset.view === view;
       button.classList.toggle('active', selected);

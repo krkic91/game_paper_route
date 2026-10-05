@@ -56,7 +56,7 @@ async function noOverflow(page) {
     watch(page);
     await page.goto(base);
     await page.locator('.game-card').first().waitFor();
-    assert.equal(await page.locator('.game-card').count(), 11);
+    assert.equal(await page.locator('.game-card').count(), 12);
     await noOverflow(page);
     await page.screenshot({ path: join(shots, 'desktop-home.png'), fullPage: true });
     await page.locator('[data-filter="board"]').click();
@@ -67,7 +67,7 @@ async function noOverflow(page) {
     await page.locator('#search').fill('khong-co-tro-nay');
     assert.equal(await page.locator('#empty-state').isVisible(), true);
     await page.locator('#clear-filters').click();
-    assert.equal(await page.locator('.game-card').count(), 11);
+    assert.equal(await page.locator('.game-card').count(), 12);
     await page.locator('[data-favorite="pool"]').click();
     await page.locator('[data-view="favorites"]').click();
     assert.equal(await page.locator('.game-card').count(), 1);
@@ -82,7 +82,7 @@ async function noOverflow(page) {
     await close(page);
     await page.locator('[data-view="favorites"]').click();
     await page.locator('.brand').click();
-    assert.equal(await page.locator('.game-card').count(), 11);
+    assert.equal(await page.locator('.game-card').count(), 12);
 
     await open(page, 'caro');
     assert.equal(await page.locator('.caro-cell').count(), 225);
@@ -167,6 +167,10 @@ async function noOverflow(page) {
     await page.locator('.sudoku-cell[aria-readonly="false"]').first().click();
     await page.locator('[data-number="1"]').click();
     assert.equal(await page.locator('.sudoku-cell[aria-selected="true"]').getAttribute('data-value'), '1');
+    await close(page);
+
+    await open(page, 'puppies');
+    assert.equal(await page.locator('.puppies-cell').count(), 25);
     await close(page);
 
     await open(page, 'memory');
@@ -283,6 +287,7 @@ async function noOverflow(page) {
       'quan',
       '2048',
       'sudoku',
+      'puppies',
       'memory',
       'pool',
       'race',
@@ -292,7 +297,7 @@ async function noOverflow(page) {
     ]) {
       await open(mobile, id);
       await noOverflow(mobile);
-      if (['ludo', 'quan', '2048', 'sudoku', 'race'].includes(id))
+      if (['ludo', 'quan', '2048', 'sudoku', 'puppies', 'race'].includes(id))
         await mobile.screenshot({ path: join(shots, `mobile-${id}.png`) });
       assert.equal(await mobile.locator('#game-help').isVisible(), false);
       await mobile.locator('#help-game').click();
@@ -328,7 +333,7 @@ async function noOverflow(page) {
     ]) {
       await mobile.setViewportSize(viewport);
       await noOverflow(mobile);
-      for (const id of ['caro', 'ludo', 'quan', 'sudoku', 'pool', 'race']) {
+      for (const id of ['caro', 'ludo', 'quan', 'sudoku', 'puppies', 'pool', 'race']) {
         await open(mobile, id);
         await noOverflow(mobile);
         assert.ok(
@@ -346,12 +351,15 @@ async function noOverflow(page) {
     watch(offline);
     await offline.goto(pathToFileURL(resolve(__dirname, '../index.html')).href);
     await offline.locator('.game-card').first().waitFor();
-    assert.equal(await offline.locator('.game-card').count(), 11);
+    assert.equal(await offline.locator('.game-card').count(), 12);
     await open(offline, '2048');
     assert.equal(await offline.locator('.number-tile').count(), 16);
     await close(offline);
     await open(offline, 'sudoku');
     assert.equal(await offline.locator('.sudoku-cell').count(), 81);
+    await close(offline);
+    await open(offline, 'puppies');
+    assert.equal(await offline.locator('.puppies-cell').count(), 25);
     await close(offline);
     await open(offline, 'delivery');
     const offlineFrame = await (
@@ -398,7 +406,7 @@ async function noOverflow(page) {
     await restricted.close();
     assert.deepEqual(errors, [], 'no browser errors');
     console.log(
-      'Browser checks passed: all 11 games, game rules, AI turns, pause/restart, favorites, search, persistence, mobile, and file://.',
+      'Browser checks passed: all 12 games, game rules, AI turns, pause/restart, favorites, search, persistence, mobile, and file://.',
     );
     console.log(`Screenshots: ${shots}`);
   } finally {
