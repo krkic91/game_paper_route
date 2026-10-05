@@ -5,6 +5,7 @@
   gap: 15px;
   background: #fffcf2;
   color: #52617b;
+  color-scheme: light;
   padding: 22px 24px 18px;
   --puppies-ink: #52617b;
 }

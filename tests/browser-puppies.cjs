@@ -99,6 +99,7 @@ async function desktop(browser, engine) {
   try {
     await open(page);
     assert.equal(await page.locator('.puppies-cell').count(), 25);
+    assert.equal(await page.locator('[data-puppies-level]').evaluate(el => getComputedStyle(el).colorScheme), 'light', 'native level selector stays readable on the cream background');
     const solution = solveRegions(await regions(page));
     const wrong = Array.from({ length: 25 }, (_, i) => i).find(i => !solution.includes(i));
     await cell(page, wrong).click();
