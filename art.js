@@ -91,6 +91,19 @@
     return html;
   }
   function cover(id) {
+    if (id === 'chess') {
+      const squares = Array.from({ length: 64 }, (_, i) => `<rect x="${i % 8 * 22}" y="${Math.floor(i / 8) * 22}" width="22" height="22" fill="${(i % 8 + Math.floor(i / 8)) % 2 ? '#668371' : '#ecedd6'}"/>`).join('');
+      const pieces = [[4, 'bK'], [0, 'bR'], [7, 'bR'], [9, 'bP'], [12, 'bP'], [14, 'bP'], [21, 'bN'], [35, 'wN'], [42, 'wB'], [49, 'wP'], [52, 'wP'], [54, 'wP'], [59, 'wQ'], [60, 'wK']].map(([i, piece]) => `<g transform="translate(${i % 8 * 22 + 1} ${Math.floor(i / 8) * 22 + 1}) scale(.3125)">${window.ArcadeRoyalArt.chessPiece(piece)}</g>`).join('');
+      return scene(`<g transform="translate(106 28) rotate(-8 88 88)"><rect x="-9" y="-9" width="194" height="194" rx="10" fill="#b8c5a3"/>${squares}${pieces}</g><g transform="translate(293 130) scale(1.15)">${window.ArcadeRoyalArt.chessPiece('wK')}</g><g transform="translate(44 49) rotate(-10) scale(.8)">${window.ArcadeRoyalArt.chessPiece('bN')}</g>`, '#a7bba7', '<circle cx="360" cy="16" r="82" fill="#cbd7b9"/><circle cx="10" cy="240" r="98" fill="#8da58e"/>');
+    }
+    if (id === 'xiangqi') {
+      let lines = '';
+      for (let row = 0; row < 10; row++) lines += `<path d="M0 ${row * 20}h160"/>`;
+      for (let col = 0; col < 9; col++) lines += col === 0 || col === 8 ? `<path d="M${col * 20} 0v180"/>` : `<path d="M${col * 20} 0v80m0 20v80"/>`;
+      lines += '<path d="m60 0 40 40m0-40-40 40m0 100 40 40m0-40-40 40"/>';
+      const pieces = [[0, 'bR'], [4, 'bK'], [8, 'bR'], [19, 'bC'], [27, 'bP'], [31, 'bP'], [35, 'bP'], [54, 'rP'], [58, 'rP'], [62, 'rP'], [64, 'rC'], [70, 'rN'], [81, 'rR'], [85, 'rK'], [89, 'rR']].map(([i, piece]) => `<g transform="translate(${i % 9 * 20 - 9} ${Math.floor(i / 9) * 20 - 9}) scale(.28125)">${window.ArcadeRoyalArt.xiangqiPiece(piece, true)}</g>`).join('');
+      return scene(`<g transform="translate(117 31) rotate(7 80 90)"><rect x="-14" y="-14" width="188" height="208" rx="12" fill="#ead0a0"/><g fill="none" stroke="#aa8058" stroke-width="1">${lines}</g><text x="80" y="94" text-anchor="middle" fill="#a48259" font-size="10" font-family="serif">SÔNG HÀ</text>${pieces}</g><g transform="translate(33 119) rotate(-14) scale(.9)">${window.ArcadeRoyalArt.xiangqiPiece('rC', true)}</g><g transform="translate(310 54) rotate(14) scale(.8)">${window.ArcadeRoyalArt.xiangqiPiece('bN', true)}</g>`, '#c7aa80', '<circle cx="362" cy="223" r="94" fill="#b39873"/><circle cx="38" cy="16" r="80" fill="#ddc49b"/>');
+    }
     if (id === 'delivery')
       return scene(
         `<path d="m-80 250 203-250h128L74 250" fill="#a4b59b"/><path d="m-40 250 203-250h112L111 250" fill="#62897c"/><path d="m15 250 203-250" stroke="#e0e3b1" stroke-width="3" stroke-dasharray="16 14"/>${tree(317, 182, 1.05, '#829c66')}${bike(198, 156, 0.92, '#e5c463')}${envelope(302, 72, -19)}`,

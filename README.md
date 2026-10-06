@@ -1,7 +1,7 @@
 <!-- version v1.0 -->
 # Trạm Chơi
 
-**Một trang, 12 game chơi được ngay.** Cổng mini game tiếng Việt, giữ nguyên **Delivery Dash** và bổ sung game thể thao, bàn cờ, arcade, trí tuệ. Caro có chế độ online hai người khác thiết bị qua máy chủ Node.js. Không có tài khoản, quảng cáo hay bước build.
+**Một trang, 14 game chơi được ngay.** Cổng mini game tiếng Việt, giữ nguyên **Delivery Dash** và bổ sung game thể thao, bàn cờ, arcade, trí tuệ. Caro có chế độ online hai người khác thiết bị qua máy chủ Node.js. Không có tài khoản, quảng cáo hay bước build.
 
 ## Chạy dự án
 
@@ -33,6 +33,8 @@ python -m http.server 4173
 | **Delivery Dash**   | 1 người                                       | Lái xe giao báo, né chướng ngại, hoàn thành tuyến đường gốc.      |
 | **Đua xe đạp**      | Bạn đấu 3 đối thủ máy                         | Đua 1 km; quản lý năng lượng, nước rút, né cọc tiêu và vũng nước. |
 | **Caro**            | Đấu máy / 2 người cùng thiết bị / online       | Bàn 15 × 15, nối từ 5 quân theo hàng ngang, dọc hoặc chéo.        |
+| **Cờ vua**          | Đấu máy Dễ/Vừa / 2 người cùng thiết bị · 2D   | Chiếu hết vua; có nhập thành, bắt tốt qua đường, phong cấp.    |
+| **Cờ tướng**        | Đấu máy Dễ/Vừa / 2 người cùng thiết bị · 2D   | Phối hợp Xe, Pháo, Mã; chiếu bí hoặc khiến đối thủ hết nước đi. |
 | **Cờ cá ngựa**      | Bạn + 3 máy / 2 người / 4 người cùng thiết bị | Tung xúc xắc, xuất chuồng, đá ngựa và đưa đủ 4 ngựa về đích.      |
 | **Ô ăn quan**       | Đấu máy / 2 người cùng thiết bị               | Chọn ô dân và hướng rải, ăn quân, tính điểm quan/dân.             |
 | **Bida bỏ túi**     | Luyện tập 1 người                             | Ngắm từ bi trắng, chọn lực, đánh đủ 15 bi màu vào 6 lỗ.           |
@@ -56,7 +58,7 @@ Luật và điều khiển chi tiết luôn có trong nút **ⓘ Hướng dẫn*
 
 ## Tính năng trang
 
-- Thư viện 12 game với hình minh họa riêng, bố cục tương thích máy tính và điện thoại; 10 game có thêm bản 3D, Sudoku và Xếp cún dùng bản 2D.
+- Thư viện 14 game với hình minh họa riêng, bố cục tương thích máy tính và điện thoại; 10 game có thêm bản 3D. Cờ vua, Cờ tướng, Sudoku và Xếp cún dùng bản 2D.
 - Tìm kiếm tiếng Việt có dấu hoặc không dấu; lọc theo Arcade, Thể thao, Bàn cờ, Trí tuệ.
 - Sắp xếp theo đề xuất, tên hoặc game mới chơi.
 - Đánh dấu **yêu thích**, danh sách **chơi gần đây**, **kỷ lục riêng cho từng game**.
@@ -81,6 +83,35 @@ Game hành động có nút cảm ứng. Rắn và 2048 hỗ trợ vuốt. Bàn 
 Yêu thích, lịch sử và kỷ lục nằm trong `localStorage` với khóa **`tramchoi.library.v1`**. Các dữ liệu này chỉ có trên trình duyệt/thiết bị hiện tại, không gửi lên máy chủ. Nếu lưu trữ bị chặn, dữ liệu chỉ tồn tại trong phiên hiện tại. Ở chế độ offline, tạm dừng không mất lượt máy hoặc thời gian lật thẻ; tải lại trang bắt đầu một ván mới, riêng Sudoku và Xếp cún khôi phục ván đã lưu.
 
 Caro online gửi tên hiển thị và thao tác chơi đến máy chủ, lưu phòng trong RAM của một tiến trình. Token riêng để khôi phục chỗ ngồi nằm trong `sessionStorage`, không có trong link mời và không được chia sẻ. Tải lại cùng tab có thể trở lại ván trong thời hạn giữ chỗ **90 giây**. Phòng không hoạt động được dọn sau **30 phút**; khởi động lại máy chủ làm mất toàn bộ phòng.
+
+## Cờ vua và Cờ tướng
+
+Mở hai game trong mục **Bàn cờ**, hoặc dùng `/#play/chess` và `/#play/xiangqi`.
+Chơi với máy ở mức **Dễ / Vừa**, hoặc chọn **2 người / 1 máy** để cùng chơi trên
+một thiết bị. Người chơi đi trước với quân Trắng (cờ vua) hoặc Đỏ (cờ tướng).
+
+- Chọn quân rồi chạm ô có chấm; ô bắt quân có vòng tròn. Bàn chỉ cho đi nước
+  hợp lệ, đánh dấu nước vừa đi và báo khi Vua/Tướng bị chiếu.
+- Dùng mũi tên để chọn ô, Enter hoặc Space để chọn/đi quân. **Xoay bàn** đổi góc
+  nhìn; **Hoàn tác** lùi một nước khi chơi hai người, hoặc cả lượt bạn và máy.
+- Máy Dễ nhìn một nước; máy Vừa xét cả nước đáp của đối thủ. Máy chọn trong các
+  nước hợp lệ, tính giá trị quân và vị trí; phù hợp chơi giải trí.
+- **Cờ vua:** có nhập thành hai phía, bắt tốt qua đường và bảng chọn Hậu/Xe/Tượng/Mã
+  khi phong cấp. Chiếu hết thắng; bí nước không bị chiếu hòa. Tự hòa khi lặp thế
+  ba lần, đủ 100 nửa nước không đi tốt/ăn quân, hoặc thiếu quân cơ bản (hai vua,
+  vua và một quân nhẹ, chỉ còn tượng cùng màu ô). Các thế cờ chết phức tạp khác
+  chưa được nhận diện. Lặp thế/50 nước áp dụng tự động thay cho yêu cầu hòa.
+- **Cờ tướng:** Tướng/Sĩ trong cung, Tượng không qua sông và có cản mắt, Mã có cản
+  chân, Pháo ăn qua đúng một ngòi, Tốt qua sông được đi ngang. Không để hai tướng
+  đối mặt hoặc tự chiếu. Chiếu bí và bí nước đều thua; lặp thế ba lần tự hòa.
+  Bản giải trí này chưa phân xử chiếu dai/đuổi dai theo luật giải đấu.
+- Hai game không dùng đồng hồ; ván hiện tại nằm trong phiên chơi. Tải lại hoặc
+  đóng/mở game bắt đầu ván mới. Tạm dừng giữ nguyên bàn và dừng lượt máy đang chờ.
+  Thắng được 1.000 điểm; đấu máy chỉ ghi điểm khi người chơi thắng.
+
+Luật di chuyển tham khảo [FIDE Laws of Chess](https://handbook.fide.com/chapter/e012023)
+và [World Xiangqi Rules của WXF](https://www.wxf-xiangqi.org/images/wxf-rules/2018_World_XiangQi_Rules_English2018.pdf).
+Các lựa chọn hòa tự động và phạm vi phân xử của bản này được nêu ở trên.
 
 ## Sudoku
 
@@ -151,6 +182,10 @@ games/
   puppies-logic.js       Bộ màn, luật vùng màu, mạng chơi và khôi phục ván
   puppies.js            Điều khiển Xếp cún, gợi ý, lưu ván và chuyển màn
   puppies.css           Bàn nhiều màu và giao diện Xếp cún responsive
+  chess-logic.js         Luật cờ vua, hoàn tác và máy tính nước
+  xiangqi-logic.js       Luật cờ tướng, hoàn tác và máy tính nước
+  royal.js              Giao diện hai bàn cờ, quân SVG, phong cấp và lượt máy
+  royal.css             Bàn cờ và giao diện responsive
   online.js             Kết nối Caro online, phiên và khôi phục kết nối
   caro-online-ui.js     Giao diện phòng, sẵn sàng và chơi tiếp
   action.js             Đua xe đạp, bida, rắn, phá gạch
@@ -173,6 +208,9 @@ tests/browser-online.cjs     Hai người chơi trong browser context độc l�
 tests/browser-smoke.cjs  Kiểm tra trình duyệt tùy chọn
 tests/puppies.test.cjs   Luật Xếp cún, 24 lời giải độc lập và khôi phục ván
 tests/browser-puppies.cjs  Xếp cún trên Chromium/WebKit và màn hình cảm ứng
+tests/chess.test.cjs     Perft, nhập thành, bắt tốt qua đường, phong cấp, kết quả
+tests/xiangqi.test.cjs   Chân mã, ngòi pháo, cung/sông, chiếu, bí nước, AI
+tests/browser-royal.cjs  Hai bàn cờ trên Chromium/WebKit, cảm ứng và lifecycle
 ```
 
 ## Kiểm thử
@@ -184,7 +222,7 @@ npm run check
 npm test
 ```
 
-Bộ kiểm thử kiểm tra thắng/thua, luật di chuyển, AI, va chạm, bảo toàn điểm ô ăn quan, sinh ô mới, lật thẻ, pause và giải phóng tài nguyên; đồng thời kiểm tra máy chủ/client Caro online, logic Sudoku và Xếp cún. Các bài kiểm thử Delivery Dash ban đầu vẫn được giữ lại. Sau khi bổ sung Xếp cún ngày 05/10/2026: **89 bài kiểm thử đạt**.
+Bộ kiểm thử kiểm tra thắng/thua, luật di chuyển, AI, va chạm, bảo toàn điểm ô ăn quan, sinh ô mới, lật thẻ, pause và giải phóng tài nguyên; đồng thời kiểm tra máy chủ/client Caro online, Sudoku, Xếp cún, Cờ vua và Cờ tướng. Các bài kiểm thử Delivery Dash ban đầu vẫn được giữ lại. Sau khi bổ sung hai bàn cờ ngày 06/10/2026: **123 bài kiểm thử đạt**.
 
 ### Kiểm tra trình duyệt (tùy chọn)
 
@@ -202,9 +240,10 @@ npm run test:browser
 npm run test:online
 npm run test:sudoku
 npm run test:puppies
+npm run test:royal
 ```
 
-Trên Windows, script tự dùng Edge nếu có. Có thể chỉ định `BROWSER_PATH` (đường dẫn executable) và `TEST_URL` nếu cần. Kiểm thử mở cả 12 game, chơi các lượt mẫu, kiểm tra AI, tìm kiếm không dấu, yêu thích, lưu kỷ lục, tạm dừng/chơi lại, màn hình điện thoại và mở trực tiếp `file://`. Ảnh chụp lưu trong thư mục tạm `tram-choi-screenshots`, hoặc đường dẫn do biến `SCREENSHOTS` chỉ định.
+Trên Windows, script tự dùng Edge nếu có. Có thể chỉ định `BROWSER_PATH` (đường dẫn executable) và `TEST_URL` nếu cần. Kiểm thử mở cả 14 game, chơi các lượt mẫu, kiểm tra AI, tìm kiếm không dấu, yêu thích, lưu kỷ lục, tạm dừng/chơi lại, màn hình điện thoại và mở trực tiếp `file://`. Ảnh chụp lưu trong thư mục tạm `tram-choi-screenshots`, hoặc đường dẫn do biến `SCREENSHOTS` chỉ định.
 
 `test:sudoku` chạy Chromium và WebKit: kiểm tra đề có một đáp án bằng bộ giải độc lập,
 nhập số/ghi chú, hoàn tác, hỗ trợ, lưu/khôi phục ván, tạm dừng, hoàn thành và các viewport
@@ -219,6 +258,16 @@ Bàn 8 × 8 được kiểm tra cảm ứng, ô vuông không đổi kích thư�
 320 × 740, 390 × 844, 744 × 1133, 1024 × 1366, 1180 × 820 và 844 × 390, DPR 2–3.
 Có thể đặt `PUPPIES_BROWSERS=webkit` hoặc `chromium`. Ảnh và báo cáo `results.json`
 nằm trong `test-results/puppies`, hoặc thư mục do `SCREENSHOTS` chỉ định.
+
+`test:royal` chạy Cờ vua và Cờ tướng trên Chromium/WebKit: đi quân, ăn quân,
+phong cấp có lựa chọn, nhập thành, bắt tốt qua đường, chiếu hết/lặp thế,
+hoàn tác, tạm dừng lượt máy và đóng game khi máy đang chờ. Sáu cấu hình cảm ứng
+là 320 × 740, 390 × 844, 744 × 1133, 1024 × 1366, 1180 × 820, 844 × 390,
+DPR 2–3; kiểm tra ô vuông, không tràn ngang, chạm, lật bàn và hoàn tác.
+Chọn riêng engine bằng `ROYAL_BROWSERS=chromium` hoặc `webkit`. Ảnh và báo cáo
+JSON nằm ở `test-results/royal` (hoặc `SCREENSHOTS`). Unit test cờ vua đối chiếu
+cây nước đi khai cuộc 20/400/8.902, thế nhập thành 48/2.039 và thế tàn cuộc
+14/191/2.812; cờ tướng kiểm tra khai cuộc 44/1.920 cùng các tình huống đặc biệt.
 
 `test:online` kiểm tra hai người chơi bằng browser context độc lập: mã/link mời, phòng đầy, sẵn sàng, đồng bộ nước đi, tải lại trang, mất/kết nối mạng, thắng, chơi tiếp và bỏ cuộc. Có thể chọn `ONLINE_BROWSER=webkit` hoặc `chromium`, đặt `ONLINE_WIDTH`/`ONLINE_HEIGHT` cho viewport của người thứ hai và `ONLINE_TEST_3D=1` để kiểm tra thêm đổi 2D/3D. Xem các lệnh PowerShell cụ thể trong [hướng dẫn kiểm thử online](docs/caro-online.md#kiểm-thử). Ảnh mặc định ở `test-results/online/<browser>-<width>`.
 
