@@ -83,7 +83,7 @@
     else state.status = 'playing';
   }
 
-  function place(state, index) {
+  function place(state, index, autoMark = true) {
     const result = (changed, code) => ({ changed, code, index });
     if (state.status !== 'playing') return result(false, 'ended');
     if (!validIndex(state, index)) return result(false, 'invalid');
@@ -92,7 +92,7 @@
       state.dogs[index] = false;
       return result(true, 'removed');
     }
-    if (autoMarks(state).includes(index)) return result(false, 'blocked');
+    if (autoMark && autoMarks(state).includes(index)) return result(false, 'blocked');
     if (!state.solution.includes(index)) {
       state.lives--;
       state.mistakes++;
@@ -106,8 +106,8 @@
     return result(true, 'placed');
   }
 
-  function toggleMark(state, index) {
-    if (state.status !== 'playing' || !validIndex(state, index) || state.dogs[index] || autoMarks(state).includes(index)) return false;
+  function toggleMark(state, index, autoMark = true) {
+    if (state.status !== 'playing' || !validIndex(state, index) || state.dogs[index] || (autoMark && autoMarks(state).includes(index))) return false;
     remember(state);
     state.marks[index] = !state.marks[index];
     return true;

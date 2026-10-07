@@ -7,6 +7,29 @@ const P = require('../games/puppies-logic.js');
 
 const copy = value => JSON.parse(JSON.stringify(value));
 
+test('manual exclusion mode allows marking blocked cells and charges every wrong placement', () => {
+  const state = P.create(1);
+  P.place(state, state.solution[0], false);
+  const index = P.autoMarks(state)[0];
+  assert.equal(P.toggleMark(state, index), false, 'default assistance still excludes this cell');
+  assert.equal(P.toggleMark(state, index, false), true);
+  assert.equal(state.marks[index], true);
+  assert.equal(P.place(state, index).code, 'blocked');
+  assert.equal(state.lives, 3);
+  assert.equal(P.place(state, index, false).code, 'mistake');
+  assert.equal(state.lives, 2);
+  assert.equal(state.marks[index], true);
+  assert.equal(P.undo(state), true);
+  assert.equal(state.marks[index], false);
+  assert.equal(state.lives, 2, 'undo does not refund mistakes in manual mode');
+  P.toggleMark(state, index, false);
+  assert.deepEqual(P.restore(copy(state)).marks, state.marks, 'manual notes under excluded cells survive restore');
+  assert.equal(P.toggleMark(state, index, false), true);
+  assert.equal(state.marks[index], false);
+  for (const dog of state.solution.slice(1)) assert.equal(P.place(state, dog, false).code, 'placed');
+  assert.equal(state.status, 'won');
+});
+
 // Enumerate column permutations independently of the production bit-mask solver.
 function independentSolutions({ size, regions }) {
   const answers = [];

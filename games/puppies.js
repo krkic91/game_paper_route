@@ -19,6 +19,7 @@
     let mode = 'dog';
     let selected = 0;
     let colorblind = false;
+    let autoMark = true;
     let completed = new Set();
     let restored = false;
     let wrong = -1;
@@ -27,6 +28,7 @@
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
       state = saved && L.restore(saved.state);
       colorblind = saved?.colorblind === true;
+      autoMark = saved?.autoMark !== false;
       if (Array.isArray(saved?.completed)) completed = new Set(saved.completed.filter((level) => Number.isInteger(level) && level >= 1 && level <= L.LEVEL_COUNT));
       restored = Boolean(state);
     } catch (_) { /* Storage may be unavailable; play still works. */ }
@@ -36,7 +38,8 @@
       className: 'puppies-workspace',
       toolbar: '<label class="puppies-level"><span>XẾP CÚN</span><select data-puppies-level aria-label="Chọn cấp độ Xếp cún">' +
         Array.from({ length: L.LEVEL_COUNT }, (_, i) => `<option value="${i + 1}">Cấp độ ${i + 1}</option>`).join('') + '</select></label>' +
-        '<button type="button" class="puppies-access" data-puppies-action="colorblind" aria-pressed="false"><span aria-hidden="true">Aa</span><span>Ký hiệu vùng</span></button>',
+        '<button type="button" class="puppies-access" data-puppies-action="colorblind" aria-pressed="false"><span aria-hidden="true">Aa</span><span>Ký hiệu vùng</span></button>' +
+        '<label class="puppies-assist"><input type="checkbox" data-puppies-auto-mark checked><span>Tự đánh dấu ×<small>Tắt để chơi khó hơn: tự đánh dấu các ô loại trừ.</small></span></label>',
       board: '<div class="puppies-playfield"><div class="puppies-summary"><div class="puppies-count">' + PUPPY + '<strong data-puppies-count>0 / 5</strong><span>cún về nhà</span></div><div class="puppies-lives" role="img" aria-label="Còn 3 lượt sai">' + BONE.repeat(3) + '</div></div>' +
         '<div class="puppies-rules" aria-label="Ba quy tắc xếp cún"><div>' + ruleIcon('region') + '<p><strong>1 cún</strong><br>mỗi vùng màu</p></div><div>' + ruleIcon('line') + '<p><strong>1 cún</strong><br>mỗi hàng, cột</p></div><div>' + ruleIcon('near') + '<p><strong>Không chạm</strong><br>kể cả đường chéo</p></div></div>' +
         '<div class="puppies-frame"><div class="puppies-board" role="grid" aria-label="Bảng Xếp cún"></div></div>' +
@@ -52,7 +55,7 @@
     let cells = [];
 
     function save() {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ state, completed: [...completed], colorblind })); }
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ state, completed: [...completed], colorblind, autoMark })); }
       catch (_) { /* Full storage must never interrupt a move. */ }
     }
     function buildBoard() {
@@ -84,7 +87,7 @@
       }
     }
     function render() {
-      const automatic = new Set(L.autoMarks(state));
+      const automatic = new Set(autoMark ? L.autoMarks(state) : []);
       ui.workspace.classList.toggle('puppies-colorblind', colorblind);
       ui.workspace.dataset.status = state.status;
       levelSelect.value = state.level;
@@ -106,6 +109,7 @@
       lives.setAttribute('aria-label', `Còn ${state.lives} lượt sai`);
       [...lives.children].forEach((bone, index) => bone.classList.toggle('is-used', index >= state.lives));
       host.querySelector('[data-puppies-action="colorblind"]').setAttribute('aria-pressed', String(colorblind));
+      host.querySelector('[data-puppies-auto-mark]').checked = autoMark;
       host.querySelectorAll('[data-puppies-mode]').forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.puppiesMode === mode)));
       host.querySelector('[data-puppies-action="undo"]').disabled = state.status !== 'playing' || !L.canUndo(state);
       host.querySelector('[data-puppies-action="hint"]').disabled = state.status !== 'playing';
@@ -118,7 +122,7 @@
         const next = endPanel.querySelector('[data-puppies-action="next"]');
         next.textContent = won && state.level < L.LEVEL_COUNT ? 'Cấp tiếp theo →' : 'Chơi lại cấp này';
       }
-      ui.message(feedback || (state.status === 'won' ? 'Mỗi cún đã tìm được chỗ của mình. Làm tốt lắm!' : state.status === 'lost' ? 'Bạn có thể chơi lại cấp này bất cứ lúc nào.' : mode === 'mark' ? 'Chế độ đánh dấu: chạm ô để đặt hoặc bỏ dấu ×. Không mất xương.' : 'Tìm một chỗ cho mỗi cún. Các ô không thể đặt cạnh cún được tự động đánh dấu ×.'));
+      ui.message(feedback || (state.status === 'won' ? 'Mỗi cún đã tìm được chỗ của mình. Làm tốt lắm!' : state.status === 'lost' ? 'Bạn có thể chơi lại cấp này bất cứ lúc nào.' : mode === 'mark' ? 'Chế độ đánh dấu: chạm ô để đặt hoặc bỏ dấu ×. Không mất xương.' : autoMark ? 'Tìm một chỗ cho mỗi cún. Các ô bị loại trừ được tự động đánh dấu ×.' : 'Chơi khó: tự đánh dấu × để loại trừ. Mỗi lần đặt cún sai mất 1 xương.'));
     }
     function finish(before) {
       if (before === 'playing' && state.status === 'won') {
@@ -135,12 +139,12 @@
       feedback = '';
       const before = state.status;
       if (state.dogs[index]) {
-        L.place(state, index);
+        L.place(state, index, autoMark);
         feedback = 'Đã bỏ cún khỏi ô này.';
       } else if (mode === 'mark') {
-        if (!L.toggleMark(state, index)) feedback = 'Ô này được tự động loại trừ bởi một cún đã đặt.';
+        if (!L.toggleMark(state, index, autoMark)) feedback = 'Ô này được tự động loại trừ bởi một cún đã đặt.';
       } else {
-        const result = L.place(state, index);
+        const result = L.place(state, index, autoMark);
         if (result.code === 'mistake') {
           wrong = index;
           feedback = state.status === 'lost' ? 'Bạn đã dùng hết 3 xương. Chơi lại để thử cách suy luận khác nhé.' : `Cún chưa thể ở ô này. Còn ${state.lives} xương; hãy kiểm tra các vùng màu.`;
@@ -148,7 +152,7 @@
           scope.after(0.8, () => { wrong = -1; render(); });
         } else if (result.code === 'blocked') {
           feedback = 'Ô này đã được loại trừ. Hãy chọn một ô khác; bạn không mất xương.';
-        } else if (result.code === 'placed') feedback = state.status === 'won' ? '' : 'Đúng rồi! Các ô cùng hàng, cột, vùng màu và cạnh cún đã được loại trừ.';
+        } else if (result.code === 'placed') feedback = state.status === 'won' ? '' : autoMark ? 'Đúng rồi! Các ô cùng hàng, cột, vùng màu và cạnh cún đã được loại trừ.' : 'Đúng rồi! Hãy tự đánh dấu × ở các ô bạn đã loại trừ.';
       }
       finish(before);
     }
@@ -207,6 +211,11 @@
       else if (button.dataset.puppiesMode) { mode = button.dataset.puppiesMode; feedback = ''; render(); }
     });
     scope.on(levelSelect, 'change', () => restart(Number(levelSelect.value)));
+    scope.on(host.querySelector('[data-puppies-auto-mark]'), 'change', (event) => {
+      autoMark = event.target.checked;
+      feedback = autoMark ? 'Đã bật đánh dấu × tự động.' : 'Đã tắt đánh dấu × tự động. Bạn tự loại trừ các ô; đặt cún sai mất 1 xương.';
+      render(); save();
+    });
     scope.on(window, 'keydown', (event) => {
       const key = S.gameKey(event);
       if (!key || (event.repeat && !key.startsWith('arrow'))) return;
@@ -221,8 +230,8 @@
       } else if (key === 'delete' || key === 'backspace') {
         event.preventDefault();
         if (state.status !== 'playing') return;
-        if (state.dogs[selected]) L.place(state, selected);
-        else if (state.marks[selected]) L.toggleMark(state, selected);
+        if (state.dogs[selected]) L.place(state, selected, autoMark);
+        else if (state.marks[selected]) L.toggleMark(state, selected, autoMark);
         feedback = ''; render(); save();
       } else if (key === 'enter' || key === ' ') {
         event.preventDefault(); activate(selected);

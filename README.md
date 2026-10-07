@@ -146,6 +146,10 @@ cún không được chạm nhau theo tám hướng. Cùng đường chéo nhưn
   dùng 7 × 7 và màn 19–24 dùng 8 × 8. Mỗi vùng màu là một nhóm ô liền nhau.
 - Chọn **Đặt cún** hoặc **Đánh dấu ×**, rồi chạm/click ô. Đặt đúng cún tự hiện ×
   ở các ô bị loại trừ. Lấy cún ra sẽ gỡ các dấu tự động không còn cần thiết.
+- Tắt **Tự đánh dấu ×** phía trên bàn để chơi khó hơn: đặt đúng hoặc dùng gợi ý
+  không tự đánh dấu các ô khác; bạn tự thêm/bỏ dấu ×. Mọi lần đặt cún sai đều
+  mất xương. Bật/tắt giữa ván giữ nguyên cún và dấu thủ công; tùy chọn được lưu
+  khi tải lại, chơi lại hoặc đổi cấp. Mặc định vẫn bật cho các ván đã lưu trước đây.
 - Đặt sai đáp án mất một trong ba chiếc xương. Đánh dấu × hoặc chạm ô đã bị loại
   trừ tự động không mất xương. Hết xương có thể chơi lại cùng đề.
 - Có gợi ý, hoàn tác và ký hiệu A–H giúp phân biệt vùng ngoài màu sắc. Hoàn tác

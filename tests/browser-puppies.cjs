@@ -92,6 +92,42 @@ async function level(page, number) {
   await page.locator('[data-puppies-level]').selectOption(String(number));
 }
 
+async function manualExclusions(page, solution) {
+  const toggle = page.locator('[data-puppies-auto-mark]');
+  assert.equal(await toggle.isChecked(), true);
+  await cell(page, solution[0]).click();
+  const excluded = Number(await page.locator('.puppies-cell[data-state="blocked"]').first().getAttribute('data-cell'));
+  await toggle.uncheck();
+  assert.equal(await page.locator('.puppies-cell[data-state="blocked"]').count(), 0);
+  await value(page, solution[0], 'dog');
+  await value(page, excluded, 'empty');
+  await page.locator('[data-puppies-mode="mark"]').click();
+  await cell(page, excluded).click();
+  await value(page, excluded, 'marked');
+  await action(page, 'undo').click();
+  await value(page, excluded, 'empty');
+  await cell(page, excluded).click();
+  await toggle.check(); await value(page, excluded, 'blocked');
+  await toggle.uncheck(); await value(page, excluded, 'marked');
+  await page.reload();
+  await page.locator('.puppies-cell').last().waitFor();
+  assert.equal(await toggle.isChecked(), false);
+  await value(page, solution[0], 'dog'); await value(page, excluded, 'marked');
+  // In harder play, manually inferred exclusions are editable with keyboard too.
+  await cell(page, excluded).focus(); await page.keyboard.press('Delete');
+  await value(page, excluded, 'empty');
+  await cell(page, excluded).click(); await lives(page, 2);
+  await value(page, excluded, 'empty');
+  await action(page, 'hint').click();
+  assert.equal(await page.locator('.puppies-cell[data-state="dog"]').count(), 2);
+  assert.equal(await page.locator('.puppies-cell[data-state="blocked"]').count(), 0);
+  await page.locator('#restart-game').click();
+  assert.equal(await toggle.isChecked(), false);
+  await level(page, 2); assert.equal(await toggle.isChecked(), false);
+  await level(page, 1); await lives(page, 3);
+  await toggle.check();
+}
+
 async function desktop(browser, engine) {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: 'reduce' });
   const errors = [], page = await context.newPage();
@@ -101,6 +137,7 @@ async function desktop(browser, engine) {
     assert.equal(await page.locator('.puppies-cell').count(), 25);
     assert.equal(await page.locator('[data-puppies-level]').evaluate(el => getComputedStyle(el).colorScheme), 'light', 'native level selector stays readable on the cream background');
     const solution = solveRegions(await regions(page));
+    await manualExclusions(page, solution);
     const wrong = Array.from({ length: 25 }, (_, i) => i).find(i => !solution.includes(i));
     await cell(page, wrong).click();
     await lives(page, 2);
@@ -212,12 +249,14 @@ async function mobile(browser, engine, profile) {
     await open(page);
     await level(page, 19);
     assert.equal(await page.locator('.puppies-cell').count(), 64);
+    await page.locator('[data-puppies-auto-mark]').uncheck();
     const answer = solveRegions(await regions(page));
     await noOverflow(page, label);
     checkGrid(await geometry(page), label);
     const before = await geometry(page);
     await cell(page, answer[0]).tap();
     await value(page, answer[0], 'dog');
+    assert.equal(await page.locator('.puppies-cell[data-state="blocked"]').count(), 0);
     await cell(page, answer[0]).tap();
     await value(page, answer[0], 'empty');
     await page.locator('[data-puppies-mode="mark"]').tap();

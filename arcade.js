@@ -231,7 +231,7 @@
       instructions: [
         'Mỗi hàng, mỗi cột và mỗi vùng màu phải có đúng một cún.',
         'Hai cún không được nằm sát nhau, kể cả chéo góc. Cún có thể cùng đường chéo nếu cách xa nhau.',
-        'Chọn Đặt cún hoặc Đánh dấu × rồi chạm một ô. Chạm cún đã đặt để lấy lại; các ô bị loại trừ tự hiện ×.',
+        'Chọn Đặt cún hoặc Đánh dấu × rồi chạm một ô. Chạm cún đã đặt để lấy lại. Tắt Tự đánh dấu × để chơi khó hơn và tự loại trừ các ô.',
         'Có 3 chiếc xương mỗi màn. Đặt cún sai đáp án mất 1 xương; đánh dấu × không mất xương.',
         'Dùng Hoàn tác, Gợi ý hoặc bật Ký hiệu vùng để phân biệt màu. Mũi tên chọn ô, Enter đặt, phím X đổi chế độ.',
         'Giải xong để sang màn tiếp theo. Ván chơi và lựa chọn ký hiệu vùng được tự lưu trên trình duyệt.',

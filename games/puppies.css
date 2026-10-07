@@ -15,7 +15,12 @@
   border-bottom: 0;
   padding: 0;
   gap: 16px;
+  flex-wrap: wrap;
+  row-gap: 10px;
 }
+.puppies-assist { flex-basis: 100%; display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 7px 10px; border: 1px solid #e2dece; border-radius: 10px; background: #fffdf7; font-size: 12px; font-weight: 650; cursor: pointer; }
+.puppies-assist input { width: 18px; height: 18px; margin: 0; flex: 0 0 18px; accent-color: #658451; cursor: pointer; }
+.puppies-assist small { display: block; margin-top: 3px; color: #7b826f; font-size: 10px; font-weight: 400; line-height: 1.4; }
 .puppies-level { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .puppies-level > span { font-size: 9px; font-weight: 750; letter-spacing: 2px; color: #9b946e; }
 .puppies-level select {
