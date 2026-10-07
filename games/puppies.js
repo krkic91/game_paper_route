@@ -39,7 +39,7 @@
       toolbar: '<label class="puppies-level"><span>XẾP CÚN</span><select data-puppies-level aria-label="Chọn cấp độ Xếp cún">' +
         Array.from({ length: L.LEVEL_COUNT }, (_, i) => `<option value="${i + 1}">Cấp độ ${i + 1}</option>`).join('') + '</select></label>' +
         '<button type="button" class="puppies-access" data-puppies-action="colorblind" aria-pressed="false"><span aria-hidden="true">Aa</span><span>Ký hiệu vùng</span></button>' +
-        '<label class="puppies-assist"><input type="checkbox" data-puppies-auto-mark checked><span>Tự đánh dấu ×<small>Tắt để chơi khó hơn: tự đánh dấu các ô loại trừ.</small></span></label>',
+        '<label class="puppies-assist"><input type="checkbox" data-puppies-auto-mark><span>Tự đánh dấu ×<small>Tắt để chơi khó hơn: tự đánh dấu các ô loại trừ.</small></span></label>',
       board: '<div class="puppies-playfield"><div class="puppies-summary"><div class="puppies-count">' + PUPPY + '<strong data-puppies-count>0 / 5</strong><span>cún về nhà</span></div><div class="puppies-lives" role="img" aria-label="Còn 3 lượt sai">' + BONE.repeat(3) + '</div></div>' +
         '<div class="puppies-rules" aria-label="Ba quy tắc xếp cún"><div>' + ruleIcon('region') + '<p><strong>1 cún</strong><br>mỗi vùng màu</p></div><div>' + ruleIcon('line') + '<p><strong>1 cún</strong><br>mỗi hàng, cột</p></div><div>' + ruleIcon('near') + '<p><strong>Không chạm</strong><br>kể cả đường chéo</p></div></div>' +
         '<div class="puppies-frame"><div class="puppies-board" role="grid" aria-label="Bảng Xếp cún"></div></div>' +
