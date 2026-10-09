@@ -32,12 +32,12 @@
       if (Array.isArray(saved?.completed)) completed = new Set(saved.completed.filter((level) => Number.isInteger(level) && level >= 1 && level <= L.LEVEL_COUNT));
       restored = Boolean(state);
     } catch (_) { /* Storage may be unavailable; play still works. */ }
-    if (!state) state = L.create(1);
+    if (!state) state = L.createShuffled(1);
 
     const ui = S.buildUI(host, {
       className: 'puppies-workspace',
-      toolbar: '<label class="puppies-level"><span>XẾP CÚN</span><select data-puppies-level aria-label="Chọn cấp độ Xếp cún">' +
-        Array.from({ length: L.LEVEL_COUNT }, (_, i) => `<option value="${i + 1}">Cấp độ ${i + 1}</option>`).join('') + '</select></label>' +
+      toolbar: `<label class="puppies-level"><span>XẾP CÚN · ${L.LEVEL_COUNT} CẤP</span><select data-puppies-level aria-label="Chọn cấp độ Xếp cún" aria-describedby="puppies-difficulty">` +
+        Array.from({ length: L.LEVEL_COUNT }, (_, i) => `<option value="${i + 1}">Cấp độ ${i + 1}</option>`).join('') + '</select><small id="puppies-difficulty" data-puppies-difficulty></small></label>' +
         '<button type="button" class="puppies-access" data-puppies-action="colorblind" aria-pressed="false"><span aria-hidden="true">Aa</span><span>Ký hiệu vùng</span></button>' +
         '<label class="puppies-assist"><input type="checkbox" data-puppies-auto-mark><span>Tự đánh dấu ×<small>Tắt để chơi khó hơn: tự đánh dấu các ô loại trừ.</small></span></label>',
       board: '<div class="puppies-playfield"><div class="puppies-summary"><div class="puppies-count">' + PUPPY + '<strong data-puppies-count>0 / 5</strong><span>cún về nhà</span></div><div class="puppies-lives" role="img" aria-label="Còn 3 lượt sai">' + BONE.repeat(3) + '</div></div>' +
@@ -61,6 +61,7 @@
     function buildBoard() {
       board.replaceChildren();
       board.style.setProperty('--puppies-size', state.size);
+      board.dataset.size = state.size;
       board.setAttribute('aria-rowcount', state.size);
       board.setAttribute('aria-colcount', state.size);
       board.setAttribute('aria-label', `Xếp cún ${state.size} hàng, ${state.size} cột. Dùng phím mũi tên để chọn ô và Enter để đặt cún hoặc đánh dấu.`);
@@ -91,6 +92,8 @@
       ui.workspace.classList.toggle('puppies-colorblind', colorblind);
       ui.workspace.dataset.status = state.status;
       levelSelect.value = state.level;
+      const info = L.getLevelInfo(state.level);
+      host.querySelector('[data-puppies-difficulty]').textContent = `${info.difficulty} · ${info.size} × ${info.size}`;
       [...levelSelect.options].forEach((option) => {
         const level = Number(option.value);
         option.textContent = `Cấp độ ${level}${completed.has(level) ? ' ✓' : ''}`;
@@ -118,7 +121,7 @@
         const won = state.status === 'won';
         endPanel.classList.toggle('is-lost', !won);
         endPanel.querySelector('[data-puppies-result]').textContent = won ? 'Cả đàn đã về nhà!' : 'Hết xương rồi!';
-        endPanel.querySelector('[data-puppies-detail]').textContent = won ? (state.level === L.LEVEL_COUNT ? 'Bạn đã hoàn thành cấp cuối. Chọn một cấp bất kỳ để thử lại nhé.' : `Hoàn thành cấp ${state.level} · ${state.hints} gợi ý · ${state.mistakes} lần sai.`) : 'Thử lại bàn này và dùng dấu × để loại trừ từng ô nhé.';
+        endPanel.querySelector('[data-puppies-detail]').textContent = won ? (state.level === L.LEVEL_COUNT ? 'Bạn đã hoàn thành cấp cuối. Chọn một cấp bất kỳ để thử lại nhé.' : `Hoàn thành cấp ${state.level} · ${state.hints} gợi ý · ${state.mistakes} lần sai.`) : 'Chơi lại cấp này với bố trí mới, giữ nguyên độ khó. Dùng dấu × để loại trừ từng ô nhé.';
         const next = endPanel.querySelector('[data-puppies-action="next"]');
         next.textContent = won && state.level < L.LEVEL_COUNT ? 'Cấp tiếp theo →' : 'Chơi lại cấp này';
       }
@@ -161,13 +164,13 @@
     }
     function restart(nextLevel = state.level) {
       if (!Number.isInteger(nextLevel) || nextLevel < 1 || nextLevel > L.LEVEL_COUNT) nextLevel = state.level;
-      if (hasProgress() && !window.confirm('Bắt đầu lại? Tiến trình của bàn đang chơi sẽ được thay thế.')) {
+      if (hasProgress() && !window.confirm('Bắt đầu ván mới với bố trí xáo trộn? Tiến trình của bàn đang chơi sẽ được thay thế.')) {
         levelSelect.value = state.level;
         return false;
       }
       scope.clearTimers();
-      state = L.create(nextLevel);
-      mode = 'dog'; selected = 0; wrong = -1; feedback = '';
+      state = L.createShuffled(nextLevel, state);
+      mode = 'dog'; selected = 0; wrong = -1; feedback = 'Ván mới đã xáo trộn bố trí và màu sắc. Độ khó của cấp này được giữ nguyên.';
       buildBoard(); render(); save();
       ui.workspace.scrollIntoView({ block: 'start', inline: 'nearest' });
       return true;
@@ -175,7 +178,7 @@
     function action(name) {
       if (name === 'colorblind') {
         colorblind = !colorblind;
-        feedback = colorblind ? 'Đã bật ký hiệu A–H và họa tiết để phân biệt vùng màu.' : '';
+        feedback = colorblind ? `Đã bật ký hiệu A–${String.fromCharCode(64 + state.size)} và họa tiết để phân biệt vùng màu.` : '';
       } else if (name === 'next') {
         restart(state.status === 'won' && state.level < L.LEVEL_COUNT ? state.level + 1 : state.level);
         return;

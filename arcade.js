@@ -234,9 +234,9 @@
         'Chọn Đặt cún hoặc Đánh dấu × rồi chạm một ô. Chạm cún đã đặt để lấy lại. Tắt Tự đánh dấu × để chơi khó hơn và tự loại trừ các ô.',
         'Có 3 chiếc xương mỗi màn. Đặt cún sai đáp án mất 1 xương; đánh dấu × không mất xương.',
         'Dùng Hoàn tác, Gợi ý hoặc bật Ký hiệu vùng để phân biệt màu. Mũi tên chọn ô, Enter đặt, phím X đổi chế độ.',
-        'Giải xong để sang màn tiếp theo. Ván chơi và lựa chọn ký hiệu vùng được tự lưu trên trình duyệt.',
+        'Giải xong để sang màn tiếp theo. Mỗi ván mới xáo trộn bố trí và màu, giữ độ khó của cấp. Tải lại trang tiếp tục đúng ván đã lưu.',
       ],
-      variant: '24 màn từ bàn 5 × 5 đến 8 × 8. Mỗi vùng màu liền nhau và mỗi màn có đúng một đáp án. Chơi lại giữ nguyên đề và hồi 3 xương; hoàn tác không hoàn lại xương hoặc lượt gợi ý đã dùng.',
+      variant: '50 cấp từ bàn 5 × 5 đến 10 × 10. Cấp 25–32 tăng thử thách trên bàn 8 × 8, cấp 33–42 dùng bàn 9 × 9, cấp 43–50 dùng bàn 10 × 10. Mỗi ván mới xoay/lật bố cục và hoán đổi màu, giữ nguyên cấu trúc suy luận, vùng liền nhau và một đáp án. Chơi lại cùng cấp đổi vị trí đáp án và hồi 3 xương; hoàn tác không hoàn lại xương hoặc lượt gợi ý đã dùng.',
     },
     {
       id: 'memory',

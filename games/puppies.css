@@ -23,6 +23,7 @@
 .puppies-assist small { display: block; margin-top: 3px; color: #7b826f; font-size: 10px; font-weight: 400; line-height: 1.4; }
 .puppies-level { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .puppies-level > span { font-size: 9px; font-weight: 750; letter-spacing: 2px; color: #9b946e; }
+.puppies-level > small { font-size: 11px; font-weight: 600; color: #75745e; }
 .puppies-level select {
   max-width: 100%;
   padding: 3px 26px 3px 0;
@@ -91,6 +92,8 @@
 .puppies-cell[data-region="5"] { --puppies-region: #f3d968; }
 .puppies-cell[data-region="6"] { --puppies-region: #a18bce; }
 .puppies-cell[data-region="7"] { --puppies-region: #54b88d; }
+.puppies-cell[data-region="8"] { --puppies-region: #e69aaa; }
+.puppies-cell[data-region="9"] { --puppies-region: #b3b6bf; }
 .puppies-cell:focus { outline: none; }
 .puppies-cell:focus-visible { outline: 3px solid #3c4d64; outline-offset: -4px; }
 .puppies-cell[aria-disabled="true"] { cursor: default; }
@@ -109,6 +112,8 @@
 .puppies-colorblind .puppies-cell[data-region="1"], .puppies-colorblind .puppies-cell[data-region="5"] { background-image: radial-gradient(#ffffff85 1.5px, transparent 2px); background-size: 9px 9px; }
 .puppies-colorblind .puppies-cell[data-region="2"], .puppies-colorblind .puppies-cell[data-region="6"] { background-image: repeating-linear-gradient(0deg, transparent 0 7px, #ffffff3d 7px 9px); }
 .puppies-colorblind .puppies-cell[data-region="3"], .puppies-colorblind .puppies-cell[data-region="7"] { background-image: repeating-linear-gradient(90deg, transparent 0 7px, #ffffff3d 7px 9px); }
+.puppies-colorblind .puppies-cell[data-region="8"] { background-image: repeating-linear-gradient(-45deg, transparent 0 8px, #ffffff5c 8px 10px); }
+.puppies-colorblind .puppies-cell[data-region="9"] { background-image: radial-gradient(transparent 2px, #ffffff70 2px 3px, transparent 3px); background-size: 10px 10px; }
 .puppies-workspace .game-controls { max-width: 560px; gap: 10px; }
 .puppies-modes { display: flex; padding: 4px; gap: 3px; border-radius: 14px; background: #ecebdc; }
 .puppies-modes button, .puppies-tools button, .puppies-end button {
@@ -145,6 +150,9 @@
   .puppies-rule-grid { width: 30px; height: 30px; flex-basis: 30px; }
   .puppies-frame { padding: 8px; border-radius: 12px; }
   .puppies-board, .puppies-row { gap: 4px; }
+  .puppies-board[data-size="9"], .puppies-board[data-size="10"],
+  .puppies-board[data-size="9"] .puppies-row, .puppies-board[data-size="10"] .puppies-row { gap: 2px; }
+  .puppies-board[data-size="9"] .puppies-cell, .puppies-board[data-size="10"] .puppies-cell { border-radius: 4px; }
   .puppies-summary { margin-bottom: 13px; gap: 12px; }
   .puppies-count, .puppies-lives { padding: 4px 10px; }
   .puppies-workspace .game-controls { gap: 9px; }

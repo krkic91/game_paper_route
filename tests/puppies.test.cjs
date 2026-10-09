@@ -3,6 +3,7 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const { createHash } = require('node:crypto');
 const P = require('../games/puppies-logic.js');
 
 const copy = value => JSON.parse(JSON.stringify(value));
@@ -30,24 +31,21 @@ test('manual exclusion mode allows marking blocked cells and charges every wrong
   assert.equal(state.status, 'won');
 });
 
-// Enumerate column permutations independently of the production bit-mask solver.
+// Search with plain sets, independently of the production bit-mask solver.
+// Reject conflicts as rows are added so exhaustive verification also handles 10×10.
 function independentSolutions({ size, regions }) {
-  const answers = [];
-  function permute(columns, remaining) {
-    if (remaining.length) {
-      for (const column of remaining) {
-        permute([...columns, column], remaining.filter(other => other !== column));
-      }
-      return;
+  const answers = [], cells = [], columns = new Set(), colors = new Set();
+  function search(row, previousColumn) {
+    if (row === size) { answers.push(cells.slice()); return; }
+    for (let column = 0; column < size; column++) {
+      const index = row * size + column, region = regions[index];
+      if (columns.has(column) || colors.has(region) || row && Math.abs(column - previousColumn) < 2) continue;
+      columns.add(column); colors.add(region); cells.push(index);
+      search(row + 1, column);
+      columns.delete(column); colors.delete(region); cells.pop();
     }
-    const cells = columns.map((column, row) => row * size + column);
-    if (new Set(cells.map(index => regions[index])).size !== size) return;
-    for (let row = 1; row < size; row++) {
-      if (Math.abs(columns[row] - columns[row - 1]) < 2) return;
-    }
-    answers.push(cells);
   }
-  permute([], Array.from({ length: size }, (_, index) => index));
+  search(0, -1);
   return answers;
 }
 
@@ -68,12 +66,13 @@ function assertConnected(state, region) {
   assert.equal(reached.size, cells.length, `level ${state.level}, disconnected region ${region}`);
 }
 
-test('all 24 levels have connected regions and one independently verified solution', () => {
-  assert.equal(P.LEVEL_COUNT, 24);
+test('all 50 levels increase board size gradually and have connected regions with one independent solution', () => {
+  assert.equal(P.LEVEL_COUNT, 50);
   const maps = new Set();
   for (let level = 1; level <= P.LEVEL_COUNT; level++) {
     const state = P.create(level);
-    assert.equal(state.size, 5 + Math.floor((level - 1) / 6));
+    const expectedSize = level <= 6 ? 5 : level <= 12 ? 6 : level <= 18 ? 7 : level <= 32 ? 8 : level <= 42 ? 9 : 10;
+    assert.equal(state.size, expectedSize, `level ${level}: intended difficulty band`);
     assert.equal(state.regions.length, state.size ** 2);
     assert.equal(new Set(state.regions).size, state.size);
     for (let region = 0; region < state.size; region++) assertConnected(state, region);
@@ -83,7 +82,146 @@ test('all 24 levels have connected regions and one independently verified soluti
     assert.equal(P.countSolutions(state, 1), 1);
     maps.add(state.regions.join(''));
   }
-  assert.equal(maps.size, 24, 'levels do not repeat the same region map');
+  assert.equal(maps.size, 50, 'levels do not repeat the same region map');
+});
+
+test('the original 24 templates remain unchanged so existing saved games still restore', () => {
+  const original = Array.from({ length: 24 }, (_, index) => {
+    const { size, regions, solution } = P.create(index + 1);
+    return { size, regions, solution };
+  });
+  assert.equal(createHash('sha256').update(JSON.stringify(original)).digest('hex'),
+    '9b4c416453390977e591ea3c0d2d1d33efdd60f63e47c35c7a271d441b7f46b0');
+  const previousLastLevel = P.create(24);
+  previousLastLevel.solution.forEach(index => P.place(previousLastLevel, index));
+  assert.equal(previousLastLevel.variant, undefined);
+  assert.deepEqual(P.restore(copy(previousLastLevel)), previousLastLevel);
+});
+
+test('level information exposes the seven difficulty bands without sharing mutable data', () => {
+  const bands = [[1, 6, 5, 'Dễ'], [7, 12, 6, 'Vừa'], [13, 18, 7, 'Khá'], [19, 24, 8, 'Khó'],
+    [25, 32, 8, 'Rất khó'], [33, 42, 9, 'Chuyên gia'], [43, 50, 10, 'Bậc thầy']];
+  for (const [first, last, size, difficulty] of bands) {
+    for (let level = first; level <= last; level++) {
+      const info = P.getLevelInfo(level);
+      assert.deepEqual(info, { level, size, difficulty });
+      info.size = 100;
+      assert.equal(P.getLevelInfo(level).size, P.create(level).size);
+    }
+  }
+  for (const level of [0, 51, NaN, null, '25']) assert.deepEqual(P.getLevelInfo(level), P.getLevelInfo(1));
+});
+
+test('all eight shuffled orientations preserve every level and its unique solution', () => {
+  for (let level = 1; level <= P.LEVEL_COUNT; level++) {
+    const base = P.create(level), layouts = new Set();
+    for (let transform = 0; transform < 8; transform++) {
+      const state = P.createShuffled(level, null, () => (transform + 0.25) / 8);
+      assert.equal(state.level, level);
+      assert.equal(state.size, base.size);
+      assert.equal(state.variant.transform, transform);
+      assert.deepEqual(state.variant.colors.slice().sort((a, b) => a - b), Array.from({ length: base.size }, (_, i) => i));
+      for (let region = 0; region < state.size; region++) {
+        assertConnected(state, region);
+        assert.equal(state.regions.filter(color => color === state.variant.colors[region]).length,
+          base.regions.filter(color => color === region).length, 'each region keeps its area');
+      }
+      assert.deepEqual(independentSolutions(state), [state.solution], `level ${level}, orientation ${transform}`);
+      assert.equal(P.countSolutions(state), 1);
+      layouts.add(state.regions.join(''));
+    }
+    assert.equal(layouts.size, 8);
+  }
+});
+
+test('each replay changes the answer positions even with a repeated random value', () => {
+  for (let level = 1; level <= P.LEVEL_COUNT; level++) {
+    let previous = P.create(level);
+    for (let round = 0; round < 12; round++) {
+      P.hint(previous);
+      const snapshot = copy(previous);
+      const fresh = P.createShuffled(level, previous, () => 0);
+      assert.notDeepEqual(fresh.solution, previous.solution, `level ${level}, round ${round}`);
+      assert.notDeepEqual(fresh.regions, previous.regions);
+      assert.deepEqual(previous, snapshot, 'new-game creation does not change the previous board');
+      assert.equal(fresh.status, 'playing');
+      assert.equal(fresh.lives, 3);
+      assert.equal(fresh.hints, 0);
+      assert.equal(fresh.mistakes, 0);
+      assert.ok(fresh.dogs.every(value => !value) && fresh.marks.every(value => !value));
+      assert.equal(P.canUndo(fresh), false);
+      previous = fresh;
+    }
+  }
+  for (const random of [() => NaN, () => -1, () => 1, () => Infinity]) {
+    const state = P.createShuffled(19, null, random);
+    assert.equal(P.countSolutions(state), 1);
+  }
+});
+
+test('shuffled saves restore the exact board, progress and private array ownership', () => {
+  const playing = P.createShuffled(19, null, () => 0.42);
+  P.hint(playing);
+  const wrong = playing.dogs.findIndex((_, i) => !playing.solution.includes(i));
+  P.toggleMark(playing, wrong, false);
+  P.place(playing, wrong, false);
+  const won = P.createShuffled(4, null, () => 0.91);
+  won.solution.forEach(index => P.place(won, index));
+  const lost = P.createShuffled(24, null, () => 0.73);
+  const mistake = lost.dogs.findIndex((_, i) => !lost.solution.includes(i));
+  for (let i = 0; i < 3; i++) P.place(lost, mistake);
+  for (const state of [playing, won, lost]) {
+    const raw = copy(state), restored = P.restore(raw);
+    assert.deepEqual(restored, state);
+    assert.notStrictEqual(restored.variant.colors, raw.variant.colors);
+    assert.notStrictEqual(restored.regions, raw.regions);
+    assert.notStrictEqual(restored.solution, raw.solution);
+    assert.equal(P.canUndo(restored), false);
+    raw.variant.colors[0] = 99;
+    assert.deepEqual(restored.variant, state.variant);
+  }
+  const legacy = P.create(1);
+  P.hint(legacy);
+  assert.equal(legacy.variant, undefined);
+  assert.deepEqual(P.restore(copy(legacy)), legacy, 'pre-shuffle saves remain supported');
+});
+
+test('new difficulty bands preserve shuffled boards, notes and terminal results across saves', () => {
+  for (const level of [25, 33, 43, 50]) {
+    for (const ending of ['playing', 'won', 'lost']) {
+      const state = P.createShuffled(level, null, () => 0.61);
+      const wrong = state.regions.findIndex((_, index) => !state.solution.includes(index));
+      P.toggleMark(state, wrong, false);
+      P.hint(state);
+      if (ending === 'won') state.solution.filter(index => !state.dogs[index]).forEach(index => P.place(state, index, false));
+      else if (ending === 'lost') for (let attempt = 0; attempt < 3; attempt++) P.place(state, wrong, false);
+      const raw = copy(state), restored = P.restore(raw);
+      assert.equal(restored?.level, level, `restore level ${level}`);
+      assert.equal(restored.status, ending);
+      assert.deepEqual(restored, state);
+      assert.equal(P.canUndo(restored), false);
+      for (const field of ['regions', 'solution', 'dogs', 'marks']) assert.notStrictEqual(restored[field], raw[field]);
+    }
+  }
+});
+
+test('restore rejects forged shuffle metadata or a board that disagrees with it', () => {
+  const source = P.createShuffled(1, null, () => 0.55);
+  for (const variant of [null, {}, { transform: -1, colors: [0, 1, 2, 3, 4] },
+    { transform: 8, colors: [0, 1, 2, 3, 4] }, { transform: 1.5, colors: [0, 1, 2, 3, 4] },
+    { transform: '1', colors: [0, 1, 2, 3, 4] }, { transform: 1, colors: [0, 0, 2, 3, 4] },
+    { transform: 1, colors: [0, 1, 2, 3, 5] }, { transform: 1, colors: [0, 1, 2, 3] },
+    { transform: 1, colors: [0, 1, 2, 3, '4'] }, { transform: 1, colors: Array(5) }]) {
+    const raw = copy(source); raw.variant = variant;
+    assert.equal(P.restore(raw), null);
+  }
+  for (const mutate of [raw => { raw.variant.transform = (raw.variant.transform + 1) % 8; },
+    raw => { [raw.variant.colors[0], raw.variant.colors[1]] = [raw.variant.colors[1], raw.variant.colors[0]]; },
+    raw => { delete raw.variant; }, raw => { raw.regions[0] = (raw.regions[0] + 1) % raw.size; },
+    raw => { raw.solution[0] = (raw.solution[0] + 1) % (raw.size ** 2); }]) {
+    const raw = copy(source); mutate(raw);
+    assert.equal(P.restore(raw), null);
+  }
 });
 
 test('new games have independent arrays, fresh counters and safe invalid-level fallback', () => {
@@ -102,7 +240,7 @@ test('new games have independent arrays, fresh counters and safe invalid-level f
   state.dogs[0] = true;
   state.marks[1] = true;
   assert.deepEqual(other, P.create(1));
-  for (const level of [0, -1, 25, 1.5, '2', null, NaN, Infinity]) {
+  for (const level of [0, -1, 51, 1.5, '2', null, NaN, Infinity]) {
     assert.equal(P.create(level).level, 1);
   }
 });
@@ -116,7 +254,8 @@ test('solution counting handles impossible and ambiguous maps and rejects invali
   assert.equal(P.countSolutions(ambiguous, 1), 1);
   assert.equal(P.countSolutions(ambiguous, 100), independentSolutions(ambiguous).length);
   assert.deepEqual(ambiguous, before);
-  for (const invalid of [null, {}, { size: 0 }, { size: 10 }, { size: 2.5 },
+  assert.equal(P.countSolutions(rowRegions(10)), 2, 'the solver accepts 10×10 boards');
+  for (const invalid of [null, {}, { size: 0 }, { size: 11 }, { size: 2.5 },
     { size: 2, regions: [0, 0, 0, 0] }, { size: 2, regions: [0, 1] },
     { size: 2, regions: [0, 1, 2, 1] }, { size: 2, regions: [0, 1, -1, 1] },
     { size: 2, regions: [0, 1, '0', 1] }, { size: 2, regions: Array(4) }]) {
@@ -245,7 +384,7 @@ test('hints place an unresolved dog and undo preserves the assistance count', ()
 
 test('completing a level wins once and locks subsequent moves, hints and undo', () => {
   for (const byHint of [false, true]) {
-    const state = P.create(24);
+    const state = P.create(50);
     for (const index of state.solution) {
       if (byHint) assert.equal(P.hint(state), index);
       else assert.equal(P.place(state, index).code, 'placed');
@@ -298,7 +437,7 @@ test('restore clones valid playing, won and lost saves without changing progress
 test('restore rejects changed puzzles, malformed arrays, forged results and inconsistent counters', () => {
   const mutations = [
     raw => { raw.level = 0; },
-    raw => { raw.level = 25; },
+    raw => { raw.level = 51; },
     raw => { raw.level = '1'; },
     raw => { raw.size = 6; },
     raw => { raw.regions[0] = 1; },

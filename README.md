@@ -41,7 +41,7 @@ python -m http.server 4173
 | **Rắn săn mồi**     | 1 người                                       | Ăn trái cây, tránh tường và thân mình trên bàn 20 × 20.           |
 | **2048**            | 1 người                                       | Trượt và gộp số; đạt 2048 có thể chơi tiếp.                       |
 | **Sudoku**          | 1 người · 2D · Dễ / Vừa / Khó                  | Điền số 1–9 vào bàn 9 × 9, không trùng hàng, cột và khối 3 × 3.    |
-| **Xếp cún**         | 1 người · 2D · 24 màn                         | Mỗi hàng, cột và vùng màu có một cún; các cún không chạm nhau.    |
+| **Xếp cún**         | 1 người · 2D · 50 màn                         | Mỗi hàng, cột và vùng màu có một cún; các cún không chạm nhau.    |
 | **Lật thẻ trí nhớ** | 1 người                                       | Tìm 8 cặp trái cây trên 16 thẻ với ít lần lật nhất.               |
 | **Phá gạch**        | 1 người                                       | Đỡ bóng, phá 50 viên gạch với 3 mạng.                             |
 
@@ -142,8 +142,32 @@ Mở **Xếp cún** trong mục **Trí tuệ**, hoặc truy cập `/#play/puppie
 hứng từ bàn cún nhiều vùng màu: mỗi hàng, cột và vùng phải có đúng một cún; hai
 cún không được chạm nhau theo tám hướng. Cùng đường chéo nhưng cách xa vẫn hợp lệ.
 
-- 24 màn có một đáp án: màn 1–6 dùng bàn 5 × 5, màn 7–12 dùng 6 × 6, màn 13–18
-  dùng 7 × 7 và màn 19–24 dùng 8 × 8. Mỗi vùng màu là một nhóm ô liền nhau.
+- 50 màn có một đáp án duy nhất, mỗi vùng màu là một nhóm ô liền nhau. Giữ nguyên
+  24 màn đầu để tiếp tục được các ván đã lưu. Độ khó và kích thước hiện dưới ô chọn cấp:
+
+  | Cấp | Bàn | Mức khó |
+  | --- | --- | --- |
+  | 1–6 | 5 × 5 | Dễ |
+  | 7–12 | 6 × 6 | Vừa |
+  | 13–18 | 7 × 7 | Khá |
+  | 19–24 | 8 × 8 | Khó |
+  | 25–32 | 8 × 8 | Rất khó |
+  | 33–42 | 9 × 9 | Chuyên gia |
+  | 43–50 | 10 × 10 | Bậc thầy |
+
+- Các cấp 25–50 không có vùng chỉ gồm một ô. Bộ đề được chọn và xếp thứ tự bằng
+  thước đo suy luận: loại trừ từ hàng/cột/vùng, kiểm tra giả định dẫn tới mâu thuẫn
+  và độ sâu tìm kiếm. Điểm được lấy trung bình trên tám phép xoay/lật; đây là
+  thước đo tương đối, cảm nhận độ khó còn tùy cách giải của người chơi.
+- `scripts/generate-puppies.cjs` sinh ứng viên offline bằng seed và kiểm tra số
+  nghiệm. Ví dụ: `node scripts/generate-puppies.cjs --size 10 --attempts 30000 --seed 20261009`.
+  Script chỉ in dữ liệu ứng viên, không tự thay bộ đề đang chơi; game dùng đề đã
+  kiểm tra sẵn nên không phải chờ sinh đề khi mở một cấp.
+- Mỗi **ván mới** xáo trộn bằng cách xoay/lật bố cục và hoán đổi màu của chính cấp
+  đang chọn. Cách này giữ nguyên kích thước, cấu trúc suy luận và độ khó; không
+  tráo hàng/cột tùy ý làm thay đổi luật kề nhau. Chơi lại cùng cấp đảm bảo bộ vị
+  trí đáp án khác ván vừa chơi. Tải lại/đóng mở game khôi phục đúng bàn đang lưu,
+  kể cả ván cũ trước khi có xáo trộn; chỉ xác nhận ván mới mới đổi bố trí.
 - Chọn **Đặt cún** hoặc **Đánh dấu ×**, rồi chạm/click ô. Đặt đúng cún tự hiện ×
   ở các ô bị loại trừ. Lấy cún ra sẽ gỡ các dấu tự động không còn cần thiết.
 - Tắt **Tự đánh dấu ×** phía trên bàn để chơi khó hơn: đặt đúng hoặc dùng gợi ý
@@ -151,8 +175,8 @@ cún không được chạm nhau theo tám hướng. Cùng đường chéo nhưn
   mất xương. Bật/tắt giữa ván giữ nguyên cún và dấu thủ công; tùy chọn được lưu
   khi tải lại, chơi lại hoặc đổi cấp. Mặc định vẫn bật cho các ván đã lưu trước đây.
 - Đặt sai đáp án mất một trong ba chiếc xương. Đánh dấu × hoặc chạm ô đã bị loại
-  trừ tự động không mất xương. Hết xương có thể chơi lại cùng đề.
-- Có gợi ý, hoàn tác và ký hiệu A–H giúp phân biệt vùng ngoài màu sắc. Hoàn tác
+  trừ tự động không mất xương. Hết xương có thể chơi lại cùng cấp với bố trí mới.
+- Có gợi ý, hoàn tác và ký hiệu A–J giúp phân biệt vùng ngoài màu sắc. Hoàn tác
   không hoàn lại xương hoặc số lần gợi ý đã sử dụng.
 - Dùng mũi tên để chọn ô, Enter để thao tác và phím X để đổi chế độ. Nút tạm dừng
   và các điều khiển chung hoạt động như những game khác.
@@ -210,7 +234,7 @@ tests/online-server.test.cjs  Phòng, lượt, kết nối lại và hết hạn
 tests/online-client.test.cjs  Phiên, yêu cầu và phục hồi client
 tests/browser-online.cjs     Hai người chơi trong browser context độc lập
 tests/browser-smoke.cjs  Kiểm tra trình duyệt tùy chọn
-tests/puppies.test.cjs   Luật Xếp cún, 24 lời giải độc lập và khôi phục ván
+tests/puppies.test.cjs   Luật Xếp cún, 50 lời giải độc lập và khôi phục ván
 tests/browser-puppies.cjs  Xếp cún trên Chromium/WebKit và màn hình cảm ứng
 tests/chess.test.cjs     Perft, nhập thành, bắt tốt qua đường, phong cấp, kết quả
 tests/xiangqi.test.cjs   Chân mã, ngòi pháo, cung/sông, chiếu, bí nước, AI
@@ -255,10 +279,13 @@ nhập số/ghi chú, hoàn tác, hỗ trợ, lưu/khôi phục ván, tạm dừ
 hoặc `chromium`; ảnh nằm trong `test-results/sudoku`. `npm test` bao gồm kiểm thử
 logic Sudoku, dữ liệu lưu hỏng và tính duy nhất trên 60 đề sinh theo seed.
 
-`test:puppies` giải cả 24 màn từ các vùng màu hiển thị bằng bộ giải độc lập trên
+`test:puppies` giải cả 50 màn từ các vùng màu hiển thị bằng bộ giải độc lập trên
 Chromium và WebKit. Script kiểm tra đặt cún/đánh dấu, mất xương, hoàn tác, gợi ý,
 bàn phím, tạm dừng, thắng/thua, chuyển cấp, lưu/khôi phục và lưu trữ bị chặn.
-Bàn 8 × 8 được kiểm tra cảm ứng, ô vuông không đổi kích thước và tràn ngang ở
+Kiểm tra thêm chơi lại đổi bố trí/đáp án, hủy ván mới giữ nguyên bàn và tải lại
+khôi phục chính xác ván đã xáo trộn. Unit test đối chiếu nghiệm độc lập cho cả
+8 phép xoay/lật của mỗi cấp (400 bố trí), dữ liệu lưu mới và dữ liệu cũ.
+Bàn 10 × 10 được kiểm tra cảm ứng, đủ 10 màu/ký hiệu vùng, ô vuông không đổi kích thước và tràn ngang ở
 320 × 740, 390 × 844, 744 × 1133, 1024 × 1366, 1180 × 820 và 844 × 390, DPR 2–3.
 Có thể đặt `PUPPIES_BROWSERS=webkit` hoặc `chromium`. Ảnh và báo cáo `results.json`
 nằm trong `test-results/puppies`, hoặc thư mục do `SCREENSHOTS` chỉ định.
