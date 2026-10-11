@@ -1,15 +1,22 @@
 // version v1.0
 /* Connected color regions: one puppy per row, column and region; puppies cannot touch. */
 (function (root, factory) {
-  const api = factory();
+  const catalog = typeof module === 'object' && module.exports ? require('./puppies-catalog.js') : root.PuppiesCatalog;
+  const api = factory(catalog);
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.PuppiesLogic = api;
-})(typeof globalThis === 'undefined' ? this : globalThis, function () {
+})(typeof globalThis === 'undefined' ? this : globalThis, function (catalog) {
   'use strict';
 
+  const CATALOG_VERSION = 2, PUZZLES_PER_LEVEL = 5;
+  if (!catalog || catalog.version !== CATALOG_VERSION || !Array.isArray(catalog.levels) || catalog.levels.length !== 100 ||
+      !catalog.levels.every(level => Array.isArray(level.puzzles) && level.puzzles.length === PUZZLES_PER_LEVEL)) {
+    throw new Error('Missing or invalid Xep cun puzzle catalog.');
+  }
   // Each string was generated offline, then checked for connected regions and exactly one solution.
   // Solution digits are column positions, one for each row. Region digits are in row-major order.
-  const puzzles = [
+  // Keep the original catalog only to resume saved rounds without changing their answer.
+  const legacyPuzzles = [
     [5, '0000001400344243344433444', '41302'],
     [5, '1300013004330243344433344', '20314'],
     [5, '3330331133331323333333443', '31402'],
@@ -67,15 +74,12 @@
   const history = new WeakMap();
 
   function getLevelInfo(level = 1) {
-    if (!Number.isInteger(level) || level < 1 || level > puzzles.length) level = 1;
-    const difficulty = level <= 6 ? 'Dễ' : level <= 12 ? 'Vừa' : level <= 18 ? 'Khá' :
-      level <= 24 ? 'Khó' : level <= 32 ? 'Rất khó' : level <= 42 ? 'Chuyên gia' : 'Bậc thầy';
-    return { level, size: puzzles[level - 1][0], difficulty };
+    if (!Number.isInteger(level) || level < 1 || level > catalog.levels.length) level = 1;
+    const { size, difficulty } = catalog.levels[level - 1];
+    return { level, size, difficulty };
   }
 
-  function create(level = 1) {
-    if (!Number.isInteger(level) || level < 1 || level > puzzles.length) level = 1;
-    const [size, regions, solution] = puzzles[level - 1];
+  function createState(level, size, regions, solution) {
     const state = {
       level, size,
       regions: Array.from(regions, Number),
@@ -85,6 +89,24 @@
     };
     history.set(state, []);
     return state;
+  }
+
+  function create(level = 1, puzzleIndex = 0) {
+    if (!Number.isInteger(level) || level < 1 || level > catalog.levels.length) level = 1;
+    if (!Number.isInteger(puzzleIndex) || puzzleIndex < 0 || puzzleIndex >= PUZZLES_PER_LEVEL) puzzleIndex = 0;
+    const entry = catalog.levels[level - 1];
+    const [regions, solution] = entry.puzzles[puzzleIndex];
+    const state = createState(level, entry.size, regions, solution);
+    state.catalogVersion = CATALOG_VERSION;
+    state.puzzleIndex = puzzleIndex;
+    state.puzzleCycle = [puzzleIndex];
+    return state;
+  }
+
+  function validCycle(cycle, puzzleIndex) {
+    return Array.isArray(cycle) && cycle.length >= 1 && cycle.length <= PUZZLES_PER_LEVEL &&
+      Array.from(cycle).every(index => Number.isInteger(index) && index >= 0 && index < PUZZLES_PER_LEVEL) &&
+      new Set(cycle).size === cycle.length && cycle[cycle.length - 1] === puzzleIndex;
   }
 
   // Square symmetries preserve rows/columns, adjacency and connected regions exactly.
@@ -108,11 +130,21 @@
   }
 
   function createShuffled(level = 1, previous = null, random = Math.random) {
-    const state = create(level);
+    level = getLevelInfo(level).level;
     const pick = length => {
       const value = typeof random === 'function' ? random() : Math.random();
       return Number.isFinite(value) && value >= 0 && value < 1 ? Math.floor(value * length) : 0;
     };
+    const continuing = previous?.catalogVersion === CATALOG_VERSION && previous.level === level &&
+      validCycle(previous.puzzleCycle, previous.puzzleIndex);
+    // Each same-level run deals all five genuinely different templates before recycling.
+    // At the cycle boundary, also exclude the last template from the previous cycle.
+    const cycle = continuing && previous.puzzleCycle.length < PUZZLES_PER_LEVEL ? previous.puzzleCycle : [];
+    const available = Array.from({ length: PUZZLES_PER_LEVEL }, (_, index) => index).filter(index =>
+      !cycle.includes(index) && (!continuing || index !== previous.puzzleIndex));
+    const puzzleIndex = available[pick(available.length)];
+    const state = create(level, puzzleIndex);
+    state.puzzleCycle = cycle.concat(puzzleIndex);
     const previousSolution = previous?.level === state.level && Array.isArray(previous.solution) ?
       previous.solution.slice().sort((a, b) => a - b).join(',') : null;
     const transforms = Array.from({ length: 8 }, (_, transform) => transform).filter(transform =>
@@ -213,8 +245,18 @@
   }
 
   function restore(raw) {
-    if (!raw || typeof raw !== 'object' || !Number.isInteger(raw.level) || raw.level < 1 || raw.level > puzzles.length) return null;
-    const expected = create(raw.level);
+    if (!raw || typeof raw !== 'object' || !Number.isInteger(raw.level) || raw.level < 1) return null;
+    let expected;
+    if (raw.catalogVersion === undefined) {
+      if (raw.level > legacyPuzzles.length || raw.puzzleIndex !== undefined || raw.puzzleCycle !== undefined) return null;
+      expected = createState(raw.level, ...legacyPuzzles[raw.level - 1]);
+    } else {
+      if (raw.catalogVersion !== CATALOG_VERSION || raw.level > catalog.levels.length ||
+          !Number.isInteger(raw.puzzleIndex) || raw.puzzleIndex < 0 || raw.puzzleIndex >= PUZZLES_PER_LEVEL ||
+          !validCycle(raw.puzzleCycle, raw.puzzleIndex)) return null;
+      expected = create(raw.level, raw.puzzleIndex);
+      expected.puzzleCycle = raw.puzzleCycle.slice();
+    }
     if (raw.variant !== undefined) {
       const variant = raw.variant;
       if (!variant || !Number.isInteger(variant.transform) || variant.transform < 0 || variant.transform > 7 ||
@@ -265,5 +307,6 @@
     return count;
   }
 
-  return { LEVEL_COUNT: puzzles.length, getLevelInfo, create, createShuffled, place, toggleMark, autoMarks, hint, undo, canUndo, restore, countSolutions };
+  return { CATALOG_VERSION, LEVEL_COUNT: catalog.levels.length, PUZZLES_PER_LEVEL,
+    getLevelInfo, create, createShuffled, place, toggleMark, autoMarks, hint, undo, canUndo, restore, countSolutions };
 });

@@ -21,6 +21,7 @@
     let colorblind = false;
     let autoMark = true;
     let completed = new Set();
+    let legacyCompleted = new Set();
     let restored = false;
     let wrong = -1;
     let feedback = '';
@@ -29,7 +30,13 @@
       state = saved && L.restore(saved.state);
       colorblind = saved?.colorblind === true;
       autoMark = saved?.autoMark !== false;
-      if (Array.isArray(saved?.completed)) completed = new Set(saved.completed.filter((level) => Number.isInteger(level) && level >= 1 && level <= L.LEVEL_COUNT));
+      const validLevels = (values, maximum) => Array.isArray(values) ? values.filter(level => Number.isInteger(level) && level >= 1 && level <= maximum) : [];
+      if (saved?.catalogVersion === L.CATALOG_VERSION) {
+        completed = new Set(validLevels(saved.completed, L.LEVEL_COUNT));
+        legacyCompleted = new Set(validLevels(saved.legacyCompleted, 50));
+      } else {
+        legacyCompleted = new Set(validLevels(saved?.completed, 50));
+      }
       restored = Boolean(state);
     } catch (_) { /* Storage may be unavailable; play still works. */ }
     if (!state) state = L.createShuffled(1);
@@ -39,7 +46,8 @@
       toolbar: `<label class="puppies-level"><span>XẾP CÚN · ${L.LEVEL_COUNT} CẤP</span><select data-puppies-level aria-label="Chọn cấp độ Xếp cún" aria-describedby="puppies-difficulty">` +
         Array.from({ length: L.LEVEL_COUNT }, (_, i) => `<option value="${i + 1}">Cấp độ ${i + 1}</option>`).join('') + '</select><small id="puppies-difficulty" data-puppies-difficulty></small></label>' +
         '<button type="button" class="puppies-access" data-puppies-action="colorblind" aria-pressed="false"><span aria-hidden="true">Aa</span><span>Ký hiệu vùng</span></button>' +
-        '<label class="puppies-assist"><input type="checkbox" data-puppies-auto-mark><span>Tự đánh dấu ×<small>Tắt để chơi khó hơn: tự đánh dấu các ô loại trừ.</small></span></label>',
+        '<label class="puppies-assist"><input type="checkbox" data-puppies-auto-mark><span>Tự đánh dấu ×<small>Tắt để chơi khó hơn: tự đánh dấu các ô loại trừ.</small></span></label>' +
+        '<p class="puppies-catalog-note" data-puppies-catalog-note></p>',
       board: '<div class="puppies-playfield"><div class="puppies-summary"><div class="puppies-count">' + PUPPY + '<strong data-puppies-count>0 / 5</strong><span>cún về nhà</span></div><div class="puppies-lives" role="img" aria-label="Còn 3 lượt sai">' + BONE.repeat(3) + '</div></div>' +
         '<div class="puppies-rules" aria-label="Ba quy tắc xếp cún"><div>' + ruleIcon('region') + '<p><strong>1 cún</strong><br>mỗi vùng màu</p></div><div>' + ruleIcon('line') + '<p><strong>1 cún</strong><br>mỗi hàng, cột</p></div><div>' + ruleIcon('near') + '<p><strong>Không chạm</strong><br>kể cả đường chéo</p></div></div>' +
         '<div class="puppies-frame"><div class="puppies-board" role="grid" aria-label="Bảng Xếp cún"></div></div>' +
@@ -55,7 +63,7 @@
     let cells = [];
 
     function save() {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ state, completed: [...completed], colorblind, autoMark })); }
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ catalogVersion: L.CATALOG_VERSION, state, completed: [...completed], legacyCompleted: [...legacyCompleted], colorblind, autoMark })); }
       catch (_) { /* Full storage must never interrupt a move. */ }
     }
     function buildBoard() {
@@ -93,10 +101,13 @@
       ui.workspace.dataset.status = state.status;
       levelSelect.value = state.level;
       const info = L.getLevelInfo(state.level);
-      host.querySelector('[data-puppies-difficulty]').textContent = `${info.difficulty} · ${info.size} × ${info.size}`;
+      const legacy = state.catalogVersion !== L.CATALOG_VERSION;
+      host.querySelector('[data-puppies-difficulty]').textContent = `${legacy ? 'Ván cũ' : info.difficulty} · ${state.size} × ${state.size}`;
+      host.querySelector('[data-puppies-catalog-note]').textContent = (legacy ? 'Bạn đang chơi đề cũ. Chơi lại để thử đề nâng cấp.' : `${L.PUZZLES_PER_LEVEL} đề khác nhau mỗi cấp. Chơi lại để đổi đề cùng mức khó.`) +
+        (legacyCompleted.size ? ' ◇ Đã vượt ở bản trước · ✓ Đã vượt đề nâng cấp.' : '');
       [...levelSelect.options].forEach((option) => {
         const level = Number(option.value);
-        option.textContent = `Cấp độ ${level}${completed.has(level) ? ' ✓' : ''}`;
+        option.textContent = `Cấp độ ${level}${completed.has(level) ? ' ✓' : legacyCompleted.has(level) ? ' ◇' : ''}`;
       });
       cells.forEach((cell, index) => {
         const value = state.dogs[index] ? 'dog' : automatic.has(index) ? 'blocked' : state.marks[index] ? 'marked' : 'empty';
@@ -121,7 +132,7 @@
         const won = state.status === 'won';
         endPanel.classList.toggle('is-lost', !won);
         endPanel.querySelector('[data-puppies-result]').textContent = won ? 'Cả đàn đã về nhà!' : 'Hết xương rồi!';
-        endPanel.querySelector('[data-puppies-detail]').textContent = won ? (state.level === L.LEVEL_COUNT ? 'Bạn đã hoàn thành cấp cuối. Chọn một cấp bất kỳ để thử lại nhé.' : `Hoàn thành cấp ${state.level} · ${state.hints} gợi ý · ${state.mistakes} lần sai.`) : 'Chơi lại cấp này với bố trí mới, giữ nguyên độ khó. Dùng dấu × để loại trừ từng ô nhé.';
+        endPanel.querySelector('[data-puppies-detail]').textContent = legacy ? 'Tiến độ đề cũ được giữ lại. Chơi lại để thử đề nâng cấp của cấp này.' : won ? (state.level === L.LEVEL_COUNT ? 'Bạn đã hoàn thành cấp cuối. Chọn một cấp bất kỳ để thử một đề khác nhé.' : `Hoàn thành cấp ${state.level} · ${state.hints} gợi ý · ${state.mistakes} lần sai.`) : 'Chơi lại cấp này với một đề khác cùng mức khó. Dùng dấu × để loại trừ từng ô nhé.';
         const next = endPanel.querySelector('[data-puppies-action="next"]');
         next.textContent = won && state.level < L.LEVEL_COUNT ? 'Cấp tiếp theo →' : 'Chơi lại cấp này';
       }
@@ -129,7 +140,7 @@
     }
     function finish(before) {
       if (before === 'playing' && state.status === 'won') {
-        completed.add(state.level);
+        (state.catalogVersion === L.CATALOG_VERSION ? completed : legacyCompleted).add(state.level);
         options.onScore?.(Math.max(100, state.size * 200 - state.mistakes * 100 - state.hints * 150));
       }
       render();
@@ -164,13 +175,13 @@
     }
     function restart(nextLevel = state.level) {
       if (!Number.isInteger(nextLevel) || nextLevel < 1 || nextLevel > L.LEVEL_COUNT) nextLevel = state.level;
-      if (hasProgress() && !window.confirm('Bắt đầu ván mới với bố trí xáo trộn? Tiến trình của bàn đang chơi sẽ được thay thế.')) {
+      if (hasProgress() && !window.confirm('Bắt đầu ván mới với một đề khác? Tiến trình của bàn đang chơi sẽ được thay thế.')) {
         levelSelect.value = state.level;
         return false;
       }
       scope.clearTimers();
       state = L.createShuffled(nextLevel, state);
-      mode = 'dog'; selected = 0; wrong = -1; feedback = 'Ván mới đã xáo trộn bố trí và màu sắc. Độ khó của cấp này được giữ nguyên.';
+      mode = 'dog'; selected = 0; wrong = -1; feedback = 'Đã chọn một đề khác cùng mức khó. Hãy tìm cách loại trừ từ các vùng mới nhé.';
       buildBoard(); render(); save();
       ui.workspace.scrollIntoView({ block: 'start', inline: 'nearest' });
       return true;
@@ -245,7 +256,7 @@
     scope.on(document, 'visibilitychange', () => { if (document.hidden) save(); }, true);
     scope.cleanup(save);
     buildBoard();
-    if (restored && state.status === 'playing') feedback = 'Đã khôi phục bàn đang chơi. Tiến trình tự lưu trên trình duyệt này.';
+    if (restored) feedback = state.catalogVersion !== L.CATALOG_VERSION ? 'Đã giữ nguyên ván cũ. Chơi lại để chuyển sang bộ đề 100 cấp nâng cấp.' : 'Đã khôi phục bàn đang chơi. Tiến trình tự lưu trên trình duyệt này.';
     render(); save();
     return S.handle(scope, restart);
   };

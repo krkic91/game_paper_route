@@ -93,11 +93,11 @@ async function level(page, number) {
   await page.locator('[data-puppies-level]').selectOption(String(number));
 }
 function expectedSize(number) {
-  return number <= 6 ? 5 : number <= 12 ? 6 : number <= 18 ? 7 : number <= 32 ? 8 : number <= 42 ? 9 : 10;
+  return number <= 10 ? 7 : number <= 25 ? 8 : number <= 40 ? 9 : 10;
 }
 async function levelDetails(page, number) {
   const size = expectedSize(number);
-  const name = number <= 6 ? 'Dễ' : number <= 12 ? 'Vừa' : number <= 18 ? 'Khá' : number <= 24 ? 'Khó' : number <= 32 ? 'Rất khó' : number <= 42 ? 'Chuyên gia' : 'Bậc thầy';
+  const name = number <= 10 ? 'Khó' : number <= 25 ? 'Rất khó' : number <= 40 ? 'Chuyên gia' : number <= 60 ? 'Bậc thầy' : number <= 80 ? 'Siêu khó' : 'Thử thách tối thượng';
   assert.equal(await page.locator('.puppies-cell').count(), size ** 2, `level ${number}: board size increases with the difficulty band`);
   const difficulty = page.locator('[data-puppies-difficulty]');
   assert.equal(await difficulty.isVisible(), true, `level ${number}: difficulty is visible`);
@@ -135,6 +135,19 @@ function regionShape(map) {
     return labels.get(color);
   });
 }
+function structuralKey(map) {
+  const size = Math.sqrt(map.length);
+  return Array.from({ length: 8 }, (_, transform) => {
+    const moved = Array(map.length);
+    map.forEach((color, index) => {
+      let row = Math.floor(index / size), column = index % size;
+      if (transform >= 4) column = size - column - 1;
+      for (let turn = 0; turn < transform % 4; turn++) [row, column] = [column, size - row - 1];
+      moved[row * size + column] = color;
+    });
+    return regionShape(moved).join(',');
+  }).sort()[0];
+}
 async function boardSnapshot(page) {
   return {
     level: await page.locator('[data-puppies-level]').inputValue(),
@@ -155,7 +168,7 @@ async function assertRestartShuffles(page, trigger = () => page.locator('#restar
   assert.equal(after.level, before.level, 'a new round keeps the chosen level');
   assert.equal(after.regions.length, before.regions.length, 'a new round keeps the board size');
   assert.equal(after.difficulty, before.difficulty, 'a new round keeps the displayed difficulty');
-  assert.notDeepEqual(regionShape(after.regions), regionShape(before.regions), 'a new round changes the region geometry');
+  assert.notEqual(structuralKey(after.regions), structuralKey(before.regions), 'a new round uses a genuinely different structure, not a rotation, reflection or recoloring');
   assert.notDeepEqual(answer, previousAnswer, 'a new round changes the puppy positions');
   assert.ok(after.cells.every(value => value === 'empty'), 'a new round clears puppies and manual notes');
   assert.equal(after.usedLives, 0);
@@ -186,10 +199,28 @@ async function shuffledRounds(page) {
   await page.locator('[data-puppies-auto-mark]').uncheck();
   await action(page, 'colorblind').click();
   assert.equal(await action(page, 'colorblind').getAttribute('aria-pressed'), 'true');
+  // Start a new level so its five-template deck begins here, then verify no repeat
+  // across the entire first cycle, including a reload halfway through the deck.
+  await level(page, 2);
+  await level(page, 1);
+  const seen = new Set([structuralKey(await regions(page))]);
   let answer;
-  for (let round = 0; round < 3; round++) answer = await assertRestartShuffles(page);
+  for (let round = 1; round < 5; round++) {
+    if (round === 2) {
+      const before = await boardSnapshot(page);
+      await page.reload();
+      await page.locator('.puppies-cell').last().waitFor();
+      assert.deepEqual(await boardSnapshot(page), before, 'reload keeps the current template in its replay cycle');
+    }
+    answer = await assertRestartShuffles(page);
+    const key = structuralKey(await regions(page));
+    assert.equal(seen.has(key), false, 'five successive rounds provide five different puzzle structures');
+    seen.add(key);
+  }
+  assert.equal(seen.size, 5);
+  answer = await assertRestartShuffles(page);
   await cell(page, answer[0]).click();
-  const note = Array.from({ length: 25 }, (_, i) => i).find(index => !answer.includes(index));
+  const note = Array.from({ length: answer.length ** 2 }, (_, i) => i).find(index => !answer.includes(index));
   await page.locator('[data-puppies-mode="mark"]').click();
   await cell(page, note).click();
   const beforeReload = await boardSnapshot(page);
@@ -241,19 +272,81 @@ async function manualExclusions(page, solution) {
   await toggle.check();
 }
 
+async function legacyMigration(browser, engine) {
+  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: 'reduce' });
+  const errors = [], page = await context.newPage();
+  watch(page, errors);
+  const fixtures = [
+    [1, 5, '0000001400344243344433444', '41302'],
+    [24, 8, '4440000041330023433333234433333344333333666353666666666666666667', '51630427'],
+    [50, 10, '1330022244133200224433222222443322244444366622444466655444446666644444666667744466668888446666668899', '3061842579'],
+  ];
+  try {
+    await open(page);
+    for (const [number, size, regionText, answerText] of fixtures) {
+      const solution = Array.from(answerText, (column, row) => row * size + Number(column));
+      const state = { level: number, size, regions: Array.from(regionText, Number), solution,
+        dogs: Array(size * size).fill(false), marks: Array(size * size).fill(false),
+        lives: 2, hints: 1, mistakes: 1, status: 'playing' };
+      state.dogs[solution[0]] = true;
+      const note = state.regions.findIndex((_, index) => !solution.includes(index));
+      state.marks[note] = true;
+      // Dispose the current game before injecting a legacy save; otherwise its
+      // pagehide/visibility autosave would correctly overwrite this test fixture.
+      await page.locator('#close-game').click();
+      await page.evaluate(saved => localStorage.setItem('tram-choi.puppies.v1', JSON.stringify(saved)), {
+        state, completed: [1, 24, 50], colorblind: true, autoMark: false,
+      });
+      await open(page);
+      await page.locator('.puppies-cell').last().waitFor();
+      assert.deepEqual(await regions(page), state.regions, `legacy level ${number}: exact old layout is preserved`);
+      assert.equal(await page.locator('[data-puppies-difficulty]').textContent(), `Ván cũ · ${size} × ${size}`);
+      await value(page, solution[0], 'dog');
+      await value(page, note, 'marked');
+      await lives(page, 2);
+      assert.equal(await page.locator('[data-puppies-auto-mark]').isChecked(), false);
+      assert.deepEqual(await completedLevels(page), [], 'old achievements do not count as wins on harder upgraded puzzles');
+      for (const completed of [1, 24, 50]) assert.match(await page.locator(`[data-puppies-level] option[value="${completed}"]`).textContent(), /◇/);
+      await cancelChange(page, () => page.locator('#restart-game').click());
+      const legacySnapshot = await boardSnapshot(page);
+      await page.reload();
+      await page.locator('.puppies-cell').last().waitFor();
+      assert.deepEqual(await boardSnapshot(page), legacySnapshot, 'migrated wrapper still resumes the old in-progress board exactly');
+      for (const completed of [1, 24, 50]) assert.match(await page.locator(`[data-puppies-level] option[value="${completed}"]`).textContent(), /◇/);
+      await page.locator('#restart-game').click();
+      await levelDetails(page, number);
+      assert.notEqual(structuralKey(await regions(page)), structuralKey(state.regions), 'restarting an old save upgrades its puzzle structure');
+      assert.equal(await page.locator('.puppies-cell[data-state="dog"]').count(), 0);
+      assert.equal(await page.locator('[data-puppies-auto-mark]').isChecked(), false);
+      assert.equal(await action(page, 'colorblind').getAttribute('aria-pressed'), 'true');
+      await lives(page, 3);
+      const answer = solveRegions(await regions(page));
+      await page.evaluate(indices => indices.forEach(index => document.querySelector(`.puppies-cell[data-cell="${index}"]`).click()), answer);
+      await status(page, 'won');
+      assert.deepEqual(await completedLevels(page), [number]);
+      await page.reload();
+      await page.locator('.puppies-cell').last().waitFor();
+      await status(page, 'won');
+      assert.deepEqual(await completedLevels(page), [number], 'upgraded completion badges persist independently of legacy achievements');
+      for (const completed of [1, 24, 50].filter(value => value !== number)) assert.match(await page.locator(`[data-puppies-level] option[value="${completed}"]`).textContent(), /◇/);
+    }
+    assert.deepEqual(errors, [], `${engine}: no browser exceptions during legacy-save migration`);
+  } finally { await context.close(); }
+}
+
 async function desktop(browser, engine) {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: 'reduce' });
   const errors = [], page = await context.newPage();
   watch(page, errors);
   try {
     await open(page);
-    assert.equal(await page.locator('.puppies-cell').count(), 25);
-    assert.equal(await page.locator('[data-puppies-level] option').count(), 50, 'all 50 levels are available');
+    assert.equal(await page.locator('.puppies-cell').count(), 49);
+    assert.equal(await page.locator('[data-puppies-level] option').count(), 100, 'all 100 levels are available');
     assert.equal(await page.locator('[data-puppies-level]').evaluate(el => getComputedStyle(el).colorScheme), 'light', 'native level selector stays readable on the cream background');
     await manualExclusions(page, solveRegions(await regions(page)));
     await shuffledRounds(page);
     let solution = solveRegions(await regions(page));
-    let wrong = Array.from({ length: 25 }, (_, i) => i).find(i => !solution.includes(i));
+    let wrong = Array.from({ length: solution.length ** 2 }, (_, i) => i).find(i => !solution.includes(i));
     await cell(page, wrong).click();
     await lives(page, 2);
     await value(page, wrong, 'empty');
@@ -286,17 +379,18 @@ async function desktop(browser, engine) {
     await lives(page, 2);
     assert.equal(await action(page, 'colorblind').getAttribute('aria-pressed'), 'true');
 
+    const beforeHint = await cell(page, solution[0]).getAttribute('data-state');
     await action(page, 'hint').click();
     await value(page, solution[0], 'dog');
     await action(page, 'undo').click();
-    await value(page, solution[0], 'empty');
+    await value(page, solution[0], beforeHint);
     await page.locator('#pause-game').click();
     await page.keyboard.press('x');
     await page.locator('#resume-game').click();
     assert.equal(await page.locator('[data-puppies-mode="dog"]').getAttribute('aria-pressed'), 'true');
 
     solution = await assertRestartShuffles(page);
-    wrong = Array.from({ length: 25 }, (_, i) => i).find(i => !solution.includes(i));
+    wrong = Array.from({ length: solution.length ** 2 }, (_, i) => i).find(i => !solution.includes(i));
     await lives(page, 3);
     assert.equal(await page.locator('.puppies-cell[data-state="marked"]').count(), 0);
     for (let i = 0; i < 3; i++) await cell(page, wrong).click();
@@ -310,38 +404,43 @@ async function desktop(browser, engine) {
     await lives(page, 3);
 
     // Solve every board using only its public colored grid, exercising win/next/last level.
-    for (let number = 1; number <= 50; number++) {
+    for (let number = 1; number <= 100; number++) {
       assert.equal(await page.locator('[data-puppies-level]').inputValue(), String(number));
       await levelDetails(page, number);
       const answer = solveRegions(await regions(page));
-      for (const index of answer) await cell(page, index).click();
+      // Use public DOM clicks for the bulk progression check. Real mouse and touch
+      // interactions are exercised above, at size boundaries and on every profile.
+      const realMouse = [10, 11, 25, 26, 40, 41, 50, 51, 60, 61, 80, 81, 100].includes(number);
+      await page.evaluate(indices => indices.forEach(index => document.querySelector(`.puppies-cell[data-cell="${index}"]`).click()), realMouse ? answer.slice(0, -1) : answer);
+      if (realMouse) await cell(page, answer[answer.length - 1]).click();
       await status(page, 'won');
       assert.equal(await page.locator('.puppies-cell[data-state="dog"]').count(), answer.length);
       assert.match(await page.locator('[data-puppies-level] option:checked').textContent(), /✓/);
-      if (number === 24) {
+      if (number === 50) {
         const oldFinalBoard = await boardSnapshot(page);
         const previouslyCompleted = await completedLevels(page);
-        assert.deepEqual(previouslyCompleted, Array.from({ length: 24 }, (_, index) => index + 1));
+        assert.deepEqual(previouslyCompleted, Array.from({ length: 50 }, (_, index) => index + 1));
         await page.reload();
         await page.locator('.puppies-cell').last().waitFor();
         assert.deepEqual(await boardSnapshot(page), oldFinalBoard, 'the previous final level restores exactly after winning');
         await status(page, 'won');
         assert.deepEqual(await completedLevels(page), previouslyCompleted, 'existing completion badges survive reload');
         await action(page, 'next').click();
-        assert.equal(await page.locator('[data-puppies-level]').inputValue(), '25', 'a restored win on the previous final level advances to level 25');
+        assert.equal(await page.locator('[data-puppies-level]').inputValue(), '51', 'a restored win on level 50 advances to level 51');
         assert.deepEqual(await completedLevels(page), previouslyCompleted, 'entering the added levels preserves existing completion badges');
-      } else if (number < 50) await action(page, 'next').click();
+      } else if (number < 100) await action(page, 'next').evaluate(el => el.click());
+      if (number % 10 === 0) console.log(`${engine}: solved ${number}/100 levels through the public UI`);
     }
     const completedBoard = await boardSnapshot(page);
     await page.reload();
     await page.locator('.puppies-cell').last().waitFor();
     assert.deepEqual(await boardSnapshot(page), completedBoard, 'reload preserves a completed shuffled board');
     await status(page, 'won');
-    assert.equal(await page.locator('[data-puppies-level]').inputValue(), '50');
-    assert.deepEqual(await completedLevels(page), Array.from({ length: 50 }, (_, index) => index + 1), 'all completion badges survive reload');
+    assert.equal(await page.locator('[data-puppies-level]').inputValue(), '100');
+    assert.deepEqual(await completedLevels(page), Array.from({ length: 100 }, (_, index) => index + 1), 'all completion badges survive reload');
     await assertRestartShuffles(page, () => action(page, 'next').click());
     await status(page, 'playing');
-    assert.equal(await page.locator('[data-puppies-level]').inputValue(), '50');
+    assert.equal(await page.locator('[data-puppies-level]').inputValue(), '100');
     await paletteAndLabels(page, 10, `${engine} desktop 10x10`);
     checkGrid(await geometry(page), `${engine} desktop`);
     await noOverflow(page, `${engine} desktop`);
@@ -358,7 +457,7 @@ async function desktop(browser, engine) {
     await page.locator('#close-game').click();
     await page.evaluate(() => localStorage.setItem('tram-choi.puppies.v1', '{broken'));
     await open(page);
-    assert.equal(await page.locator('.puppies-cell').count(), 25);
+    assert.equal(await page.locator('.puppies-cell').count(), 49);
     await page.addInitScript(() => {
       Storage.prototype.getItem = () => { throw new Error('Storage unavailable'); };
       Storage.prototype.setItem = () => { throw new Error('Storage unavailable'); };
@@ -379,8 +478,8 @@ async function mobile(browser, engine, profile) {
   watch(page, errors);
   try {
     await open(page);
-    await level(page, 50);
-    await levelDetails(page, 50);
+    await level(page, 100);
+    await levelDetails(page, 100);
     await page.locator('[data-puppies-auto-mark]').uncheck();
     const answer = solveRegions(await regions(page));
     await noOverflow(page, label);
@@ -424,9 +523,12 @@ async function mobile(browser, engine, profile) {
     const executablePath = engine === 'chromium' ? process.env.BROWSER_PATH || (existsSync(edge) ? edge : undefined) : undefined;
     const browser = await engines[engine].launch({ headless: true, executablePath });
     try {
+      await legacyMigration(browser, engine);
+      report.runs.push({ engine, version: browser.version(), checks: 'old level 1/24/50 saves keep exact layouts, progress and settings; old achievements remain distinct; restarting upgrades the level; new achievements survive reload', passed: true });
+      console.log(`${engine}: legacy saves and achievement migration passed`);
       await desktop(browser, engine);
-      report.runs.push({ engine, version: browser.version(), viewport: '1440x1000 and 800x600', checks: 'all 50 levels solved, increasing size bands and difficulty labels, lives, marks, undo, hint, keyboard, pause, repeated same-level reshuffle, cancelled reset/level change, replay after loss/win, restored level 24 win advances to 25 with old completion badges, final level 50 replay, exact board/progress/settings persistence, corrupt/unavailable storage', passed: true });
-      console.log(`${engine}: desktop interactions, reshuffle/persistence and all 50 levels passed`);
+      report.runs.push({ engine, version: browser.version(), viewport: '1440x1000 and 800x600', checks: 'all 100 levels solved through public DOM clicks with real mouse interaction at band boundaries; six difficulty labels, lives, marks, undo, hint, keyboard, pause, five different same-level structures before reuse, cancelled reset/level change, replay after loss/win, restored level 50 win advances to 51 with completion badges, final level 100 replay, exact board/progress/settings persistence, corrupt/unavailable storage', passed: true });
+      console.log(`${engine}: desktop interactions, reshuffle/persistence and all 100 levels passed`);
       for (const profile of profiles) {
         await mobile(browser, engine, profile);
         report.runs.push({ engine, version: browser.version(), ...profile, checks: '10x10 grid with cells at least 24px, touch, same-level reshuffle, preserved difficulty preferences, 10 distinct region colors and visible A–J labels, stable cell dimensions, no horizontal overflow', passed: true });
