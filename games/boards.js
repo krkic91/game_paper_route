@@ -860,6 +860,7 @@
       const inProgress = state.moves > 0 && !state.ended;
       if (inProgress && !window.confirm('Bắt đầu ván mới với luật này? Ván đang chơi sẽ bị thay thế.')) {
         fillRulesForm(state.rules);
+        ui.message('Đã giữ nguyên luật và ván đang chơi.');
         return;
       }
       settings.rules = rules;

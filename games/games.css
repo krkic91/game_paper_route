@@ -671,6 +671,8 @@
 }
 .quan-workspace .game-board-area {
   min-height: 300px;
+  /* Never shrink below the board: a centred, overflowing scene would cover the rules panel above. */
+  flex: 1 0 auto;
 }
 .quan-scene {
   width: 100%;
@@ -812,6 +814,7 @@
   margin-left: 0;
 }
 .quan-rules-panel {
+  flex-shrink: 0;
   width: 100%;
   max-width: 760px;
   margin: 12px auto 0;

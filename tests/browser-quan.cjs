@@ -28,12 +28,26 @@ async function open(page) {
 async function noOverflow(page) {
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'no horizontal scroll');
 }
+// The board must never be painted over the panel's buttons (regression: short laptop screens).
+async function panelClickable(page) {
+  for (const selector of ['.quan-rules-panel [type="submit"]', '[data-quan-rules-close]']) {
+    const covered = await page.evaluate((selector) => {
+      const el = document.querySelector(selector);
+      el.scrollIntoView({ block: 'center' });
+      const r = el.getBoundingClientRect();
+      const top = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+      return el === top || el.contains(top) ? '' : top?.className || 'nothing';
+    }, selector);
+    assert.equal(covered, '', `${selector} is covered by ${covered}`);
+  }
+}
 (async () => {
   const browser = await chromium.launch({ headless: true, executablePath });
   const errors = [];
   try {
     for (const profile of [
       { name: 'desktop', viewport: { width: 1440, height: 1000 }, motion: 'no-preference' },
+      { name: 'laptop', viewport: { width: 1366, height: 768 }, motion: 'reduce' },
       { name: 'mobile', viewport: { width: 390, height: 844 }, motion: 'reduce', isMobile: true, hasTouch: true },
     ]) {
       const context = await browser.newContext({
@@ -99,6 +113,7 @@ async function noOverflow(page) {
       await page.locator('[data-quan-rules-toggle]').click();
       await page.locator('.quan-rules-panel').waitFor({ state: 'visible' });
       await noOverflow(page);
+      await panelClickable(page);
       await page.screenshot({ path: join(output, `${profile.name}-rules.png`) });
       await page.locator('.quan-rules-panel [name="youngQuan"]').check();
       await page.locator('.quan-rules-panel [name="debt"]').selectOption('borrow');
