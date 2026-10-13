@@ -59,7 +59,7 @@
       intro:
         'Một bàn cờ, hai ký hiệu và vô số chiến thuật. Tìm nước thắng trước khi đối thủ nhận ra!',
       instructions: [
-        'Chọn Đấu với máy, 2 người cùng máy hoặc Chơi online. X luôn đi trước.',
+        'Chọn Đấu với máy, 2 người cùng máy hoặc Chơi online. X luôn đi trước; khi đấu máy, ô “Đi trước” chọn bạn hay máy cầm X.',
         'Online: tạo phòng rồi gửi mã hoặc link mời. Cả hai chọn Sẵn sàng để bắt đầu.',
         'Nhấn một ô trống để đặt quân. Có thể dùng mũi tên trên bàn và Enter để đánh.',
         'Nối từ 5 quân cùng loại liên tiếp theo hàng ngang, dọc hoặc chéo để thắng.',
@@ -80,7 +80,7 @@
       keywords: 'chess cờ vua quốc tế vua hậu xe tượng mã tốt chiến thuật',
       intro: 'Một bàn cờ 64 ô và cuộc đấu trí giữa hai đội quân. Phát triển quân, bảo vệ vua và tìm nước chiếu hết.',
       instructions: [
-        'Chọn Đấu với máy hoặc 2 người cùng máy. Trắng đi trước; khi đấu máy, bạn cầm Trắng.',
+        'Chọn Đấu với máy hoặc 2 người cùng máy. Trắng đi trước; khi đấu máy, ô “Đi trước” chọn bạn hay máy cầm Trắng (bàn tự xoay để quân của bạn ở dưới).',
         'Chạm quân của bên đang đi rồi chọn ô được đánh dấu. Mũi tên chọn ô, Enter hoặc Space để thao tác.',
         'Không được để vua bị chiếu. Chiếu hết là thắng; không còn nước hợp lệ nhưng không bị chiếu là hòa.',
         'Có nhập thành, bắt tốt qua đường và phong cấp thành Hậu, Xe, Tượng hoặc Mã. Chọn vua rồi ô cách hai cột để nhập thành.',
@@ -100,7 +100,7 @@
       keywords: 'xiangqi cờ tướng trung hoa tướng sĩ tượng xe pháo mã tốt chốt',
       intro: 'Đỏ và Đen đối đầu trên bàn cờ có sông và cung tướng. Phối hợp xe, pháo, mã để khóa đường lui của đối thủ.',
       instructions: [
-        'Chọn Đấu với máy hoặc 2 người cùng máy. Đỏ đi trước; khi đấu máy, bạn cầm Đỏ.',
+        'Chọn Đấu với máy hoặc 2 người cùng máy. Đỏ đi trước; khi đấu máy, ô “Đi trước” chọn bạn hay máy cầm Đỏ (bàn tự xoay để quân của bạn ở dưới).',
         'Chạm quân rồi chạm giao điểm được đánh dấu. Mũi tên chọn điểm, Enter hoặc Space để đi quân.',
         'Tướng và Sĩ ở trong cung; Tượng không qua sông và bị cản mắt. Mã bị cản chân. Hai tướng không được đối mặt trên cột trống.',
         'Pháo đi như Xe khi không ăn; phải có đúng một quân làm ngòi khi ăn. Tốt chỉ tiến; qua sông được đi ngang, không đi lùi.',
@@ -146,7 +146,7 @@
         'Nút “Luật chơi” bật thêm luật tùy chọn: quan non, cách xử lý khi thiếu điểm (điểm âm / vay đối thủ / kết thúc ván) và ô quan trống có chặn lượt hay không.',
       ],
       variant:
-        'Mặc định dùng luật cơ bản: không quan non, thiếu điểm thì cho điểm âm. Máy có 3 mức Dễ / Thường / Khó; hoặc chọn 2 người để chơi chung thiết bị.',
+        'Mặc định dùng luật cơ bản: không quan non, thiếu điểm thì cho điểm âm. Chọn “Đi trước” để bạn hoặc máy đi nước đầu. Máy có 3 mức Dễ / Thường / Khó; hoặc chọn 2 người để chơi chung thiết bị.',
     },
     {
       id: 'pool',

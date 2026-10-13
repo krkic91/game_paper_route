@@ -20,12 +20,23 @@
           ['bot', 'Đấu với máy'],
           ['local', '2 người cùng máy'],
           ['online', 'Chơi online'],
-        ]),
+        ]) +
+        '<label class="game-option" data-caro-first-wrap><span>Đi trước</span><select data-caro-first aria-label="Chọn ai đi trước"><option value="human">Bạn (X)</option><option value="bot">Máy (X)</option></select></label>',
       board:
         '<div class="caro-frame"><div class="caro-board" role="grid" aria-label="Bàn caro 15 hàng, 15 cột. Dùng mũi tên để chọn ô, Enter để đánh."></div></div>',
     });
     const board = ui.area.querySelector('.caro-board'),
-      mode = ui.toolbar.querySelector('select');
+      mode = ui.toolbar.querySelector('select'),
+      firstSelect = ui.toolbar.querySelector('[data-caro-first]');
+    // X always opens. When the computer goes first it plays X and you play O.
+    const FIRST_KEY = 'tram-choi.caro.first';
+    let first = 'human';
+    try {
+      if (localStorage.getItem(FIRST_KEY) === 'bot') first = 'bot';
+    } catch {}
+    firstSelect.value = first;
+    let human = 1;
+    const botMark = () => 3 - human;
     const panel = onlineUI.mount(ui, scope);
     let state = L.createCaro(),
       busy = false,
@@ -64,9 +75,7 @@
         return `${player === network.you?.mark ? 'Bạn' : person?.name || 'Đối thủ'} · ${player === 1 ? 'X' : 'O'}`;
       }
       return mode.value === 'bot'
-        ? player === 1
-          ? 'Bạn · X'
-          : 'Máy · O'
+        ? `${player === human ? 'Bạn' : 'Máy'} · ${player === 1 ? 'X' : 'O'}`
         : `Người ${player} · ${player === 1 ? 'X' : 'O'}`;
     }
     function render() {
@@ -88,6 +97,7 @@
           state.ended ? (state.winner ? name(state.winner) : 'Hòa') : name(state.turn),
       );
       ui.setStat('moves', state.moves);
+      ui.toolbar.querySelector('[data-caro-first-wrap]').hidden = mode.value !== 'bot';
       visual?.sync(state);
     }
     function announceTurn() {
@@ -95,6 +105,15 @@
       ui.message(
         busy ? 'Máy đang suy nghĩ…' : `Lượt ${name(state.turn)}. Nối 5 quân liên tiếp để thắng.`,
       );
+    }
+    function botTurn() {
+      busy = true;
+      render();
+      announceTurn();
+      scope.after(0.4, () => {
+        busy = false;
+        play(L.chooseCaroMove(state));
+      });
     }
     function play(index) {
       if (isOnline()) {
@@ -106,7 +125,7 @@
       render();
       if (state.ended) {
         busy = false;
-        const win = state.winner && (mode.value === 'local' || state.winner === 1);
+        const win = state.winner && (mode.value === 'local' || state.winner === human);
         ui.message(
           state.winner ? `${name(state.winner)} đã nối được 5 quân!` : 'Bàn đã kín. Một ván hòa!',
         );
@@ -120,14 +139,8 @@
             onScore: options.onScore,
           }),
         );
-      } else if (mode.value === 'bot' && state.turn === 2) {
-        busy = true;
-        render();
-        announceTurn();
-        scope.after(0.4, () => {
-          busy = false;
-          play(L.chooseCaroMove(state));
-        });
+      } else if (mode.value === 'bot' && state.turn === botMark()) {
+        botTurn();
       } else {
         busy = false;
         announceTurn();
@@ -164,9 +177,26 @@
       S.clearOverlays(ui);
       state = L.createCaro();
       busy = false;
-      render();
-      announceTurn();
+      human = mode.value === 'bot' && first === 'bot' ? 2 : 1;
+      if (mode.value === 'bot' && state.turn === botMark()) botTurn();
+      else {
+        render();
+        announceTurn();
+      }
     }
+    // Who opens only matters at the start, so a mid-game change asks and starts a new match.
+    scope.on(firstSelect, 'change', () => {
+      const next = firstSelect.value === 'bot' ? 'bot' : 'human';
+      if (state.moves && !state.ended && !window.confirm('Đổi người đi trước sẽ bắt đầu ván mới. Bạn muốn đổi chứ?')) {
+        firstSelect.value = first;
+        return;
+      }
+      first = next;
+      try {
+        localStorage.setItem(FIRST_KEY, first);
+      } catch {}
+      restart();
+    });
     scope.on(mode, 'change', () => {
       if (previousMode === 'online' && !isOnline()) {
         if (!onlineUI.confirmLeave()) { mode.value = 'online'; return; }
@@ -457,11 +487,12 @@
   Games.quan = function (host, options) {
     const scope = S.createScope();
     let visual = null;
-    const settings = { rules: L.quanRules(), difficulty: 'normal' };
+    const settings = { rules: L.quanRules(), difficulty: 'normal', first: 0 };
     try {
       const saved = JSON.parse(localStorage.getItem(QUAN_SETTINGS_KEY));
       if (saved?.rules) settings.rules = L.quanRules(saved.rules);
       if (QUAN_LEVELS.some(([value]) => value === saved?.difficulty)) settings.difficulty = saved.difficulty;
+      if (saved?.first === 1) settings.first = 1;
     } catch {}
     const saveSettings = () => {
       try {
@@ -478,6 +509,7 @@
           ['bot', 'Đấu với máy'],
           ['local', '2 người cùng máy'],
         ]) +
+        '<label class="game-mode quan-first"><span>Đi trước</span><select data-quan-first aria-label="Chọn ai đi trước"><option value="0">Bạn</option><option value="1">Máy</option></select></label>' +
         `<label class="game-mode quan-difficulty" data-quan-difficulty-wrap><span>Độ khó</span><select data-quan-difficulty aria-label="Độ khó của máy">${QUAN_LEVELS.map(([value, title]) => `<option value="${value}">${title}</option>`).join('')}</select></label>` +
         '<button type="button" class="control-button quan-rules-toggle" data-quan-rules-toggle aria-expanded="false" aria-controls="quan-rules-panel">Luật chơi</button>',
       board:
@@ -497,11 +529,13 @@
     ui.toolbar.after(panel);
     const mode = ui.toolbar.querySelector('.game-mode select'),
       difficulty = ui.toolbar.querySelector('[data-quan-difficulty]'),
+      firstSelect = ui.toolbar.querySelector('[data-quan-first]'),
       rulesToggle = ui.toolbar.querySelector('[data-quan-rules-toggle]'),
       board = ui.area.querySelector('.quan-board'),
       summary = ui.area.querySelector('.quan-rules-summary'),
       skipButton = ui.controls.querySelector('[data-quan-skip]');
     difficulty.value = settings.difficulty;
+    firstSelect.value = String(settings.first);
     let state,
       selected = -1,
       busy = false,
@@ -556,7 +590,7 @@
       const texts = quanRuleTexts(state.rules);
       summary.textContent = `Luật ván này: ${texts.map((t) => t.short).join(' · ')}`;
       options.setHelpNote?.(
-        `Luật đang áp dụng: ${texts.map((t) => t.long).join('; ')}. Bấm “Luật chơi” để đổi (bắt đầu ván mới). Máy có 3 mức Dễ / Thường / Khó, hoặc chọn 2 người để chơi chung thiết bị.`,
+        `Luật đang áp dụng: ${texts.map((t) => t.long).join('; ')}. Bấm “Luật chơi” để đổi (bắt đầu ván mới). Ô “Đi trước” chọn bạn hay máy (hoặc Người 1 / Người 2) đi nước đầu. Máy có 3 mức Dễ / Thường / Khó, hoặc chọn 2 người để chơi chung thiết bị.`,
       );
     }
     function fillRulesForm(rules) {
@@ -624,6 +658,10 @@
         if (label.textContent !== name) label.textContent = name;
       }
       ui.toolbar.querySelector('[data-quan-difficulty-wrap]').hidden = !isBot();
+      [...firstSelect.options].forEach((option, player) => {
+        const name = playerName(player);
+        if (option.textContent !== name) option.textContent = name;
+      });
       ui.controls.querySelectorAll('[data-sow]').forEach((button) => {
         button.disabled = !showArrows;
       });
@@ -745,16 +783,20 @@
       } else if (isBot() && state.turn === 1) {
         render();
         ui.message(`${detail} Máy đang tính nước…`);
-        scope.after(0.6, () => {
-          const choice = L.chooseQuanMove(state, settings.difficulty);
-          busy = false;
-          if (choice) play(choice.pit, choice.direction);
-        });
+        botTurn(0.6);
       } else {
         busy = false;
         render();
         ui.message(`${detail} Lượt ${playerName(state.turn)}.`);
       }
+    }
+    function botTurn(delay) {
+      busy = true;
+      scope.after(delay, () => {
+        const choice = L.chooseQuanMove(state, settings.difficulty);
+        busy = false;
+        if (choice) play(choice.pit, choice.direction);
+      });
     }
     function play(pit, direction) {
       if (busy || state.ended) return;
@@ -882,16 +924,33 @@
       scope.clearTimers();
       S.clearOverlays(ui);
       clearFloats();
-      state = L.createQuan(settings.rules);
+      state = L.createQuan(settings.rules, settings.first);
       selected = -1;
       busy = false;
       lastMove = null;
       updateRulesInfo();
-      render();
-      ui.message(
-        'Chọn một ô dân ở hàng dưới, rồi bấm mũi tên ◀ ▶ để rải. Phím tắt: 1–5 chọn ô, ← → rải, Esc bỏ chọn.',
-      );
+      const tips = 'Bấm mũi tên ◀ ▶ trên ô để rải. Phím tắt: 1–5 chọn ô, ← → rải, Esc bỏ chọn.';
+      if (isBot() && state.turn === 1) {
+        botTurn(0.8);
+        render();
+        ui.message(`Máy đi trước, đang tính nước… ${tips}`);
+      } else {
+        render();
+        ui.message(`${playerName(state.turn)} đi trước: chọn một ô dân ở hàng ${state.turn === 0 ? 'dưới' : 'trên'}. ${tips}`);
+      }
     }
+    // Who moves first only matters at the start, so changing it mid-game starts a new match.
+    scope.on(firstSelect, 'change', () => {
+      const first = Number(firstSelect.value) === 1 ? 1 : 0;
+      if (state.moves > 0 && !state.ended && !window.confirm('Đổi người đi trước sẽ bắt đầu ván mới. Bạn muốn đổi chứ?')) {
+        firstSelect.value = String(settings.first);
+        ui.message('Đã giữ nguyên ván đang chơi.');
+        return;
+      }
+      settings.first = first;
+      saveSettings();
+      restart();
+    });
     scope.on(mode, 'change', restart);
     if (options.renderer === '3d') visual = window.Arcade3D.createView('quan', ui, scope);
     restart();

@@ -254,3 +254,16 @@ test('FEN parser rejects malformed dimensions, pieces, kings, side and counters'
     '4k3/8/8/8/8/8/8/4K3 w - - -1 1'
   ]) assert.throws(() => C.fromFEN(fen), TypeError);
 });
+
+test('the computer can open as White and also answer as Black', () => {
+  // "Máy đi trước" gives the computer White; otherwise it plays Black. Both sides must work.
+  const state = C.create();
+  for (let ply = 0; ply < 6; ply++) {
+    const side = state.turn;
+    const chosen = C.chooseMove(state, 'easy');
+    assert.ok(chosen, `ply ${ply}`);
+    assert.equal(state.board[chosen.from][0], side);
+    assert.equal(C.move(state, chosen), true);
+  }
+  assert.equal(state.turn, 'w');
+});

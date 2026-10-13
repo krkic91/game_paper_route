@@ -274,6 +274,29 @@ test('quan: two empty pits in a row end the turn without a capture', () => {
   assert.deepEqual(state.scores, [0, 0]);
   assert.equal(state.turn, 1);
 });
+test('caro: the computer can open as X in the centre and answer as O', () => {
+  const state = L.createCaro();
+  const opening = L.chooseCaroMove(state);
+  assert.equal(opening, 112);
+  assert.ok(L.moveCaro(state, opening));
+  assert.ok(L.moveCaro(state, 0));
+  const reply = L.chooseCaroMove(state);
+  assert.ok(reply >= 0 && !state.board[reply]);
+  assert.equal(state.turn, 1, 'X (the computer) is to move again');
+});
+test('quan: either player can move first', () => {
+  assert.equal(L.createQuan().turn, 0);
+  assert.equal(L.createQuan({}, 0).turn, 0);
+  const upper = L.createQuan({ debt: 'borrow' }, 1);
+  assert.equal(upper.turn, 1);
+  assert.equal(upper.rules.debt, 'borrow');
+  assert.equal(L.moveQuan(upper, 7, 1), null, 'the lower row must wait');
+  const choice = L.chooseQuanMove(upper, 'hard', rng(5));
+  assert.ok(L.quanSide(1).includes(choice.pit));
+  assert.ok(L.moveQuan(upper, choice.pit, choice.direction));
+  assert.equal(upper.turn, 0);
+  assert.equal(sumQuan(upper), 70);
+});
 test('quan rules: normalisation falls back to the basic rules', () => {
   assert.deepEqual(L.quanRules(), { youngQuan: false, youngMin: 5, debt: 'negative', emptyQuan: 'empty' });
   assert.deepEqual(L.quanRules({ youngQuan: 1, debt: 'steal', emptyQuan: 'block', youngMin: 'x' }), {

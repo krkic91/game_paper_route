@@ -260,3 +260,15 @@ test('The computer takes a mate in one and avoids an immediate loss in normal mo
   });
   assert.equal(canMate, false);
 });
+
+test('the computer can open as Red and also answer as Black', () => {
+  const state = X.create();
+  for (let ply = 0; ply < 6; ply++) {
+    const side = state.turn;
+    const move = X.chooseMove(state, 'easy');
+    assert.ok(move, `ply ${ply}`);
+    assert.equal(state.board[move.from][0], side);
+    assert.equal(X.move(state, move), true);
+  }
+  assert.equal(state.turn, 'r');
+});

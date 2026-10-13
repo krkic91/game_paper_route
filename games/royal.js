@@ -54,7 +54,13 @@
     const L = chess ? window.ChessLogic : window.XiangqiLogic;
     const names = chess ? chessNames : xiangqiNames;
     const columns = chess ? 8 : 9, rows = chess ? 8 : 10;
-    const human = chess ? 'w' : 'r';
+    const starter = chess ? 'w' : 'r'; // White / Red always moves first
+    const firstKey = 'tram-choi.' + kind + '.first';
+    let first = 'human';
+    try { if (localStorage.getItem(firstKey) === 'bot') first = 'bot'; } catch {}
+    // When the computer opens, it takes the first side and you play Black from the bottom of the board.
+    const humanSide = () => (mode === 'bot' && first === 'bot' ? 'b' : starter);
+    let human = starter;
     const pieceArt = chess ? chessPiece : xiangqiPiece;
     const sideName = (side) => side === 'b' ? 'Đen' : chess ? 'Trắng' : 'Đỏ';
     const scope = S.createScope();
@@ -70,7 +76,7 @@
     const ui = S.buildUI(host, {
       className: 'royal-workspace royal-' + kind,
       toolbar: '<div class="royal-heading"><span>BÀN CỜ CỦA BẠN</span><strong>' + (chess ? 'Cờ vua' : 'Cờ tướng') + '</strong></div>' +
-        '<div class="royal-settings"><label><span>Chế độ</span><select data-royal-mode aria-label="Chế độ chơi"><option value="bot">Chơi với máy</option><option value="local">2 người / 1 máy</option></select></label><label data-royal-difficulty-wrap><span>Độ khó</span><select data-royal-difficulty aria-label="Độ khó của máy"><option value="easy">Dễ</option><option value="normal" selected>Vừa</option></select></label></div>',
+        '<div class="royal-settings"><label><span>Chế độ</span><select data-royal-mode aria-label="Chế độ chơi"><option value="bot">Chơi với máy</option><option value="local">2 người / 1 máy</option></select></label><label data-royal-first-wrap><span>Đi trước</span><select data-royal-first aria-label="Chọn ai đi trước"><option value="human">Bạn</option><option value="bot">Máy</option></select></label><label data-royal-difficulty-wrap><span>Độ khó</span><select data-royal-difficulty aria-label="Độ khó của máy"><option value="easy">Dễ</option><option value="normal" selected>Vừa</option></select></label></div>',
       board: '<div class="royal-playfield"><div class="royal-player" data-royal-player="top"></div><div class="royal-frame"><div class="royal-board" role="grid"></div></div><div class="royal-player" data-royal-player="bottom"></div>' +
         '<div class="royal-promotion" data-royal-promotion-panel role="group" aria-label="Chọn quân phong cấp" hidden><div><strong>Phong cấp cho Tốt</strong><span>Chọn quân để hoàn tất nước đi.</span></div><div class="royal-promotion-options">' + ['Q', 'R', 'B', 'N'].map((role) => '<button type="button" data-royal-promotion="' + role + '" aria-label="Phong cấp thành ' + chessNames[role] + '">' + chessPiece(role, human) + '<span>' + chessNames[role] + '</span></button>').join('') + '</div><button type="button" class="royal-text-button" data-royal-action="cancel-promotion">Hủy chọn</button></div>' +
         '<div class="royal-result" data-royal-result hidden><strong data-royal-result-title></strong><p data-royal-result-detail></p><button type="button" data-royal-action="restart">Chơi ván mới</button></div></div>',
@@ -149,12 +155,14 @@
         cell.setAttribute('aria-disabled', String(state.status !== 'playing' || thinking || Boolean(promotion)));
         cell.setAttribute('aria-label', squareName(index) + ', ' + (piece ? names[piece[1]] + ' ' + sideName(piece[0]).toLowerCase() : 'ô trống') + (destinations.has(index) ? ', có thể đi tới' : '') + (check && piece === state.turn + 'K' ? ', đang bị chiếu' : ''));
       }
-      playerPanel('top', flipped ? human : 'b');
-      playerPanel('bottom', flipped ? 'b' : human);
+      playerPanel('top', flipped ? starter : 'b');
+      playerPanel('bottom', flipped ? 'b' : starter);
       host.querySelector('[data-royal-mode]').value = mode;
       host.querySelector('[data-royal-difficulty]').value = difficulty;
       host.querySelector('[data-royal-difficulty-wrap]').hidden = mode !== 'bot';
-      host.querySelector('[data-royal-action="undo"]').disabled = !L.canUndo(state);
+      host.querySelector('[data-royal-first]').value = first;
+      host.querySelector('[data-royal-first-wrap]').hidden = mode !== 'bot';
+      host.querySelector('[data-royal-action="undo"]').disabled = !canUndoHere();
       host.querySelector('[data-royal-action="flip"]').setAttribute('aria-pressed', String(flipped));
       host.querySelector('[data-royal-turn]').textContent = state.status === 'playing' ? thinking ? 'Máy đang suy nghĩ…' : 'Lượt ' + sideName(state.turn) + (check ? ' · Đang bị chiếu!' : '') : state.status === 'draw' ? 'Ván cờ hòa' : sideName(state.winner) + ' thắng';
       host.querySelector('[data-royal-ply]').textContent = 'Nước ' + (Math.floor((state.ply ?? history.length) / 2) + 1);
@@ -164,14 +172,22 @@
         resultPanel.querySelector('[data-royal-result-title]').textContent = state.status === 'draw' ? 'Một ván cờ hòa' : sideName(state.winner) + ' giành chiến thắng!';
         resultPanel.querySelector('[data-royal-result-detail]').textContent = reasons[state.reason] || 'Ván cờ đã kết thúc.';
       }
-      ui.message(notice || (promotion ? 'Tốt đã tới hàng cuối. Chọn quân muốn phong cấp.' : state.status !== 'playing' ? reasons[state.reason] || 'Bạn có thể hoàn tác hoặc bắt đầu ván mới.' : check ? 'Vua / Tướng đang bị chiếu. Hãy chọn một nước đi để thoát chiếu.' : mode === 'bot' ? 'Bạn cầm quân ' + sideName(human).toLowerCase() + ' và đi trước. Máy chơi ở mức ' + (difficulty === 'easy' ? 'dễ.' : 'vừa.') : 'Hai người lần lượt chơi trên cùng thiết bị.'));
+      ui.message(notice || (promotion ? 'Tốt đã tới hàng cuối. Chọn quân muốn phong cấp.' : state.status !== 'playing' ? reasons[state.reason] || 'Bạn có thể hoàn tác hoặc bắt đầu ván mới.' : check ? 'Vua / Tướng đang bị chiếu. Hãy chọn một nước đi để thoát chiếu.' : mode === 'bot' ? (human === starter ? 'Bạn cầm quân ' + sideName(human).toLowerCase() + ' và đi trước.' : 'Máy cầm quân ' + sideName(starter).toLowerCase() + ' và đi trước; bạn cầm quân đen.') + ' Máy chơi ở mức ' + (difficulty === 'easy' ? 'dễ.' : 'vừa.') : 'Hai người lần lượt chơi trên cùng thiết bị.'));
     }
     function clearSelection() { selected = -1; moves = []; promotion = null; }
+    // In bot mode never undo the computer's opening move: that would leave the computer to move again.
+    function canUndoHere() {
+      return L.canUndo(state) && !(mode === 'bot' && human !== starter && history.length <= 1);
+    }
     function restart() {
       scope.clearTimers();
       state = L.create(); thinking = false; captures = []; history = []; scored = false; notice = '';
-      clearSelection(); focused = chess ? 52 : 58;
+      human = humanSide();
+      const nextFlip = human === 'b';
+      if (nextFlip !== flipped) { flipped = nextFlip; buildBoard(); }
+      clearSelection(); focused = human === 'b' ? (chess ? 12 : 31) : (chess ? 52 : 58);
       render();
+      scheduleBot();
     }
     function finishMove(move) {
       const before = state.board.slice(), beforeCaptures = captures.slice();
@@ -224,7 +240,7 @@
       render();
     }
     function undo() {
-      if (!L.canUndo(state)) return;
+      if (!canUndoHere()) return;
       scope.clearTimers(); thinking = false; clearSelection();
       do {
         if (!L.undo(state)) break;
@@ -266,6 +282,15 @@
       }
       mode = next; restart();
     });
+    scope.on(host.querySelector('[data-royal-first]'), 'change', (event) => {
+      const next = event.target.value === 'bot' ? 'bot' : 'human';
+      if ((state.ply ?? history.length) && state.status === 'playing' && !window.confirm('Đổi người đi trước sẽ bắt đầu ván mới. Bạn muốn đổi chứ?')) {
+        event.target.value = first; return;
+      }
+      first = next;
+      try { localStorage.setItem(firstKey, first); } catch {}
+      restart();
+    });
     scope.on(host.querySelector('[data-royal-difficulty]'), 'change', (event) => {
       difficulty = event.target.value; render();
     });
@@ -289,7 +314,7 @@
         cells[focused].focus();
       } else if (key === 'enter' || key === ' ') { event.preventDefault(); activate(focused); }
     });
-    buildBoard(); render();
+    buildBoard(); restart();
     return S.handle(scope, restart);
   }
   window.ArcadeGames.chess = (host, options = {}) => mount(host, options, 'chess');

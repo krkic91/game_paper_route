@@ -14,7 +14,8 @@
     "test:puppies": "node tests/browser-puppies.cjs",
     "test:royal": "node tests/browser-royal.cjs",
     "test:race": "node tests/browser-race.cjs",
-    "test:quan": "node tests/browser-quan.cjs"
+    "test:quan": "node tests/browser-quan.cjs",
+    "test:first-move": "node tests/browser-first-move.cjs"
   },
   "engines": {
     "node": ">=18"

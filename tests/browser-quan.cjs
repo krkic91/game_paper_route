@@ -131,7 +131,32 @@ async function panelClickable(page) {
       await page.reload();
       await page.locator('.quan-workspace').waitFor();
       assert.match(await page.locator('.quan-rules-summary').textContent(), /Quan non/);
+
+      // Who moves first: picking "Máy" restarts and the computer opens from the upper row.
+      await page.locator('[data-pit="9"]').click();
+      await page.locator('[data-arrow="left"]').click();
+      await page.locator('[data-quan-skip].control-button').click().catch(() => {});
+      const confirmsBefore = confirms;
+      await page.locator('[data-quan-first]').selectOption('1');
+      assert.equal(confirms, confirmsBefore + 1, 'changing the first player mid-game asks first');
+      assert.match(await status(page), /Máy đi trước/);
+      assert.equal(await page.locator('.quan-pit.own-pit:not(:disabled)').count(), 0, 'you wait while the computer opens');
+      await page.locator('[data-quan-skip].control-button').waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+      await page.locator('[data-quan-skip].control-button').click().catch(() => {});
+      await humanTurn(page);
+      const origin = await page.locator('.quan-pit.last-origin').getAttribute('data-pit');
+      assert.ok(Number(origin) >= 1 && Number(origin) <= 5, 'the computer moved from the upper row');
+      assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('tram-choi.quan.settings.v1')).first), 1);
+      await page.reload();
+      await page.locator('.quan-workspace').waitFor();
+      assert.equal(await page.locator('[data-quan-first]').inputValue(), '1', 'the choice is remembered');
+      await humanTurn(page);
+      await page.locator('[data-quan-first]').selectOption('0');
+      assert.match(await status(page), /Bạn đi trước/);
+      assert.ok((await page.locator('.quan-pit.own-pit:not(:disabled)').count()) > 0);
+
       await page.locator('.game-mode select').first().selectOption('local');
+      assert.deepEqual(await page.locator('[data-quan-first] option').allTextContents(), ['Người 1', 'Người 2']);
       assert.equal(await page.locator('[data-quan-difficulty-wrap]').isVisible(), false);
       assert.equal(await page.locator('[data-stat="p2"]').evaluate((el) => el.previousElementSibling.textContent), 'NGƯỜI 2');
       // Player 2 (top row) also sows by on-screen direction.

@@ -300,14 +300,15 @@
       emptyQuan: rules?.emptyQuan === 'block' ? 'block' : 'empty',
     };
   }
-  function createQuan(rules) {
+  // firstPlayer: 0 = lower row (Bạn / Người 1) moves first, 1 = upper row (Máy / Người 2).
+  function createQuan(rules, firstPlayer = 0) {
     return {
       pits: [0, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5],
       royals: [true, true],
       scores: [0, 0],
       debts: [0, 0],
       rules: quanRules(rules),
-      turn: 0,
+      turn: firstPlayer === 1 ? 1 : 0,
       ended: false,
       endReason: null,
       winner: null,

@@ -52,13 +52,21 @@
   gap: 4px;
   margin-left: auto;
 }
-.game-mode > span {
+/* Extra settings placed next to the mode picker (kept off .game-mode so ".game-mode select" stays unique). */
+.game-option {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.game-mode > span,
+.game-option > span {
   font-size: 8px;
   color: #809575;
   letter-spacing: 1px;
   text-transform: uppercase;
 }
-.game-mode select {
+.game-mode select,
+.game-option select {
   max-width: 190px;
   font-size: 10px;
   color: #cadbbc;
@@ -810,7 +818,7 @@
   white-space: nowrap;
   align-self: flex-end;
 }
-.quan-workspace .game-mode + .quan-difficulty {
+.quan-workspace .game-mode + .game-mode {
   margin-left: 0;
 }
 .quan-rules-panel {
@@ -1619,6 +1627,10 @@
   }
 }
 @media (max-width: 600px) {
+  .caro-workspace .game-toolbar {
+    flex-wrap: wrap;
+    row-gap: 10px;
+  }
   .quan-workspace .game-toolbar {
     flex-wrap: wrap;
     row-gap: 10px;
