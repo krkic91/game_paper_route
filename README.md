@@ -31,7 +31,7 @@ python -m http.server 4173
 | Game                | Chế độ                                        | Cách chơi chính                                                   |
 | ------------------- | --------------------------------------------- | ----------------------------------------------------------------- |
 | **Delivery Dash**   | 1 người                                       | Lái xe giao báo, né chướng ngại, hoàn thành tuyến đường gốc.      |
-| **Đua xe đạp**      | Bạn đấu 3 đối thủ máy                         | Đua 1 km; quản lý năng lượng, nước rút, né cọc tiêu và vũng nước. |
+| **Đua xe đạp**      | Bạn đấu 3 đối thủ máy · 2D/3D                  | Đua 1 km qua cua/dốc; quán tính, phanh, thả trôi, núp gió và nước rút. |
 | **Caro**            | Đấu máy / 2 người cùng thiết bị / online       | Bàn 15 × 15, nối từ 5 quân theo hàng ngang, dọc hoặc chéo.        |
 | **Cờ vua**          | Đấu máy Dễ/Vừa / 2 người cùng thiết bị · 2D   | Chiếu hết vua; có nhập thành, bắt tốt qua đường, phong cấp.    |
 | **Cờ tướng**        | Đấu máy Dễ/Vừa / 2 người cùng thiết bị · 2D   | Phối hợp Xe, Pháo, Mã; chiếu bí hoặc khiến đối thủ hết nước đi. |
@@ -225,7 +225,12 @@ games/
   royal.css             Bàn cờ và giao diện responsive
   online.js             Kết nối Caro online, phiên và khôi phục kết nối
   caro-online-ui.js     Giao diện phòng, sẵn sàng và chơi tiếp
-  action.js             Đua xe đạp, bida, rắn, phá gạch
+  action.js             Bida, rắn, phá gạch
+  race-logic.js         Mô phỏng xe đạp, địa hình, núp gió, AI và va chạm
+  race.js / race.css    Điều khiển và giao diện Đua xe đạp
+  race-2d.js            Đường cua/dốc và chuyển động xe trong Canvas
+  race-audio.js         Âm thanh xe đạp cục bộ, quản lý theo vòng đời game
+  3d/race-view.js       Đường đua, xe và camera 3D
   games.css             Giao diện các màn chơi
 
 delivery.html           Trang Delivery Dash gốc
@@ -243,6 +248,8 @@ tests/online-server.test.cjs  Phòng, lượt, kết nối lại và hết hạn
 tests/online-client.test.cjs  Phiên, yêu cầu và phục hồi client
 tests/browser-online.cjs     Hai người chơi trong browser context độc lập
 tests/browser-smoke.cjs  Kiểm tra trình duyệt tùy chọn
+tests/race.test.cjs      Quán tính, phanh, dốc, độ bám, núp gió, AI, va chạm và về đích
+tests/browser-race.cjs   Đua xe đạp 2D/3D trên Chromium/WebKit và màn hình cảm ứng
 tests/puppies.test.cjs   500 lời giải độc lập, độ khó, chu kỳ đổi đề, khôi phục ván
 tests/browser-puppies.cjs  Xếp cún trên Chromium/WebKit và màn hình cảm ứng
 tests/chess.test.cjs     Perft, nhập thành, bắt tốt qua đường, phong cấp, kết quả
@@ -263,6 +270,9 @@ Bộ kiểm thử kiểm tra thắng/thua, luật di chuyển, AI, va chạm, b�
 
 ### Kiểm tra trình duyệt (tùy chọn)
 
+Xem [hướng dẫn Đua xe đạp và kiểm thử](docs/race.md) cho phanh/thả trôi, núp gió,
+địa hình, tùy chọn âm thanh và giảm rung của bản nâng cấp.
+
 Cài Playwright **chỉ để chạy kiểm thử**, không phải dependency của trang:
 
 ```bash
@@ -278,6 +288,8 @@ npm run test:online
 npm run test:sudoku
 npm run test:puppies
 npm run test:royal
+npm run test:race
+npm run test:race:scene
 ```
 
 Trên Windows, script tự dùng Edge nếu có. Có thể chỉ định `BROWSER_PATH` (đường dẫn executable) và `TEST_URL` nếu cần. Kiểm thử mở cả 14 game, chơi các lượt mẫu, kiểm tra AI, tìm kiếm không dấu, yêu thích, lưu kỷ lục, tạm dừng/chơi lại, màn hình điện thoại và mở trực tiếp `file://`. Ảnh chụp lưu trong thư mục tạm `tram-choi-screenshots`, hoặc đường dẫn do biến `SCREENSHOTS` chỉ định.

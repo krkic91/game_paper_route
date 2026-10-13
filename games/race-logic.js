@@ -161,7 +161,7 @@
     const nextX = subject.x + subject.vx * dt;
     subject.x = clamp(nextX, 0, 3);
     if (nextX !== subject.x) subject.vx = 0;
-    const targetLean = clamp(-subject.vx * 0.2 + road.curvature * subject.speed * subject.speed * 0.09, -0.38, 0.38);
+    const targetLean = clamp(-subject.vx * 0.2 - road.curvature * subject.speed * subject.speed * 0.09, -0.38, 0.38);
     subject.lean += (targetLean - subject.lean) * (1 - Math.exp(-7 * dt));
     const cadence = subject.effort ? clamp(44 + subject.speed * 2.5 + (subject.sprinting ? 17 : 0), 44, 116) : 0;
     subject.cadence += (cadence - subject.cadence) * (1 - Math.exp(-9 * dt));

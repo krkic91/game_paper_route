@@ -62,7 +62,7 @@
       draftLabel.textContent = state.drafting && mode !== 'finished' ? 'Núp gió · tiết kiệm sức' : modeNames[mode];
       draftLabel.classList.toggle('is-drafting', state.drafting && started && !finished);
       Object.assign(ui.workspace.dataset, {
-        speed: state.speed.toFixed(3), distance: state.distance.toFixed(3), energy: state.energy.toFixed(3),
+        time: state.time.toFixed(3), speed: state.speed.toFixed(3), distance: state.distance.toFixed(3), energy: state.energy.toFixed(3),
         x: state.x.toFixed(3), mode, drafting: String(state.drafting),
         status: scope.paused ? 'paused' : !started ? 'intro' : state.status,
       });

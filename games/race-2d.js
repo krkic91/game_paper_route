@@ -107,13 +107,17 @@
       ctx.fillStyle = '#9caf80'; ctx.fillRect(0, 235, 900, 315);
       // Draw each strip back to front. Elevation and bends come from trackAt.
       const half = base.width / 2;
+      // Continuous underlays prevent anti-aliased strip edges exposing grass
+      // as horizontal seams across the tarmac.
+      for (const [width, color] of [[half + .7, '#a8b78d'], [half, '#697a76']]) {
+        const left = [], right = [];
+        for (let z = -2; z <= 190; z += 2) { left.push(project(-width, z)); right.push(project(width, z)); }
+        polygon([...left, ...right.reverse()], color);
+      }
       for (let relative = 188; relative >= -2; relative -= 2) {
         const at = state.distance + relative, road = R.trackAt(at, state.trackSeed);
         const nearLeft = project(-half, relative - .03), nearRight = project(half, relative - .03);
         const farLeft = project(-half, relative + 2.03), farRight = project(half, relative + 2.03);
-        const grass = Math.floor(at / 12) % 2 ? '#97ae80' : '#9bb383';
-        polygon([{ x: 0, y: farLeft.y }, { x: 900, y: farRight.y }, { x: 900, y: nearRight.y }, { x: 0, y: nearLeft.y }], grass);
-        polygon([project(-half - .7, relative - .03), project(half + .7, relative - .03), project(half + .7, relative + 2.03), project(-half - .7, relative + 2.03)], '#a8b78d');
         const surfaceColor = road.surface === 'wet' ? '#789092' : road.surface === 'gravel' ? '#a39b82' : Math.floor(at / 8) % 2 ? '#667773' : '#697a76';
         polygon([nearLeft, nearRight, farRight, farLeft], surfaceColor);
         for (const side of [-1, 1]) polygon([project(side * (half - .22), relative - .03), project(side * (half - .06), relative - .03), project(side * (half - .06), relative + 2.03), project(side * (half - .22), relative + 2.03)], '#e9e5c9');

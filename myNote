@@ -2,3 +2,67 @@ Chạy bằng:
 npm ci
 npm start
 Mở http://127.0.0.1:4173.
+----------------
+ 1. Cấp 1 đã là "Khó · 7×7", chưa có màn nào dễ cho người mới
+ - 100 cấp chỉ gồm các mức Khó → Rất khó → Chuyên gia → Bậc thầy → Siêu khó → Thử thách tối thượng, nhỏ nhất là 7×7. Người mới vào ngay cấp 1 dễ nản.
+ - Tôi chấm thử bằng bộ giải logic có sẵn trong scripts/: cấp 1 giải được chỉ bằng loại trừ cơ bản, không cần thử–sai. Thực tế nó dễ hơn nhãn "Khó".
+ - Đề xuất:
+     - Thêm 5–10 màn nhập môn cỡ 5×5 và 6×6.
+     - Đặt lại nhãn cho đúng mức khó thật: Dễ → Vừa → Khó…
+     - Có thể thêm một màn hướng dẫn tương tác dạy 3 luật.
+
+ 2. Gợi ý hiện chỉ lộ đáp án, không dạy cách suy luận
+ - L.hint() đặt luôn con cún ở dòng trên cùng còn thiếu của đáp án, nên gợi ý luôn đi từ trên xuống và người chơi không học được gì.
+ - Đề xuất gợi ý theo suy luận, dựa trên phần lọc ô trong scripts/generate-puppies.cjs. Gợi ý tô sáng vùng, hàng hoặc cột liên quan và giải thích, ví dụ:
+     - "Vùng tím chỉ còn 1 ô trống → cún phải ở đây"
+     - "Mọi ô còn lại của vùng vàng đều nằm ở cột 3 → các ô khác của cột 3 bị loại"
+ - Khi không tìm được bước suy luận nào mới phải lộ đáp án như bây giờ.
+
+ 3. Bố cục chưa gọn, phải cuộn mới thấy hết bàn
+ - Trên laptop 1366×768, phần đầu (chọn cấp, ô tự đánh dấu, ghi chú, bộ đếm, hình minh họa 3 luật) chiếm khoảng 300px. Bàn bị cắt, các nút Đặt cún / Đánh dấu
+   / Gợi ý nằm tít dưới.
+ - Trên điện thoại 390×844, cạnh dưới bàn bị cắt và các nút nằm ngoài màn hình.
+ - Đề xuất:
+     - Gộp phần đầu thành 1–2 dòng.
+     - Cho hình minh họa luật thu gọn được, hoặc chỉ hiện ở vài màn đầu.
+     - Để thanh công cụ nằm ngay dưới hoặc cạnh bàn.
+
+ 🟡 Trải nghiệm chơi
+
+ 4. Thao tác nhanh hơn kiểu LinkedIn Queens
+ - Chạm 1 lần đánh dấu ×, chạm lần 2 đặt cún, chạm lần 3 xóa. Như vậy không cần đổi qua lại giữa chế độ Đặt cún và Đánh dấu.
+ - Có thể kéo ngón tay để đánh dấu × nhiều ô một lượt.
+ - Bỏ được bước đổi chế độ là thao tác bị nhiều nhất trong game này.
+
+ 5. Chế độ chơi không mất xương (tùy chọn)
+ - Hiện mỗi lần đặt cún được so ngay với đáp án, sai là mất xương ngay cả khi ô đó chưa vi phạm luật nào. Cách này khuyến khích đoán mò.
+ - Đề xuất thêm tùy chọn "Thư giãn": không mất xương, chỉ tô đỏ khi hai cún vi phạm luật (cùng hàng, cột, vùng hoặc chạm nhau).
+
+ 6. Phân biệt màu vùng
+ - Một số cặp màu khá giống nhau: be và vàng, xanh ngọc và xanh nhạt, nâu và cam đất. Lúc chụp màn hình cấp 1, cả hai cặp đầu cùng xuất hiện.
+ - Đã có nút "Ký hiệu vùng". Nên chỉnh thêm bảng màu cho độ tương phản giữa các vùng tốt hơn ngay từ đầu.
+
+ 7. Tiến độ và động lực
+ - Chọn cấp bằng danh sách thả xuống 100 dòng rất khó dùng. Nên đổi sang bản đồ cấp dạng lưới có dấu ✓ và số sao.
+ - Thêm sao cho mỗi cấp: 3 sao khi không sai và không dùng gợi ý.
+ - Thêm đồng hồ và lưu thời gian tốt nhất mỗi cấp.
+ - Có hiệu ứng ăn mừng nhỏ khi xong màn.
+
+ 8. Phím tắt
+ - Thêm Z (hoặc Ctrl+Z) để hoàn tác và H để xin gợi ý.
+
+ 🟢 Kỹ thuật
+
+ 9. Smoke test chung đã lỗi thời
+ - tests/browser-smoke.cjs vẫn chờ cấp 1 có 25 ô (5×5), trong khi bộ đề mới bắt đầu từ 7×7 (49 ô).
+ - Đây chính là lỗi "49 ≠ 25" tôi báo ở các lần trước. Chỉ cần sửa con số trong test, game không lỗi.
+
+ ────────────────────────────────────────────────────────────────────────────────
+
+ Gợi ý thứ tự làm: sửa test ở mục 9 (vài phút) → làm mục 1, 2, 3 vì ảnh hưởng nhiều nhất tới người chơi mới → mục 4, 5 → mục 6, 7, 8.
+
+ Bạn muốn tôi làm những mục nào? Như các lần trước, tôi sẽ mô tả cách làm chi tiết cho bạn xác nhận rồi mới bắt tay vào sửa.
+
+
+ không cần thực hiện mục 1, mục 2 thì chia làm 2 option gợi ý hiện tại vẫn giữ nguyên và thêm gợi ý theo kiểu suy luận như bạn đã đề xuất. Các mục còn lại từ
+ mục 3 trở đi thực hiện như đề xuất

@@ -4,7 +4,7 @@
 const assert = require('node:assert/strict');
 const { existsSync, mkdirSync, writeFileSync } = require('node:fs');
 const { join } = require('node:path');
-const { chromium, webkit } = require('playwright');
+const { chromium, webkit } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const base = process.env.TEST_URL || 'http://127.0.0.1:4173';
 const output = process.env.SCREENSHOTS || join(__dirname, '../test-results/race');
 const selected = (process.env.RACE_BROWSERS || 'chromium,webkit').split(',');
@@ -35,7 +35,7 @@ function watch(page) {
 }
 async function snapshot(page) {
   const data = await workspace(page).evaluate(el => ({ ...el.dataset }));
-  for (const key of ['speed', 'distance', 'energy', 'x']) {
+  for (const key of ['time', 'speed', 'distance', 'energy', 'x']) {
     assert.ok(data[key] !== undefined && Number.isFinite(Number(data[key])), `Missing finite data-${key}`);
     data[key] = Number(data[key]);
   }
@@ -98,8 +98,12 @@ async function pointerHold(page, key, milliseconds, expected) {
   await page.mouse.down();
   try {
     if (expected) await mode(page, expected);
-    await page.waitForTimeout(milliseconds);
-    return await snapshot(page);
+    const controlStart = await snapshot(page);
+    // Software-rendered WebKit may deliver fewer frames per wall-clock second.
+    // Measure the held action in simulation time, from its actual activation.
+    await page.waitForFunction(target => Number(document.querySelector('.race-workspace')?.dataset.time) >= target,
+      controlStart.time + milliseconds / 1000, { timeout: 15000 });
+    return { ...await snapshot(page), controlStart };
   } finally { await page.mouse.up(); }
 }
 async function preferences(page, renderer, touch = false) {
@@ -253,11 +257,11 @@ async function mobile(browser, name, renderer, profile) {
   const page = await context.newPage(), errors = watch(page);
   try {
     await open(page, renderer); await noOverflow(page); await begin(page, true);
-    await page.waitForTimeout(350);
+    await page.waitForFunction(() => Number(document.querySelector('.race-workspace')?.dataset.speed) >= 4);
     await simultaneousInput(page, context, name);
     await pointerHold(page, 'coast', 300, 'coast'); await mode(page, 'pedal');
-    const beforeBrake = await snapshot(page);
     const braking = await pointerHold(page, 'brake', 350, 'brake');
+    const beforeBrake = braking.controlStart;
     assert.ok(braking.speed < beforeBrake.speed, `touch layout brake remains functional: ${JSON.stringify({ beforeBrake, braking })}`);
     await mode(page, 'pedal');
     await page.locator('[data-race-motion]').tap();
