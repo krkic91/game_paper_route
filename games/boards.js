@@ -431,106 +431,322 @@
     return S.handle(scope, restart);
   };
 
+  const QUAN_SETTINGS_KEY = 'tram-choi.quan.settings.v1';
+  const QUAN_LEVELS = [
+    ['easy', 'Dễ'],
+    ['normal', 'Thường'],
+    ['hard', 'Khó'],
+  ];
+  // Short labels for the in-game summary line, long ones for the help panel and result card.
+  function quanRuleTexts(rules) {
+    return [
+      rules.youngQuan
+        ? { short: `Quan non (< ${rules.youngMin} dân)`, long: `quan non: ô quan có ít hơn ${rules.youngMin} dân chưa được ăn` }
+        : { short: 'Không quan non', long: 'không áp dụng quan non' },
+      {
+        negative: { short: 'Thiếu điểm: cho điểm âm', long: 'hàng trống mà thiếu điểm thì cho điểm âm' },
+        borrow: { short: 'Thiếu điểm: vay đối thủ', long: 'hàng trống mà thiếu điểm thì vay 5 điểm của đối thủ, cuối ván trả lại' },
+        end: { short: 'Thiếu điểm: kết thúc ván', long: 'hàng trống mà không đủ 5 điểm thì kết thúc ván ngay' },
+      }[rules.debt],
+      rules.emptyQuan === 'block'
+        ? { short: 'Ô quan trống: chặn lượt', long: 'ô quan đã bị ăn và còn trống vẫn chặn lượt' }
+        : { short: 'Ô quan trống: như ô trống', long: 'ô quan đã bị ăn và còn trống được tính như ô trống' },
+    ];
+  }
+
   Games.quan = function (host, options) {
     const scope = S.createScope();
     let visual = null;
+    const settings = { rules: L.quanRules(), difficulty: 'normal' };
+    try {
+      const saved = JSON.parse(localStorage.getItem(QUAN_SETTINGS_KEY));
+      if (saved?.rules) settings.rules = L.quanRules(saved.rules);
+      if (QUAN_LEVELS.some(([value]) => value === saved?.difficulty)) settings.difficulty = saved.difficulty;
+    } catch {}
+    const saveSettings = () => {
+      try {
+        localStorage.setItem(QUAN_SETTINGS_KEY, JSON.stringify(settings));
+      } catch {}
+    };
+    const reducedMotion = Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
     const ui = S.buildUI(host, {
       className: 'quan-workspace',
       toolbar:
-        S.stat('BẠN / NGƯỜI 1', 'p1', 0, 'điểm') +
-        S.stat('MÁY / NGƯỜI 2', 'p2', 0, 'điểm') +
+        S.stat('BẠN', 'p1', 0, 'điểm') +
+        S.stat('MÁY', 'p2', 0, 'điểm') +
         S.modeSelect([
           ['bot', 'Đấu với máy'],
           ['local', '2 người cùng máy'],
-        ]),
+        ]) +
+        `<label class="game-mode quan-difficulty" data-quan-difficulty-wrap><span>Độ khó</span><select data-quan-difficulty aria-label="Độ khó của máy">${QUAN_LEVELS.map(([value, title]) => `<option value="${value}">${title}</option>`).join('')}</select></label>` +
+        '<button type="button" class="control-button quan-rules-toggle" data-quan-rules-toggle aria-expanded="false" aria-controls="quan-rules-panel">Luật chơi</button>',
       board:
-        '<div class="quan-scene"><div class="quan-player-label top-player">Máy · Hàng trên</div><div class="quan-board" aria-label="Bàn ô ăn quan, 10 ô dân và 2 ô quan"></div><div class="quan-player-label bottom-player">Bạn · Hàng dưới</div></div>',
-      controls: `<button class="control-button sow-button" data-sow="left">${icon('arrow-left')}Rải bên trái</button><span class="quan-selection">Chọn một ô dân</span><button class="control-button sow-button" data-sow="right">Rải bên phải${icon('arrow-right')}</button>`,
+        '<div class="quan-scene"><p class="quan-rules-summary"></p><div class="quan-player-label top-player"></div><div class="quan-board" aria-label="Bàn ô ăn quan, 10 ô dân và 2 ô quan"></div><div class="quan-player-label bottom-player"></div></div>',
+      controls: `<button class="control-button sow-button" data-sow="left" aria-label="Rải về phía trái màn hình">${icon('arrow-left')}Rải</button><span class="quan-selection">Chọn một ô dân</span><button class="control-button sow-button" data-sow="right" aria-label="Rải về phía phải màn hình">Rải${icon('arrow-right')}</button><button class="control-button quan-skip" data-quan-skip hidden>Tua nhanh</button>`,
     });
-    const mode = ui.toolbar.querySelector('select'),
-      board = ui.area.querySelector('.quan-board');
+    const panel = document.createElement('form');
+    panel.className = 'quan-rules-panel';
+    panel.id = 'quan-rules-panel';
+    panel.hidden = true;
+    panel.innerHTML = `<fieldset><legend>Luật tùy chọn</legend>
+      <label class="quan-rule quan-rule-check"><input type="checkbox" name="youngQuan"><span><strong>Quan non</strong><small>Ô quan còn quan nhưng có ít hơn 5 dân thì chưa được ăn; lượt rải dừng lại ở đó.</small></span></label>
+      <label class="quan-rule"><span><strong>Hàng trống mà không đủ 5 điểm</strong><small>Khi đủ 5 điểm, người chơi luôn tự trả 5 điểm để rải lại.</small></span><select name="debt"><option value="negative">Cho điểm âm</option><option value="borrow">Vay 5 điểm của đối thủ, cuối ván trả</option><option value="end">Kết thúc ván ngay</option></select></label>
+      <label class="quan-rule"><span><strong>Ô quan đã bị ăn và còn trống</strong><small>Ảnh hưởng tới việc ăn quân nằm sau ô quan.</small></span><select name="emptyQuan"><option value="empty">Tính như ô trống, ăn tiếp được</option><option value="block">Vẫn chặn, rải tới là mất lượt</option></select></label>
+      <p class="quan-rules-note">Luật được chốt cho cả ván. Đổi luật giữa ván sẽ bắt đầu ván mới.</p>
+      <div class="quan-rules-actions"><button type="button" class="button button-secondary" data-quan-rules-close>Đóng</button><button type="submit" class="button button-primary">Áp dụng</button></div></fieldset>`;
+    ui.toolbar.after(panel);
+    const mode = ui.toolbar.querySelector('.game-mode select'),
+      difficulty = ui.toolbar.querySelector('[data-quan-difficulty]'),
+      rulesToggle = ui.toolbar.querySelector('[data-quan-rules-toggle]'),
+      board = ui.area.querySelector('.quan-board'),
+      summary = ui.area.querySelector('.quan-rules-summary'),
+      skipButton = ui.controls.querySelector('[data-quan-skip]');
+    difficulty.value = settings.difficulty;
     let state,
       selected = -1,
-      busy = false;
+      busy = false,
+      view = null, // snapshot shown while a move is replayed
+      anim = null,
+      lastMove = null,
+      animToken = 0,
+      mover = 0, // player whose move is being replayed
+      finishAnimation = null;
+    const isRoyalPit = (i) => i === 0 || i === 6;
+    const placeInCell = (el, i) => {
+      if (isRoyalPit(i)) {
+        el.style.gridColumn = i === 0 ? 1 : 7;
+        el.style.gridRow = '1 / 3';
+      } else {
+        el.style.gridColumn = i < 6 ? i + 1 : 13 - i;
+        el.style.gridRow = i < 6 ? 1 : 2;
+      }
+    };
     const pits = Array.from({ length: 12 }, (_, index) => {
       const pit = document.createElement('button');
       pit.dataset.pit = index;
-      pit.className = `quan-pit ${index === 0 || index === 6 ? 'royal-pit' : 'folk-pit'}`;
-      if (index === 0 || index === 6) {
-        pit.style.gridColumn = index === 0 ? 1 : 7;
-        pit.style.gridRow = '1 / 3';
-      } else {
-        pit.style.gridColumn = index < 6 ? index + 1 : 13 - index;
-        pit.style.gridRow = index < 6 ? 1 : 2;
-      }
+      pit.className = `quan-pit ${isRoyalPit(index) ? 'royal-pit' : 'folk-pit'}`;
+      placeInCell(pit, index);
       board.append(pit);
       return pit;
     });
-    const playerName = (player) =>
-      mode.value === 'bot' ? (player === 0 ? 'Bạn' : 'Máy') : `Người ${player + 1}`;
+    // Board overlays share grid cells with the pits; pits stay first so :nth-child styles still match.
+    const arrows = document.createElement('div');
+    arrows.className = 'quan-arrows';
+    arrows.innerHTML = `<button type="button" class="quan-arrow" data-arrow="left" aria-label="Rải về phía trái màn hình">${icon('arrow-left', 16)}</button><button type="button" class="quan-arrow" data-arrow="right" aria-label="Rải về phía phải màn hình">${icon('arrow-right', 16)}</button>`;
+    const handBadge = document.createElement('span');
+    handBadge.className = 'quan-hand';
+    handBadge.setAttribute('aria-hidden', 'true');
+    const skipLayer = document.createElement('button');
+    skipLayer.type = 'button';
+    skipLayer.className = 'quan-skip-layer';
+    skipLayer.dataset.quanSkip = '';
+    skipLayer.setAttribute('aria-label', 'Bỏ qua hiệu ứng rải');
+    board.append(arrows, handBadge, skipLayer);
+
+    const isBot = () => mode.value === 'bot';
+    const playerName = (player) => (isBot() ? (player === 0 ? 'Bạn' : 'Máy') : `Người ${player + 1}`);
+    const playerRef = (player) => (isBot() && player === 0 ? 'bạn' : playerName(player));
+    const canAct = () => !state.ended && !busy && !(isBot() && state.turn === 1);
+    // Bottom row is numbered right to left in the model, so screen directions are mirrored there.
+    const logicDirection = (pit, screen) => (pit < 6 ? 1 : -1) * (screen === 'right' ? 1 : -1);
+    const screenDirection = (pit, direction) => (logicDirection(pit, 'right') === direction ? 'right' : 'left');
+    const screenOrder = (player) => (player === 0 ? [11, 10, 9, 8, 7] : [1, 2, 3, 4, 5]);
+
+    function updateRulesInfo() {
+      const texts = quanRuleTexts(state.rules);
+      summary.textContent = `Luật ván này: ${texts.map((t) => t.short).join(' · ')}`;
+      options.setHelpNote?.(
+        `Luật đang áp dụng: ${texts.map((t) => t.long).join('; ')}. Bấm “Luật chơi” để đổi (bắt đầu ván mới). Máy có 3 mức Dễ / Thường / Khó, hoặc chọn 2 người để chơi chung thiết bị.`,
+      );
+    }
+    function fillRulesForm(rules) {
+      panel.elements.youngQuan.checked = rules.youngQuan;
+      panel.elements.debt.value = rules.debt;
+      panel.elements.emptyQuan.value = rules.emptyQuan;
+    }
+    function setPanel(open) {
+      panel.hidden = !open;
+      rulesToggle.setAttribute('aria-expanded', String(open));
+      if (open) {
+        fillRulesForm(settings.rules);
+        panel.elements.youngQuan.focus({ preventScroll: true });
+      }
+    }
     function render() {
+      const shown = view || state;
+      const animating = Boolean(view);
+      const active = canAct();
+      const showLast = lastMove && !animating;
       pits.forEach((pit, i) => {
-        const royal = (i === 0 && state.royals[0]) || (i === 6 && state.royals[1]);
-        const count = state.pits[i];
+        const royal = (i === 0 && shown.royals[0]) || (i === 6 && shown.royals[1]);
+        const count = shown.pits[i];
         let stones = '';
         for (let n = 0; n < Math.min(count, 12); n++) {
           const angle = n * 2.4,
             radius = 10 + Math.sqrt(n) * 6;
           stones += `<i class="quan-stone" style="left:${50 + Math.cos(angle) * radius}%;top:${50 + Math.sin(angle) * radius}%;transform:rotate(${n * 47}deg)"></i>`;
         }
-        pit.innerHTML = `<span class="pit-stones" aria-hidden="true">${stones}${royal ? '<i class="royal-stone"></i>' : ''}</span><strong class="pit-count">${count}${royal ? '<span> + Q</span>' : ''}</strong>`;
+        const countText = royal ? `<span class="quan-tag">Quan</span>+ ${count}` : count;
+        const lastDirection =
+          showLast && lastMove.pit === i
+            ? `<span class="quan-last-dir ${lastMove.screen}" aria-hidden="true">${lastMove.screen === 'left' ? '◀' : '▶'}</span>`
+            : '';
+        pit.innerHTML = `<span class="pit-stones" aria-hidden="true">${stones}${royal ? '<i class="royal-stone"></i>' : ''}</span>${lastDirection}<strong class="pit-count">${countText}</strong>`;
         pit.classList.toggle('selected', selected === i);
-        pit.classList.toggle('own-pit', !state.ended && L.quanSide(state.turn).includes(i));
-        pit.disabled =
-          state.ended ||
-          busy ||
-          (mode.value === 'bot' && state.turn === 1) ||
-          !L.quanSide(state.turn).includes(i) ||
-          !count;
+        pit.classList.toggle('own-pit', !animating && !state.ended && L.quanSide(state.turn).includes(i));
+        pit.classList.toggle('sowing', Boolean(anim) && anim.pit === i);
+        pit.classList.toggle('capture-flash', Boolean(anim) && anim.type === 'capture' && anim.pit === i);
+        pit.classList.toggle('young-flash', Boolean(anim) && anim.type === 'young' && anim.pit === i);
+        pit.classList.toggle('last-origin', Boolean(showLast) && lastMove.pit === i);
+        pit.classList.toggle('last-captured', Boolean(showLast) && lastMove.captured.includes(i));
+        pit.disabled = !active || !L.quanSide(state.turn).includes(i) || !count;
         pit.setAttribute(
           'aria-label',
-          `${i === 0 || i === 6 ? 'Ô quan' : `Ô dân ${i < 6 ? i : 12 - i}, hàng ${i < 6 ? 'trên' : 'dưới'}`}: ${count} dân${royal ? ', 1 quan (10 điểm)' : ''}${selected === i ? ', đang chọn' : ''}`,
+          `${isRoyalPit(i) ? 'Ô quan' : `Ô dân ${i < 6 ? i : 12 - i}, hàng ${i < 6 ? 'trên' : 'dưới'}`}: ${count} dân${royal ? ', còn quan (10 điểm)' : ''}${selected === i ? ', đang chọn' : ''}${showLast && lastMove.pit === i ? ', ô vừa rải' : ''}${showLast && lastMove.captured.includes(i) ? ', vừa bị ăn' : ''}`,
         );
       });
-      ui.setStat('p1', state.scores[0]);
-      ui.setStat('p2', state.scores[1]);
+      const showArrows = selected >= 0 && active;
+      arrows.hidden = !showArrows;
+      if (showArrows) placeInCell(arrows, selected);
+      const handCount = anim && ['pick', 'relay', 'drop'].includes(anim.type) ? anim.hand : 0;
+      handBadge.hidden = !handCount;
+      if (handCount) {
+        placeInCell(handBadge, anim.pit);
+        handBadge.textContent = `✋ ${handCount}`;
+      }
+      skipLayer.hidden = !animating;
+      skipButton.hidden = !animating;
+      for (const player of [0, 1]) {
+        const debt = shown.debts?.[player] || 0;
+        ui.setStat(`p${player + 1}`, debt ? `${shown.scores[player]} (nợ ${debt})` : shown.scores[player]);
+        const label = ui.toolbar.querySelector(`[data-stat="p${player + 1}"]`).previousElementSibling;
+        const name = playerName(player).toUpperCase();
+        if (label.textContent !== name) label.textContent = name;
+      }
+      ui.toolbar.querySelector('[data-quan-difficulty-wrap]').hidden = !isBot();
       ui.controls.querySelectorAll('[data-sow]').forEach((button) => {
-        button.disabled = selected < 0 || busy || state.ended;
+        button.disabled = !showArrows;
       });
-      ui.controls.querySelector('.quan-selection').textContent =
-        selected >= 0 ? `Đã chọn ${state.pits[selected]} dân` : 'Chọn một ô dân';
-      ui.area.querySelector('.top-player').textContent =
-        `${playerName(1)} · Hàng trên${state.turn === 1 && !state.ended ? ' · Đến lượt' : ''}`;
-      ui.area.querySelector('.bottom-player').textContent =
-        `${playerName(0)} · Hàng dưới${state.turn === 0 && !state.ended ? ' · Đến lượt' : ''}`;
-      visual?.sync(state, { selected });
+      ui.controls.querySelector('.quan-selection').textContent = animating
+        ? 'Đang rải…'
+        : selected >= 0
+          ? `Đã chọn ${state.pits[selected]} dân`
+          : 'Chọn một ô dân';
+      const turnPlayer = animating ? mover : state.turn;
+      const turnMark = (player) =>
+        turnPlayer === player && (animating || !state.ended) ? (animating ? ' · Đang rải' : ' · Đến lượt') : '';
+      ui.area.querySelector('.top-player').textContent = `${playerName(1)} · Hàng trên${turnMark(1)}`;
+      ui.area.querySelector('.bottom-player').textContent = `${playerName(0)} · Hàng dưới${turnMark(0)}`;
+      visual?.sync(shown, {
+        selected,
+        active: anim ? anim.pit : -1,
+        flash: anim && anim.type === 'capture' ? anim.pit : -1,
+        captured: showLast ? lastMove.captured : [],
+        origin: showLast ? lastMove.pit : -1,
+        names: [playerName(0), playerName(1)],
+      });
     }
-    function play(pit, direction) {
-      const move = L.moveQuan(state, pit, direction);
-      if (!move) return;
-      selected = -1;
-      const detail = `${playerName(move.player)} ${move.captured ? `ăn được ${move.captured} điểm` : 'đã rải xong'}${move.relays ? `, rải tiếp ${move.relays} ô` : ''}.${move.refilled ? ' Hàng trống được rải lại 5 dân (trừ 5 điểm).' : ''}`;
-      ui.message(detail);
+    function clearFloats() {
+      board.querySelectorAll('.quan-gain').forEach((el) => el.remove());
+    }
+    function floatText(pit, text, className = '') {
+      const el = document.createElement('span');
+      el.className = `quan-gain ${className}`;
+      el.setAttribute('aria-hidden', 'true');
+      el.textContent = text;
+      placeInCell(el, pit);
+      board.append(el);
+      el.addEventListener('animationend', () => el.remove(), { once: true });
+      scope.after(1.2, () => el.remove());
+    }
+    // Replays the recorded steps one by one; any skip jumps straight to the real final state.
+    function animate(steps, done) {
+      const token = ++animToken;
+      const factor = reducedMotion ? 0.35 : 1;
+      const drops = steps.filter((step) => step.type === 'drop').length;
+      const durations = {
+        pick: 0.32,
+        relay: 0.34,
+        drop: Math.max(0.06, Math.min(0.17, 4.5 / Math.max(1, drops))),
+        capture: 0.55,
+        young: 0.6,
+        refill: 0.65,
+        finish: 0.2,
+      };
+      let index = 0;
+      finishAnimation = () => {
+        if (token !== animToken) return;
+        animToken++;
+        finishAnimation = null;
+        view = null;
+        anim = null;
+        done();
+      };
+      const next = () => {
+        if (token !== animToken) return;
+        if (index >= steps.length) {
+          finishAnimation();
+          return;
+        }
+        const step = steps[index++];
+        view = step;
+        anim = { type: step.type, pit: step.pit ?? -1, hand: step.hand ?? 0 };
+        if (step.type === 'capture') floatText(step.pit, `+${step.value}`);
+        if (step.type === 'young') floatText(step.pit, 'Quan non', 'is-warning');
+        render();
+        scope.after((durations[step.type] || 0.2) * factor, next);
+      };
+      next();
+    }
+    function describe(move) {
+      const name = playerName(move.player);
+      let text = `${name} ${move.captured ? `ăn được ${move.captured} điểm` : 'đã rải xong'}${move.relays ? `, rải tiếp ${move.relays} ô` : ''}.`;
+      if (move.blocked >= 0) text += ` Ô quan còn non (dưới ${state.rules.youngMin} dân) nên chưa ăn được.`;
+      if (move.refill) {
+        const who = move.refill.player;
+        text +=
+          move.refill.source === 'borrow'
+            ? ` Hàng của ${playerRef(who)} trống → ${playerRef(who)} vay 5 điểm của ${playerRef(move.refill.lender)} để rải lại (trả lại cuối ván).`
+            : ` Hàng của ${playerRef(who)} trống → ${playerRef(who)} trả 5 điểm để rải lại.`;
+      }
+      if (state.ended && state.endReason === 'debt') {
+        const who = move.steps?.at(-1)?.player ?? state.turn;
+        text += ` Hàng của ${playerRef(who)} trống mà không đủ 5 điểm → ván kết thúc.`;
+      }
+      return text;
+    }
+    function showResult() {
+      const draw = state.winner === null;
+      const reason =
+        state.endReason === 'debt' ? 'Một bên không đủ điểm để rải lại nên ván kết thúc.' : 'Hết quan, đã thu dân còn lại.';
+      S.result(ui, scope, {
+        title: draw ? 'Một ván hòa!' : `${playerName(state.winner)} thắng!`,
+        detail: `${reason} ${playerName(0)}: ${state.scores[0]} điểm · ${playerName(1)}: ${state.scores[1]} điểm. Luật: ${quanRuleTexts(state.rules)
+          .map((t) => t.short.toLowerCase())
+          .join(' · ')}.`,
+        score: isBot() ? state.scores[0] : Math.max(...state.scores),
+        win: !draw && (!isBot() || state.winner === 0),
+        onAgain: restart,
+        onScore: options.onScore,
+      });
+    }
+    function afterMove(move) {
+      lastMove = {
+        pit: move.pit,
+        screen: screenDirection(move.pit, move.direction),
+        captured: move.capturedPits,
+      };
+      const detail = describe(move);
       if (state.ended) {
         busy = false;
         render();
-        const won = state.winner === null || mode.value === 'local' || state.winner === 0;
-        scope.after(0.7, () =>
-          S.result(ui, scope, {
-            title: state.winner === null ? 'Một ván hòa!' : `${playerName(state.winner)} thắng!`,
-            detail: `Đã thu dân còn lại. ${playerName(0)}: ${state.scores[0]} điểm · ${playerName(1)}: ${state.scores[1]} điểm.`,
-            score: mode.value === 'bot' ? state.scores[0] : Math.max(...state.scores),
-            win: won,
-            onAgain: restart,
-            onScore: options.onScore,
-          }),
-        );
-      } else if (mode.value === 'bot' && state.turn === 1) {
-        busy = true;
+        ui.message(detail);
+        scope.after(0.7, showResult);
+      } else if (isBot() && state.turn === 1) {
         render();
         ui.message(`${detail} Máy đang tính nước…`);
-        scope.after(0.75, () => {
-          const choice = L.chooseQuanMove(state);
+        scope.after(0.6, () => {
+          const choice = L.chooseQuanMove(state, settings.difficulty);
           busy = false;
           if (choice) play(choice.pit, choice.direction);
         });
@@ -540,27 +756,140 @@
         ui.message(`${detail} Lượt ${playerName(state.turn)}.`);
       }
     }
-    scope.on(board, 'click', (event) => {
-      const pit = event.target.closest('[data-pit]');
-      if (!pit || pit.disabled || busy) return;
-      selected = Number(pit.dataset.pit);
+    function play(pit, direction) {
+      if (busy || state.ended) return;
+      const move = L.moveQuan(state, pit, direction, { trace: true });
+      if (!move) return;
+      selected = -1;
+      busy = true;
+      mover = move.player;
+      lastMove = null;
+      clearFloats();
+      ui.message(
+        `${playerName(move.player)} bốc ${move.steps[0].hand} dân, rải về phía ${screenDirection(pit, direction) === 'left' ? 'trái' : 'phải'}…`,
+      );
+      animate(move.steps, () => afterMove(move));
+    }
+    function select(pit) {
+      if (!canAct() || !L.quanSide(state.turn).includes(pit) || !state.pits[pit]) return;
+      selected = selected === pit ? -1 : pit;
       render();
-      ui.message(`Đã chọn ${state.pits[selected]} dân. Chọn rải bên trái hoặc bên phải.`);
+      ui.message(
+        selected < 0
+          ? 'Đã bỏ chọn.'
+          : `Đã chọn ${state.pits[selected]} dân. Bấm mũi tên ◀ ▶ trên ô (hoặc phím ← →) để chọn hướng rải.`,
+      );
+    }
+    function sow(screen) {
+      if (selected < 0 || !canAct()) return;
+      play(selected, logicDirection(selected, screen));
+    }
+    scope.on(board, 'click', (event) => {
+      if (event.target.closest('[data-quan-skip]')) {
+        finishAnimation?.();
+        return;
+      }
+      const arrow = event.target.closest('[data-arrow]');
+      if (arrow) {
+        sow(arrow.dataset.arrow);
+        return;
+      }
+      const pit = event.target.closest('[data-pit]');
+      if (!pit || pit.disabled) return;
+      select(Number(pit.dataset.pit));
     });
     scope.on(ui.controls, 'click', (event) => {
+      if (event.target.closest('[data-quan-skip]')) {
+        finishAnimation?.();
+        return;
+      }
       const button = event.target.closest('[data-sow]');
-      if (!button || button.disabled || busy || selected < 0) return;
-      const left = button.dataset.sow === 'left';
-      play(selected, selected > 6 ? (left ? 1 : -1) : left ? -1 : 1);
+      if (button && !button.disabled) sow(button.dataset.sow);
+    });
+    scope.on(window, 'keydown', (event) => {
+      if (!(host.contains(event.target) || event.target === document.body)) return;
+      const key = S.gameKey(event);
+      if (!key) return;
+      if (key === 'escape') {
+        if (!panel.hidden) {
+          event.preventDefault();
+          setPanel(false);
+          rulesToggle.focus({ preventScroll: true });
+        } else if (selected >= 0) {
+          event.preventDefault();
+          selected = -1;
+          render();
+          ui.message('Đã bỏ chọn.');
+        }
+        return;
+      }
+      if (/^[1-5]$/.test(key)) {
+        if (!canAct()) return;
+        event.preventDefault();
+        const pit = screenOrder(state.turn)[Number(key) - 1];
+        if (state.pits[pit]) {
+          if (selected !== pit) select(pit);
+        } else ui.message('Ô này đang trống, hãy chọn ô khác.');
+        return;
+      }
+      if ((key === 'arrowleft' || key === 'arrowright') && selected >= 0 && canAct()) {
+        event.preventDefault();
+        sow(key === 'arrowleft' ? 'left' : 'right');
+      }
+    });
+    scope.on(rulesToggle, 'click', () => setPanel(panel.hidden));
+    scope.on(panel, 'click', (event) => {
+      if (event.target.closest('[data-quan-rules-close]')) {
+        setPanel(false);
+        rulesToggle.focus({ preventScroll: true });
+      }
+    });
+    scope.on(panel, 'submit', (event) => {
+      event.preventDefault();
+      const rules = L.quanRules({
+        ...settings.rules,
+        youngQuan: panel.elements.youngQuan.checked,
+        debt: panel.elements.debt.value,
+        emptyQuan: panel.elements.emptyQuan.value,
+      });
+      if (JSON.stringify(rules) === JSON.stringify(state.rules)) {
+        setPanel(false);
+        ui.message('Luật không thay đổi.');
+        return;
+      }
+      const inProgress = state.moves > 0 && !state.ended;
+      if (inProgress && !window.confirm('Bắt đầu ván mới với luật này? Ván đang chơi sẽ bị thay thế.')) {
+        fillRulesForm(state.rules);
+        return;
+      }
+      settings.rules = rules;
+      saveSettings();
+      setPanel(false);
+      restart();
+      ui.message(`Đã áp dụng luật mới cho ván này. ${ui.status.textContent}`);
+    });
+    scope.on(difficulty, 'change', () => {
+      settings.difficulty = difficulty.value;
+      saveSettings();
+      ui.message(`Độ khó của máy: ${difficulty.selectedOptions[0].textContent}.`);
     });
     function restart() {
+      animToken++;
+      finishAnimation = null;
+      view = null;
+      anim = null;
       scope.clearTimers();
       S.clearOverlays(ui);
-      state = L.createQuan();
+      clearFloats();
+      state = L.createQuan(settings.rules);
       selected = -1;
       busy = false;
+      lastMove = null;
+      updateRulesInfo();
       render();
-      ui.message('Chọn một ô dân ở hàng dưới, rồi chọn hướng rải. Quan = 10 điểm, dân = 1 điểm.');
+      ui.message(
+        'Chọn một ô dân ở hàng dưới, rồi bấm mũi tên ◀ ▶ để rải. Phím tắt: 1–5 chọn ô, ← → rải, Esc bỏ chọn.',
+      );
     }
     scope.on(mode, 'change', restart);
     if (options.renderer === '3d') visual = window.Arcade3D.createView('quan', ui, scope);

@@ -1,10 +1,11 @@
 // version v1.0
 /* Shared, DOM-free game rules. Also exported to Node for regression tests. */
 (function (root, factory) {
-  const api = factory();
+  const race = typeof module === 'object' && module.exports ? require('./race-logic.js') : root.RaceLogic;
+  const api = factory(race);
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.ArcadeLogic = api;
-})(typeof globalThis === 'undefined' ? this : globalThis, function () {
+})(typeof globalThis === 'undefined' ? this : globalThis, function (race) {
   'use strict';
   const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
   const mod = (n, m) => ((n % m) + m) % m;
@@ -276,35 +277,84 @@
   }
 
   // Ô ăn quan: two royal stones worth 10 each, 50 ordinary stones.
-  // Indices 1..5: upper row, 7..11: lower row (right to left).
+  // Indices 1..5: upper row, 7..11: lower row (right to left). 0 and 6 are royal pits.
   const quanSide = (player) => (player === 0 ? [7, 8, 9, 10, 11] : [1, 2, 3, 4, 5]);
-  function createQuan() {
+  const isQuanRoyalPit = (pit) => pit === 0 || pit === 6;
+  const QUAN_DEFAULT_RULES = Object.freeze({
+    youngQuan: false,
+    youngMin: 5,
+    debt: 'negative',
+    emptyQuan: 'empty',
+  });
+  // Optional house rules are fixed for a whole match and stored on the state.
+  //  youngQuan: a royal pit holding fewer than youngMin ordinary stones cannot be captured.
+  //  debt: negative = pay 5 even below zero; borrow = take 5 from the opponent, repaid at the end;
+  //        end = without 5 points the match ends at once.
+  //  emptyQuan: empty = a captured, empty royal pit acts like an empty pit; block = it always stops the turn.
+  function quanRules(rules = {}) {
+    const min = Number(rules?.youngMin);
+    return {
+      youngQuan: Boolean(rules?.youngQuan),
+      youngMin: Number.isInteger(min) && min >= 1 && min <= 20 ? min : 5,
+      debt: ['negative', 'borrow', 'end'].includes(rules?.debt) ? rules.debt : 'negative',
+      emptyQuan: rules?.emptyQuan === 'block' ? 'block' : 'empty',
+    };
+  }
+  function createQuan(rules) {
     return {
       pits: [0, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5],
       royals: [true, true],
       scores: [0, 0],
+      debts: [0, 0],
+      rules: quanRules(rules),
       turn: 0,
       ended: false,
+      endReason: null,
       winner: null,
       moves: 0,
     };
   }
-  function quanValue(state, pit) {
-    return (
-      state.pits[pit] + ((pit === 0 && state.royals[0]) || (pit === 6 && state.royals[1]) ? 10 : 0)
-    );
+  function cloneQuan(state) {
+    return {
+      ...state,
+      pits: [...state.pits],
+      royals: [...state.royals],
+      scores: [...state.scores],
+      debts: [...(state.debts || [0, 0])],
+    };
   }
-  function finishQuan(state) {
+  function quanHasRoyal(state, pit) {
+    return (pit === 0 && state.royals[0]) || (pit === 6 && state.royals[1]);
+  }
+  function quanValue(state, pit) {
+    return state.pits[pit] + (quanHasRoyal(state, pit) ? 10 : 0);
+  }
+  function legalQuanMoves(state) {
+    if (state.ended) return [];
+    const moves = [];
+    for (const pit of quanSide(state.turn))
+      if (state.pits[pit]) for (const direction of [-1, 1]) moves.push({ pit, direction });
+    return moves;
+  }
+  function finishQuan(state, reason = 'quan') {
     for (let player = 0; player < 2; player++)
       for (const pit of quanSide(player)) {
         state.scores[player] += state.pits[pit];
         state.pits[pit] = 0;
       }
+    // Borrowed stones are returned to the lender before the final comparison.
+    const debts = state.debts || [0, 0];
+    for (let player = 0; player < 2; player++) {
+      state.scores[player] -= debts[player];
+      state.scores[1 - player] += debts[player];
+      debts[player] = 0;
+    }
     state.ended = true;
+    state.endReason = reason;
     state.winner =
       state.scores[0] === state.scores[1] ? null : state.scores[0] > state.scores[1] ? 0 : 1;
   }
-  function moveQuan(state, pit, direction) {
+  function moveQuan(state, pit, direction, options = {}) {
     if (
       state.ended ||
       !quanSide(state.turn).includes(pit) ||
@@ -312,94 +362,172 @@
       ![-1, 1].includes(direction)
     )
       return null;
+    const rules = state.rules || quanRules();
+    if (!state.debts) state.debts = [0, 0];
+    const steps = options.trace ? [] : null;
+    const snap = (type, extra = {}) => {
+      if (steps)
+        steps.push({
+          type,
+          ...extra,
+          pits: [...state.pits],
+          royals: [...state.royals],
+          scores: [...state.scores],
+          debts: [...state.debts],
+        });
+    };
     const player = state.turn;
     let hand = state.pits[pit],
       cursor = pit,
       captured = 0,
-      relays = 0;
+      relays = 0,
+      blocked = -1;
+    const capturedPits = [];
     state.pits[pit] = 0;
+    snap('pick', { pit, hand });
     while (true) {
       while (hand > 0) {
         cursor = mod(cursor + direction, 12);
         state.pits[cursor]++;
         hand--;
+        snap('drop', { pit: cursor, hand });
       }
       const next = mod(cursor + direction, 12);
-      if (next !== 0 && next !== 6 && state.pits[next] > 0) {
+      if (!isQuanRoyalPit(next) && state.pits[next] > 0) {
         hand = state.pits[next];
         state.pits[next] = 0;
         cursor = next;
         relays++;
+        snap('relay', { pit: next, hand });
         continue;
       }
       // A chain of captures must alternate an empty pit and an occupied pit.
       let empty = next;
-      while (quanValue(state, empty) === 0) {
+      while (true) {
+        if (rules.emptyQuan === 'block' && isQuanRoyalPit(empty)) break;
+        if (quanValue(state, empty) !== 0) break;
         const target = mod(empty + direction, 12),
           value = quanValue(state, target);
         if (!value) break;
+        if (rules.youngQuan && quanHasRoyal(state, target) && state.pits[target] < rules.youngMin) {
+          blocked = target;
+          snap('young', { pit: target });
+          break;
+        }
+        const royal = quanHasRoyal(state, target);
         captured += value;
         state.scores[player] += value;
         state.pits[target] = 0;
         if (target === 0) state.royals[0] = false;
         if (target === 6) state.royals[1] = false;
+        capturedPits.push(target);
+        snap('capture', { pit: target, value, royal, player });
         empty = mod(target + direction, 12);
       }
       break;
     }
     state.moves++;
-    let refilled = false;
-    if (!state.royals[0] && !state.royals[1] && !state.pits[0] && !state.pits[6]) finishQuan(state);
-    else {
+    let refill = null;
+    if (!state.royals[0] && !state.royals[1] && !state.pits[0] && !state.pits[6]) {
+      finishQuan(state, 'quan');
+      snap('finish', { reason: 'quan' });
+    } else {
       state.turn = 1 - state.turn;
-      if (quanSide(state.turn).every((i) => !state.pits[i])) {
-        // Borrowing is represented by a negative score; it is repaid by future captures.
-        state.scores[state.turn] -= 5;
-        for (const i of quanSide(state.turn)) state.pits[i] = 1;
-        refilled = true;
+      const next = state.turn;
+      if (quanSide(next).every((i) => !state.pits[i])) {
+        if (rules.debt === 'negative' || state.scores[next] >= 5) {
+          // Negative scores represent debt that future captures repay.
+          state.scores[next] -= 5;
+          refill = { player: next, source: 'self' };
+        } else if (rules.debt === 'borrow' && state.scores[1 - next] >= 5) {
+          state.scores[1 - next] -= 5;
+          state.debts[next] += 5;
+          refill = { player: next, source: 'borrow', lender: 1 - next };
+        }
+        if (refill) {
+          for (const i of quanSide(next)) state.pits[i] = 1;
+          snap('refill', refill);
+        } else {
+          finishQuan(state, 'debt');
+          snap('finish', { reason: 'debt', player: next });
+        }
       }
     }
-    return { captured, relays, refilled, player };
+    return {
+      captured,
+      capturedPits,
+      relays,
+      refilled: Boolean(refill),
+      refill,
+      blocked,
+      player,
+      pit,
+      direction,
+      ended: state.ended,
+      steps: steps || undefined,
+    };
   }
-  function chooseQuanMove(state) {
-    if (state.ended) return null;
-    let best = null,
-      bestValue = -Infinity;
-    const player = state.turn;
-    for (const pit of quanSide(player))
-      for (const direction of [-1, 1]) {
-        if (!state.pits[pit]) continue;
-        const copy = {
-          ...state,
-          pits: [...state.pits],
-          royals: [...state.royals],
-          scores: [...state.scores],
-        };
-        const result = moveQuan(copy, pit, direction);
-        let worstReply = 0;
-        if (!copy.ended) {
-          for (const reply of quanSide(copy.turn))
-            for (const dir of [-1, 1]) {
-              if (!copy.pits[reply]) continue;
-              const next = {
-                ...copy,
-                pits: [...copy.pits],
-                royals: [...copy.royals],
-                scores: [...copy.scores],
-              };
-              const response = moveQuan(next, reply, dir);
-              worstReply = Math.max(worstReply, response.captured);
-            }
-        }
-        const value = copy.ended
-          ? (copy.scores[player] - copy.scores[1 - player]) * 100
-          : result.captured - worstReply * 0.75;
-        if (value > bestValue) {
-          bestValue = value;
-          best = { pit, direction };
-        }
+  // Effective score includes outstanding loans, so the AI does not mistake borrowing for gaining.
+  function quanBalance(state, player) {
+    const debts = state.debts || [0, 0];
+    return state.scores[player] - debts[player] + debts[1 - player];
+  }
+  function evaluateQuan(state, player) {
+    const diff = quanBalance(state, player) - quanBalance(state, 1 - player);
+    if (state.ended) return diff * 50 + Math.sign(diff) * 1000;
+    let own = 0,
+      other = 0;
+    for (const i of quanSide(player)) own += state.pits[i];
+    for (const i of quanSide(1 - player)) other += state.pits[i];
+    return diff + 0.3 * (own - other);
+  }
+  function searchQuan(state, depth, player, alpha, beta) {
+    if (depth === 0 || state.ended) return evaluateQuan(state, player);
+    const moves = legalQuanMoves(state);
+    if (!moves.length) return evaluateQuan(state, player);
+    const maximizing = state.turn === player;
+    const children = moves.map((move) => {
+      const next = cloneQuan(state);
+      moveQuan(next, move.pit, move.direction);
+      return { next, quick: evaluateQuan(next, player) };
+    });
+    // Searching the most promising replies first lets alpha-beta prune more.
+    children.sort((a, b) => (maximizing ? b.quick - a.quick : a.quick - b.quick));
+    let best = maximizing ? -Infinity : Infinity;
+    for (const { next } of children) {
+      const value = searchQuan(next, depth - 1, player, alpha, beta);
+      if (maximizing) {
+        best = Math.max(best, value);
+        alpha = Math.max(alpha, value);
+      } else {
+        best = Math.min(best, value);
+        beta = Math.min(beta, value);
       }
+      if (beta <= alpha) break;
+    }
     return best;
+  }
+  const QUAN_AI_DEPTH = { easy: 1, normal: 2, hard: 5 };
+  function chooseQuanMove(state, level = 'normal', rng = Math.random) {
+    const moves = legalQuanMoves(state);
+    if (!moves.length) return null;
+    const player = state.turn;
+    if (!QUAN_AI_DEPTH[level]) level = 'normal';
+    if (level === 'easy' && rng() < 0.3) return moves[Math.floor(rng() * moves.length)];
+    const depth = QUAN_AI_DEPTH[level];
+    let bestValue = -Infinity,
+      best = [];
+    for (const move of moves) {
+      const next = cloneQuan(state);
+      moveQuan(next, move.pit, move.direction);
+      const value = searchQuan(next, depth - 1, player, -Infinity, Infinity);
+      if (value > bestValue + 1e-9) {
+        bestValue = value;
+        best = [move];
+      } else if (Math.abs(value - bestValue) <= 1e-9) best.push(move);
+    }
+    // Equal moves are chosen at random so the computer does not repeat itself.
+    return best[Math.floor(rng() * best.length)];
   }
 
   function snakeFood(state, rng = Math.random) {
@@ -503,65 +631,10 @@
   }
 
   function createRace(rng = Math.random) {
-    return {
-      distance: 0,
-      length: 1000,
-      time: 0,
-      x: 1.5,
-      speed: 0,
-      energy: 100,
-      hearts: 3,
-      invulnerable: 0,
-      status: 'playing',
-      place: 4,
-      rivals: [0, 1, 2].map((n) => ({
-        x: [0.3, 1.7, 2.8][n],
-        distance: 4 + n * 4,
-        speed: 16.8 + n * 0.9,
-      })),
-      obstacles: Array.from({ length: 19 }, (_, i) => ({
-        x: Math.floor(rng() * 4),
-        z: 80 + i * 47,
-        type: i % 5 === 3 ? 'water' : i % 3 === 0 ? 'puddle' : 'cone',
-        passed: false,
-      })),
-    };
+    return race.createRace(rng);
   }
   function stepRace(state, dt, input = {}) {
-    if (state.status !== 'playing') return state;
-    dt = clamp(dt, 0, 0.05);
-    state.time += dt;
-    state.invulnerable = Math.max(0, state.invulnerable - dt);
-    state.x = clamp(state.x + (input.steer || 0) * dt * 2.5, 0, 3);
-    const sprint = input.sprint && state.energy > 1;
-    state.energy = clamp(state.energy + (sprint ? -23 : 12) * dt, 0, 100);
-    const target = sprint ? 27 : 17;
-    state.speed += (target - state.speed) * Math.min(1, dt * 2);
-    const before = state.distance;
-    state.distance += state.speed * dt;
-    for (const rival of state.rivals)
-      rival.distance += (rival.speed + Math.sin(state.time * 0.65 + rival.x) * 1.2) * dt;
-    for (const obstacle of state.obstacles) {
-      if (obstacle.passed || obstacle.z > state.distance + 2.5 || obstacle.z < before - 2.5)
-        continue;
-      if (Math.abs(state.x - obstacle.x) < 0.4) {
-        if (obstacle.type === 'water') state.energy = Math.min(100, state.energy + 38);
-        else if (!state.invulnerable) {
-          state.hearts--;
-          state.speed = 6;
-          state.invulnerable = 1.5;
-        }
-      }
-      if (state.distance >= obstacle.z || Math.abs(state.x - obstacle.x) < 0.4)
-        obstacle.passed = true;
-    }
-    state.place = 1 + state.rivals.filter((rival) => rival.distance > state.distance).length;
-    if (state.hearts <= 0) state.status = 'lost';
-    else if (state.distance >= state.length) {
-      state.distance = state.length;
-      state.status = 'won';
-    }
-    return state;
+    return race.stepRace(state, dt, input);
   }
 
   const POOL = {
@@ -816,8 +889,12 @@
     LUDO_SAFE,
     LUDO_STARTS,
     createQuan,
+    quanRules,
+    QUAN_DEFAULT_RULES,
     quanSide,
     quanValue,
+    legalQuanMoves,
+    cloneQuan,
     moveQuan,
     chooseQuanMove,
     createSnake,

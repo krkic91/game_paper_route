@@ -1,0 +1,34 @@
+/* version v1.0 */
+.race-workspace .game-board-area { flex: 0 0 auto; min-height: 0; }
+.race-workspace .canvas-wrap { width: min(100%, max(280px, calc((100dvh - 490px) * 1.63636))); }
+.race-workspace.three-workspace .three-viewport { flex: none; height: clamp(250px, calc(100dvh - 490px), 520px); min-height: 250px; }
+.race-workspace .game-toolbar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.race-workspace .game-stat { min-width: 0; }
+.race-workspace .game-controls { display: grid; grid-template-columns: 60px minmax(130px, 270px) 60px; align-items: stretch; gap: 12px; justify-content: center; }
+.race-drive-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+.race-workspace .sprint-button { grid-column: 1 / -1; width: 100%; min-width: 0; }
+.race-workspace .sprint-button > span { flex: 1; width: auto; display: block; }
+.race-workspace .sprint-meter { margin-top: 8px; }
+.race-workspace [data-race-energy] { font-size: 11px; font-weight: 500; opacity: .8; margin-left: 8px; }
+.race-workspace .race-drive-controls .control-button { min-height: 44px; min-width: 0; font-size: 12px; padding: 8px 10px; }
+.race-workspace .race-steering { width: 100%; height: 100%; min-height: 100px; }
+.race-workspace .race-brake { border-color: #b9936b66; color: #ebc09d; }
+.race-workspace [data-hold] { touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.race-workspace [data-hold]:focus-visible, .race-settings button:focus-visible { outline: 2px solid #d1eb9c; outline-offset: 3px; }
+.race-info { width: min(100%, 720px); margin: 0 auto; }
+.race-road-readout { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px 15px; font-size: 11px; color: #aebdaf; font-variant-numeric: tabular-nums; }
+.race-road-readout span { padding: 3px 0; }
+.race-road-readout .is-drafting { color: #d3ed99; font-weight: 700; }
+.race-settings { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 9px; }
+.race-settings .control-button { min-height: 36px; font-size: 11px; padding: 7px 12px; }
+.race-workspace .game-status { max-width: 720px; margin-left: auto; margin-right: auto; }
+@media (max-width: 520px) {
+  .race-workspace .game-toolbar { gap: 4px; }
+  .race-workspace .game-stat { padding: 7px 3px; }
+  .race-workspace .game-stat small { font-size: 8px; letter-spacing: .25px; }
+  .race-workspace .game-stat strong { font-size: 17px; }
+  .race-workspace .game-stat > span { font-size: 9px; }
+  .race-workspace .game-controls { grid-template-columns: 44px minmax(0, 1fr) 44px; gap: 7px; }
+  .race-workspace .race-steering { padding: 8px; }
+  .race-road-readout { gap: 4px 9px; font-size: 10px; }
+}

@@ -137,13 +137,14 @@
     const e=boardScene('quan',ui,scope,{width:17.8,depth:9,height:1.1,label:'Ô ăn quan 3D. Chạm một hốc dân ở phía mình, rồi chọn hướng rải.',yaw:.05,elevation:.9},ui.area.querySelector('.quan-scene'));
     M.table(e,16.3,6.7,'#937653').top.visible=false;
     const shape=new e.T.Shape();shape.moveTo(-7,-3.15);shape.lineTo(7,-3.15);shape.quadraticCurveTo(8.25,-3.15,8.25,-1.7);shape.lineTo(8.25,1.7);shape.quadraticCurveTo(8.25,3.15,7,3.15);shape.lineTo(-7,3.15);shape.quadraticCurveTo(-8.25,3.15,-8.25,1.7);shape.lineTo(-8.25,-1.7);shape.quadraticCurveTo(-8.25,-3.15,-7,-3.15);
-    const stones=[],labels=[],rings=[],quans=[];
+    const stones=[],labels=[],rings=[],marks=[],quans=[];
     for(let pit=0;pit<12;pit++){
       const[x,z]=L.quanCoordinates(pit),royal=pit===0||pit===6;
       const hole=new e.T.Shape();hole.absellipse(x,-z,royal?.95:.83,royal?2.12:.86,0,Math.PI*2,false,0);shape.holes.push(hole);
       const bowl=e.cylinder(x,.042,z,royal?.95:.83,royal?.95:.83,.025,'#7e694b');bowl.scale.z=royal?2.23:1.04;bowl.castShadow=false;
       const rim=e.torus(x,.21,z,royal?.98:.87,.045,'#d5b47e');rim.scale.y=royal?2.14:1.02;
       const ring=e.torus(x,.24,z,royal?1.01:.9,.047,'#e0eb9f');ring.scale.y=royal?2.14:1.02;ring.visible=false;rings[pit]=ring;
+      const mark=e.torus(x,.25,z,royal?1.06:.95,.06,'#f0a35a');mark.scale.y=royal?2.14:1.02;mark.visible=false;mark.castShadow=false;marks[pit]=mark;
       stones[pit]=[];
       for(let n=0;n<28;n++){
         const a=n*2.399,r=.18+Math.sqrt(n)*.095;
@@ -152,21 +153,25 @@
       }
       if(royal){const quan=e.ball(x,.2,z,.29,'#f0e5be',e.root,12);quan.scale.set(.24,.4,.27);quan.rotation.z=.19;quans[pit]=quan;}
       labels[pit]=e.putLabel('5',x,.26,z+(royal?2.5:1.11),{width:1,height:.42,font:140,color:'#f2e4bf'});
-      if(!royal)e.hitPlane(`pit-${pit}`,x,.24,z,1.7,1.78,()=>ui.area.querySelector(`[data-pit="${pit}"]`)?.click(),()=>!ui.area.querySelector(`[data-pit="${pit}"]`)?.disabled);
+      if(!royal)e.hitPlane(`pit-${pit}`,x,.24,z,1.7,1.78,()=>{const button=ui.area.querySelector(`[data-pit="${pit}"]`);if(button&&!button.disabled)button.click();},()=>!ui.area.querySelector(`[data-pit="${pit}"]`)?.disabled);
     }
     const woodGeo=e.trackGeometry(new e.T.ExtrudeGeometry(shape,{depth:.28,bevelEnabled:true,bevelThickness:.06,bevelSize:.03,bevelSegments:2,curveSegments:20,steps:1}));woodGeo.rotateX(-Math.PI/2);woodGeo.translate(0,-.13,0);
     e.mesh(woodGeo,'#b99665');
-    e.putLabel('NGƯỜI 2',0,.01,-3.75,{width:3,height:.5,color:'#dce7ba',font:72});e.putLabel('BẠN / NGƯỜI 1',0,.01,3.75,{width:3.4,height:.5,color:'#dce7ba',font:64});
+    let nameLabels=[],names='';
+    function putNames(list){const key=list.join('|');if(key===names)return;names=key;nameLabels.forEach(m=>m.removeFromParent());nameLabels=[e.putLabel(list[1].toUpperCase(),0,.01,-3.75,{width:3,height:.5,color:'#dce7ba',font:72}),e.putLabel(list[0].toUpperCase(),0,.01,3.75,{width:3,height:.5,color:'#dce7ba',font:72})];}
+    putNames(['Bạn','Máy']);
     let previous=[],previousRoyals=[],bounce=0;
     function sync(state,meta={}){
       for(let pit=0;pit<12;pit++){
         const count=state.pits[pit],royal=pit===0&&state.royals[0]||pit===6&&state.royals[1],changed=previous[pit]!==count||previousRoyals[pit]!==Boolean(royal);
         previousRoyals[pit]=Boolean(royal);
-        if(changed){labels[pit].removeFromParent();const[x,z]=L.quanCoordinates(pit);labels[pit]=e.putLabel(`${count}${royal?' + Q':''}`,x,.26,z+(pit===0||pit===6?2.5:1.11),{width:1.1,height:.42,font:royal?95:190,color:'#473f2a'});}
+        if(changed){labels[pit].removeFromParent();const[x,z]=L.quanCoordinates(pit);labels[pit]=e.putLabel(royal?`Quan + ${count}`:count,x,.26,z+(pit===0||pit===6?2.5:1.11),{width:royal?1.5:1.1,height:.42,font:royal?100:190,color:'#473f2a'});}
         stones[pit].forEach((stone,n)=>{stone.visible=n<Math.min(count,28);if(changed&&stone.visible){stone.userData.fall=e.reduced?0:.1+n*.008;}});
         if(quans[pit])quans[pit].visible=royal;
-        rings[pit].visible=meta.selected===pit;
+        rings[pit].visible=meta.selected===pit||meta.active===pit||meta.origin===pit;
+        marks[pit].visible=meta.flash===pit||(meta.captured||[]).includes(pit);
       }
+      if(meta.names)putNames(meta.names);
       previous=[...state.pits];bounce=.65;e.invalidate();
     }
     scope.loop(dt=>{

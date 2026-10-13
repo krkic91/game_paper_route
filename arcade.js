@@ -34,18 +34,19 @@
       category: 'sport',
       players: '1 người',
       badge: 'NƯỚC RÚT NÀO',
-      description: 'Đường đua xanh, cuộc rượt đuổi đầy nắng.',
+      description: 'Ôm cua, vượt đồi và bứt tốc cùng đoàn đua.',
       keywords: 'bicycle racing đua tốc độ',
       intro:
-        'Cùng 3 đối thủ chinh phục đường đua dài 1 km. Tốc độ là lợi thế, nhưng nước rút đúng lúc mới là bí quyết.',
+        'Cùng 3 đối thủ chinh phục 1 km qua đường cua, dốc và những đoạn đường ướt. Giữ sức bằng cách núp gió, chọn thời điểm để vượt lên.',
       instructions: [
         'Dùng A / D, ← / → hoặc giữ các nút trái, phải để lái.',
-        'Giữ Space, W, ↑, Shift hoặc nút nước rút để tăng tốc. Thả ra để hồi năng lượng.',
-        'Tránh cọc tiêu và vũng nước. Nhặt chai nước để hồi thêm năng lượng.',
-        'Bạn có 3 mạng. Về đích nhanh, thứ hạng cao và ít va chạm sẽ được nhiều điểm hơn.',
+        'Xe tự đạp đều. Giữ Space, W, ↑, Shift hoặc nút Nước rút để tăng tốc; thả ra để hồi năng lượng.',
+        'Giữ S / ↓ hoặc nút Phanh để giảm tốc. Giữ C hoặc nút Thả trôi để nghỉ đạp; xe vẫn trôi theo quán tính.',
+        'Bám sau đối thủ để núp gió và tiết kiệm sức. Lái nhẹ trên đường ướt, đường sỏi và giảm tốc trước chướng ngại.',
+        'Chạm cọc làm hỏng xe; vũng nước giảm độ bám, chạm tay đua gây chao xe. Nhặt chai nước để hồi năng lượng. Xe có 3 điểm chịu va chạm.',
       ],
       variant:
-        'Cuộc đua đơn với 3 đối thủ do máy điều khiển. Đường đua tạo chướng ngại mới mỗi lần chơi.',
+        'Đua 2D hoặc 3D với 3 đối thủ biết né, vượt và giữ sức. Có âm thanh và tùy chọn giảm rung camera.',
     },
     {
       id: 'caro',
@@ -138,13 +139,14 @@
       intro:
         'Trò chơi dân gian thân thuộc trở lại trên màn hình. Quan sát, tính toán và chọn hướng rải thật khéo.',
       instructions: [
-        'Bạn / Người 1 chơi hàng dưới. Chọn một ô dân có quân ở hàng của mình, rồi chọn rải trái hoặc phải.',
+        'Bạn / Người 1 chơi hàng dưới. Chọn một ô dân có quân ở hàng của mình, rồi bấm mũi tên ◀ ▶ hiện trên ô để rải. Phím tắt: 1–5 chọn ô, ← → rải, Esc bỏ chọn.',
         'Rải mỗi ô 1 dân theo hướng đã chọn. Gặp ô dân có quân kế tiếp thì nhấc lên và rải tiếp; không nhấc ô quan.',
         'Gặp một ô trống rồi đến ô có quân: ăn ô có quân. Có thể ăn liên tiếp nếu tiếp tục xen kẽ trống – có quân. Quan = 10 điểm, dân = 1 điểm.',
-        'Hàng của người sắp đi trống: trừ 5 điểm để rải lại, có thể mượn thành điểm âm. Hai ô quan trống hẳn: thu dân hàng mình, ai nhiều điểm hơn thắng.',
+        'Hàng của người sắp đi trống: trả 5 điểm để rải lại mỗi ô 1 dân. Hai ô quan trống hẳn: thu dân hàng mình, ai nhiều điểm hơn thắng.',
+        'Nút “Luật chơi” bật thêm luật tùy chọn: quan non, cách xử lý khi thiếu điểm (điểm âm / vay đối thủ / kết thúc ván) và ô quan trống có chặn lượt hay không.',
       ],
       variant:
-        'Luật cơ bản, không áp dụng điều kiện “quan non”. Máy tự tính nước; hoặc chọn 2 người để chơi chung thiết bị.',
+        'Mặc định dùng luật cơ bản: không quan non, thiếu điểm thì cho điểm âm. Máy có 3 mức Dễ / Thường / Khó; hoặc chọn 2 người để chơi chung thiết bị.',
     },
     {
       id: 'pool',
@@ -603,6 +605,12 @@
     if (!dialog.open) dialog.showModal();
     document.body.classList.add('modal-open');
     const currentRecords = edition === '3d' ? records3d : records;
+    // Games with configurable rules can describe the active rule set in the help panel.
+    const setHelpNote = text => {
+      if (token !== mountGeneration) return;
+      const note = help.querySelector('.help-variant');
+      if (note) note.textContent = text;
+    };
     const onScore = score => {
       if (!Number.isFinite(score) || score < 0 || token !== mountGeneration || activeEdition !== edition) return;
       score = Math.floor(score);
@@ -617,7 +625,7 @@
         await window.Arcade3D.load();
         if (token !== mountGeneration || !dialog.open) return;
         stage.innerHTML = '';
-        const settings = { renderer: '3d', best: currentRecords[game.id] || 0, onScore };
+        const settings = { renderer: '3d', best: currentRecords[game.id] || 0, onScore, setHelpNote };
         instance = game.id === 'delivery' ? window.Arcade3D.mountDelivery(stage, settings) : window.ArcadeGames[game.id](stage, settings);
         $('#pause-game').disabled = false; $('#restart-game').disabled = false;
         (stage.querySelector('[data-start]') || stage.querySelector('.three-canvas'))?.focus({ preventScroll: true });
@@ -636,7 +644,7 @@
       frame.focus({ preventScroll: true });
     } else {
       try {
-        instance = window.ArcadeGames[game.id](stage, { best: currentRecords[game.id] || 0, onScore });
+        instance = window.ArcadeGames[game.id](stage, { best: currentRecords[game.id] || 0, onScore, setHelpNote });
         (stage.querySelector('[data-start]') || stage.querySelector('[tabindex="0"]') || stage.querySelector('.game-workspace'))?.focus({ preventScroll: true });
       } catch (error) {
         console.error('Không thể mở game:', error);

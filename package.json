@@ -6,13 +6,15 @@
   "scripts": {
     "start": "node scripts/serve.js",
     "dev": "node scripts/serve.js",
-    "test": "node --test tests/core.test.js tests/arcade.test.js tests/lifecycle.test.js tests/online-server.test.cjs tests/online-client.test.cjs tests/sudoku.test.cjs tests/puppies.test.cjs tests/chess.test.cjs tests/xiangqi.test.cjs",
+    "test": "node --test tests/core.test.js tests/arcade.test.js tests/race.test.cjs tests/lifecycle.test.js tests/online-server.test.cjs tests/online-client.test.cjs tests/sudoku.test.cjs tests/puppies.test.cjs tests/chess.test.cjs tests/xiangqi.test.cjs",
     "test:online": "node tests/browser-online.cjs",
     "test:browser": "node tests/browser-smoke.cjs",
     "check": "node scripts/check.js",
     "test:sudoku": "node tests/browser-sudoku.cjs",
     "test:puppies": "node tests/browser-puppies.cjs",
-    "test:royal": "node tests/browser-royal.cjs"
+    "test:royal": "node tests/browser-royal.cjs",
+    "test:race": "node tests/browser-race.cjs",
+    "test:quan": "node tests/browser-quan.cjs"
   },
   "engines": {
     "node": ">=18"

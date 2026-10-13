@@ -27,6 +27,7 @@
           await script('models.js');
           await script('board-views.js');
           await script('action-views.js');
+          await script('race-view.js');
           await script('delivery.js');
         })().catch(error => { pending = null; throw error; });
       }

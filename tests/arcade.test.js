@@ -242,6 +242,205 @@ test('quan: AI evaluates legal moves without changing the live state', () => {
   assert.equal(JSON.stringify(state), before);
 });
 
+// Builds an otherwise empty board so each rule can be checked in isolation.
+function quanBoard(pits, rules, extra = {}) {
+  const state = L.createQuan(rules);
+  state.pits = Array(12).fill(0);
+  for (const [pit, count] of Object.entries(pits)) state.pits[pit] = count;
+  return Object.assign(state, extra);
+}
+test('quan: sowing twelve or more stones laps the board, including both royal pits and the start pit', () => {
+  const state = quanBoard({ 7: 13, 2: 1 });
+  const total = sumQuan(state);
+  const result = L.moveQuan(state, 7, 1, { trace: true });
+  const drops = result.steps.filter((step) => step.type === 'drop').map((step) => step.pit);
+  assert.deepEqual(drops.slice(0, 12), [8, 9, 10, 11, 0, 1, 2, 3, 4, 5, 6, 7]);
+  assert.equal(sumQuan(state), total);
+});
+test('quan: the turn stops when the next pit is a royal pit', () => {
+  const state = quanBoard({ 10: 1, 1: 3 });
+  const result = L.moveQuan(state, 10, 1);
+  assert.equal(result.relays, 0);
+  assert.equal(result.captured, 0);
+  assert.equal(state.pits[0], 0);
+  assert.equal(state.pits[1], 3, 'stones behind a royal pit holding its quan are safe');
+  assert.equal(state.turn, 1);
+});
+test('quan: two empty pits in a row end the turn without a capture', () => {
+  const state = quanBoard({ 7: 1, 11: 4, 2: 1 });
+  const result = L.moveQuan(state, 7, 1);
+  assert.equal(result.captured, 0);
+  assert.equal(state.pits[11], 4);
+  assert.deepEqual(state.scores, [0, 0]);
+  assert.equal(state.turn, 1);
+});
+test('quan rules: normalisation falls back to the basic rules', () => {
+  assert.deepEqual(L.quanRules(), { youngQuan: false, youngMin: 5, debt: 'negative', emptyQuan: 'empty' });
+  assert.deepEqual(L.quanRules({ youngQuan: 1, debt: 'steal', emptyQuan: 'block', youngMin: 'x' }), {
+    youngQuan: true,
+    youngMin: 5,
+    debt: 'negative',
+    emptyQuan: 'block',
+  });
+  assert.deepEqual(L.createQuan({ debt: 'borrow' }).rules.debt, 'borrow');
+});
+test('quan rules: quan non protects a royal pit with fewer than five stones and stops the chain', () => {
+  const pits = { 11: 1, 2: 3, 4: 4, 6: 2 };
+  const young = quanBoard(pits, { youngQuan: true });
+  const result = L.moveQuan(young, 11, 1, { trace: true });
+  assert.equal(result.captured, 7);
+  assert.equal(result.blocked, 6);
+  assert.equal(young.royals[1], true);
+  assert.equal(young.pits[6], 2);
+  assert.ok(result.steps.some((step) => step.type === 'young' && step.pit === 6));
+  const grown = quanBoard({ ...pits, 6: 5 }, { youngQuan: true });
+  assert.equal(L.moveQuan(grown, 11, 1).captured, 22, 'five stones are enough to take the quan');
+});
+test('quan rules: debt handling — negative, borrow, and end of match', () => {
+  const setup = (debt, scores) => quanBoard({ 7: 1 }, { debt }, { scores });
+  const negative = setup('negative', [12, 2]);
+  L.moveQuan(negative, 7, -1);
+  assert.deepEqual(negative.scores, [12, -3]);
+  assert.deepEqual(negative.pits.slice(1, 6), [1, 1, 1, 1, 1]);
+
+  const borrow = setup('borrow', [12, 2]);
+  const before = sumQuan(borrow);
+  const loan = L.moveQuan(borrow, 7, -1);
+  assert.deepEqual(loan.refill, { player: 1, source: 'borrow', lender: 0 });
+  assert.deepEqual(borrow.scores, [7, 2]);
+  assert.deepEqual(borrow.debts, [0, 5]);
+  assert.equal(sumQuan(borrow), before, 'borrowing moves stones, never creates them');
+
+  const paysSelf = setup('borrow', [12, 8]);
+  L.moveQuan(paysSelf, 7, -1);
+  assert.deepEqual(paysSelf.scores, [12, 3], 'with enough points a player pays for itself');
+  assert.deepEqual(paysSelf.debts, [0, 0]);
+
+  const bankrupt = setup('borrow', [3, 2]);
+  L.moveQuan(bankrupt, 7, -1);
+  assert.equal(bankrupt.ended, true, 'nobody can lend, so the match ends');
+
+  const end = setup('end', [12, 2]);
+  const finish = L.moveQuan(end, 7, -1, { trace: true });
+  assert.equal(end.ended, true);
+  assert.equal(end.endReason, 'debt');
+  assert.equal(end.winner, 0);
+  assert.equal(finish.steps.at(-1).type, 'finish');
+  assert.equal(finish.steps.at(-1).player, 1);
+});
+test('quan rules: borrowed points are returned before the final comparison', () => {
+  const last = quanBoard({ 2: 1 }, { debt: 'borrow' }, {
+    royals: [false, false],
+    scores: [20, 30],
+    debts: [0, 5],
+    turn: 1,
+  });
+  // Pit 2 → 1, then 0 is empty and 11 is empty: nothing captured, both royal pits empty → finish.
+  L.moveQuan(last, 2, -1);
+  assert.equal(last.ended, true);
+  assert.deepEqual(last.debts, [0, 0]);
+  assert.deepEqual(last.scores, [25, 26]);
+});
+test('quan rules: an empty captured royal pit acts as empty or blocks, depending on the rule', () => {
+  const extra = { royals: [false, true] };
+  const open = quanBoard({ 10: 1, 1: 3, 4: 1 }, { emptyQuan: 'empty' }, extra);
+  assert.equal(L.moveQuan(open, 10, 1).captured, 3);
+  const blocked = quanBoard({ 10: 1, 1: 3, 4: 1 }, { emptyQuan: 'block' }, { royals: [false, true] });
+  assert.equal(L.moveQuan(blocked, 10, 1).captured, 0);
+  assert.equal(blocked.pits[1], 3);
+});
+test('quan: replaying the recorded steps rebuilds the board exactly', () => {
+  for (let seed = 1; seed <= 30; seed++) {
+    const random = rng(seed);
+    const rules = {
+      youngQuan: seed % 2 === 0,
+      debt: ['negative', 'borrow', 'end'][seed % 3],
+      emptyQuan: seed % 5 === 0 ? 'block' : 'empty',
+    };
+    const state = L.createQuan(rules);
+    for (let move = 0; move < 1000 && !state.ended; move++) {
+      const legal = L.legalQuanMoves(state);
+      const choice = legal[Math.floor(random() * legal.length)];
+      const replay = L.cloneQuan(state);
+      const result = L.moveQuan(state, choice.pit, choice.direction, { trace: true });
+      let hand = 0;
+      for (const step of result.steps) {
+        if (step.type === 'pick' || step.type === 'relay') {
+          hand = replay.pits[step.pit];
+          replay.pits[step.pit] = 0;
+          assert.equal(step.hand, hand);
+        } else if (step.type === 'drop') {
+          replay.pits[step.pit]++;
+          assert.equal(step.hand, --hand);
+        } else if (step.type === 'capture') {
+          replay.scores[step.player] += step.value;
+          replay.pits[step.pit] = 0;
+          if (step.pit === 0) replay.royals[0] = false;
+          if (step.pit === 6) replay.royals[1] = false;
+        } else {
+          // Refill and final collection are whole-board updates; adopt their snapshot.
+          Object.assign(replay, { pits: [...step.pits], scores: [...step.scores], royals: [...step.royals] });
+        }
+        assert.deepEqual(replay.pits, step.pits, `seed ${seed}, ${step.type}`);
+        assert.deepEqual(replay.scores, step.scores);
+        assert.deepEqual(replay.royals, step.royals);
+      }
+      const last = result.steps.at(-1);
+      assert.deepEqual(last.pits, state.pits);
+      assert.deepEqual(last.scores, state.scores);
+      assert.deepEqual(last.royals, state.royals);
+      assert.equal(sumQuan(state), 70, `seed ${seed}, move ${move}`);
+    }
+    assert.equal(state.ended, true, `seed ${seed} should finish`);
+  }
+});
+test('quan AI: every level plays legal moves under every rule set without touching the live state', () => {
+  const ruleSets = [{}, { youngQuan: true, debt: 'borrow' }, { debt: 'end', emptyQuan: 'block' }];
+  for (const rules of ruleSets)
+    for (const level of ['easy', 'normal', 'hard']) {
+      const state = L.createQuan(rules),
+        random = rng(3);
+      for (let move = 0; move < 6 && !state.ended; move++) {
+        const before = JSON.stringify(state);
+        const choice = L.chooseQuanMove(state, level, random);
+        assert.equal(JSON.stringify(state), before);
+        assert.ok(
+          L.legalQuanMoves(state).some((m) => m.pit === choice.pit && m.direction === choice.direction),
+          `${level} must choose a legal move`,
+        );
+        L.moveQuan(state, choice.pit, choice.direction);
+      }
+    }
+  assert.equal(L.chooseQuanMove({ ...L.createQuan(), ended: true }, 'hard'), null);
+});
+test('quan AI: equal moves are chosen at random rather than always the first', () => {
+  const picks = new Set();
+  for (let seed = 1; seed <= 20; seed++) {
+    const choice = L.chooseQuanMove(L.createQuan(), 'normal', rng((seed * 2654435761) >>> 0));
+    picks.add(`${choice.pit}:${choice.direction}`);
+  }
+  assert.ok(picks.size > 1);
+});
+test('quan AI: hard beats normal, and normal beats easy, in most games', () => {
+  const play = (a, b, games) => {
+    let wins = 0;
+    for (let game = 0; game < games; game++) {
+      const state = L.createQuan(),
+        random = rng(game + 11),
+        side = game % 2;
+      for (let move = 0; move < 2000 && !state.ended; move++) {
+        const choice = L.chooseQuanMove(state, state.turn === side ? a : b, random);
+        L.moveQuan(state, choice.pit, choice.direction);
+      }
+      if (state.winner === side) wins++;
+    }
+    return wins;
+  };
+  assert.ok(play('hard', 'normal', 16) >= 12);
+  assert.ok(play('normal', 'easy', 16) >= 12);
+});
+
+
 test('snake: prevents reversal and two direction changes within the same tick', () => {
   const state = L.createSnake();
   assert.equal(L.turnSnake(state, -1, 0), false);
@@ -321,10 +520,14 @@ test('memory: every deck has eight pairs and matching all of them finishes', () 
 test('race: steering is bounded and sprint trades energy for speed', () => {
   const state = L.createRace(rng());
   state.obstacles = [];
+  state.rivals = [];
+  const normal = structuredClone(state);
+  for (let i = 0; i < 40; i++) L.stepRace(normal, 0.05, { steer: 1 });
   for (let i = 0; i < 40; i++) L.stepRace(state, 0.05, { steer: 1, sprint: true });
   assert.equal(state.x, 3);
   assert.ok(state.energy < 60);
-  assert.ok(state.speed > 20);
+  assert.ok(state.speed > normal.speed);
+  assert.ok(state.speed < 12, 'starting from rest takes time to reach racing speed');
   assert.ok(state.distance > 0);
   const energy = state.energy;
   for (let i = 0; i < 20; i++) L.stepRace(state, 0.05, {});

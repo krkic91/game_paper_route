@@ -36,7 +36,7 @@ python -m http.server 4173
 | **Cờ vua**          | Đấu máy Dễ/Vừa / 2 người cùng thiết bị · 2D   | Chiếu hết vua; có nhập thành, bắt tốt qua đường, phong cấp.    |
 | **Cờ tướng**        | Đấu máy Dễ/Vừa / 2 người cùng thiết bị · 2D   | Phối hợp Xe, Pháo, Mã; chiếu bí hoặc khiến đối thủ hết nước đi. |
 | **Cờ cá ngựa**      | Bạn + 3 máy / 2 người / 4 người cùng thiết bị | Tung xúc xắc, xuất chuồng, đá ngựa và đưa đủ 4 ngựa về đích.      |
-| **Ô ăn quan**       | Đấu máy / 2 người cùng thiết bị               | Chọn ô dân và hướng rải, ăn quân, tính điểm quan/dân.             |
+| **Ô ăn quan**       | Đấu máy (Dễ/Thường/Khó) / 2 người cùng thiết bị | Chọn ô dân, bấm mũi tên trên ô để rải; có hiệu ứng rải và luật tùy chọn. |
 | **Bida bỏ túi**     | Luyện tập 1 người                             | Ngắm từ bi trắng, chọn lực, đánh đủ 15 bi màu vào 6 lỗ.           |
 | **Rắn săn mồi**     | 1 người                                       | Ăn trái cây, tránh tường và thân mình trên bàn 20 × 20.           |
 | **2048**            | 1 người                                       | Trượt và gộp số; đạt 2048 có thể chơi tiếp.                       |
@@ -49,7 +49,7 @@ python -m http.server 4173
 
 - **Caro tự do:** từ 5 quân là thắng, kể cả bị chặn hai đầu; không có nước cấm Renju. Máy ưu tiên thắng, chặn nước thắng rồi đánh giá thế cờ.
 - **Cờ cá ngựa kiểu Ludo rút gọn:** ra 6 mới xuất chuồng và được thêm lượt; điểm sao an toàn; cần đúng số bước vào đích. Có thể xếp chồng quân, không chặn đường và không phạt ba lần ra 6. Ngựa đi một vòng 52 ô rồi vào 6 ô đường về màu riêng.
-- **Ô ăn quan cơ bản:** 50 dân, 2 quan, mỗi quan 10 điểm. Có rải tiếp và ăn liên hoàn. Hàng sắp đi trống sẽ rải lại 5 dân và trừ 5 điểm, có thể ghi nợ bằng điểm âm. Ván kết thúc khi hai ô quan hoàn toàn trống, rồi thu dân còn lại ở hàng mình. Không áp dụng luật “quan non”.
+- **Ô ăn quan:** 50 dân, 2 quan, mỗi quan 10 điểm. Có rải tiếp và ăn liên hoàn. Hàng sắp đi trống sẽ rải lại 5 dân và trừ 5 điểm. Ván kết thúc khi hai ô quan hoàn toàn trống, rồi thu dân còn lại ở hàng mình. Nút **Luật chơi** bật thêm luật tùy chọn (chốt cho cả ván, lưu trên thiết bị): *quan non* (ô quan dưới 5 dân chưa được ăn), *thiếu điểm* (cho điểm âm / vay 5 điểm của đối thủ, cuối ván trả / kết thúc ván), *ô quan trống* (tính như ô trống / vẫn chặn lượt). Máy có 3 mức: Dễ (ham ăn, đôi khi đi sai), Thường (nhìn 2 nước), Khó (alpha-beta 5 nước). Nước đi được phát lại từng bước, có thể tua nhanh; phím tắt 1–5 chọn ô, ← → rải, Esc bỏ chọn.
 - **Bida luyện tập:** có va chạm, bật băng, ma sát, vào lỗ và đặt lại bi trắng. Không dùng luật đấu 8-ball; bi đen có thể vào lỗ ở bất kỳ lượt nào. Mỗi bi màu +100, mỗi cú đánh −5, lỗi bi trắng −50, dọn bàn +500.
 - **Caro online:** tạo phòng riêng, chia sẻ mã/link, cả hai sẵn sàng rồi chơi trên hai thiết bị. Máy chủ xác nhận lượt và kết quả. Chơi tiếp cần cả hai đồng ý và đổi X/O; chuyển 2D/3D giữ nguyên ván.
 - Các chế độ nhiều người của **Cờ cá ngựa** và **Ô ăn quan** là chơi chung thiết bị.

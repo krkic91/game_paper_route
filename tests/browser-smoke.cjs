@@ -139,9 +139,10 @@ async function noOverflow(page) {
     await page.waitForFunction(() =>
       document.querySelector('.game-status').textContent.includes('Lượt Bạn.'),
     );
-    await page.locator('.game-mode select').selectOption('local');
+    await page.locator('.game-mode select').first().selectOption('local');
     await page.locator('[data-pit="7"]').click();
     await page.locator('[data-sow="left"]').click();
+    await page.waitForFunction(() => document.querySelector('.quan-skip-layer').hidden);
     assert.ok((await page.locator('.quan-pit.own-pit:not(:disabled)').count()) > 0);
     assert.match(await page.locator('.top-player').textContent(), /Đến lượt/);
     await page.screenshot({ path: join(shots, 'desktop-quan.png') });

@@ -798,6 +798,242 @@
   min-width: 95px;
   text-align: center;
 }
+.quan-workspace [hidden] {
+  display: none !important;
+}
+.quan-rules-toggle {
+  min-height: 34px;
+  padding: 7px 12px;
+  font-size: 10px;
+  white-space: nowrap;
+  align-self: flex-end;
+}
+.quan-workspace .game-mode + .quan-difficulty {
+  margin-left: 0;
+}
+.quan-rules-panel {
+  width: 100%;
+  max-width: 760px;
+  margin: 12px auto 0;
+  padding: 14px 16px;
+  background: #213020;
+  border: 1px solid #4a5c3c;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px #0711096b;
+}
+.quan-rules-panel fieldset {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.quan-rules-panel legend {
+  margin-bottom: 8px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #a9c48b;
+}
+.quan-rule {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #d8e3c8;
+}
+.quan-rule-check {
+  justify-content: flex-start;
+}
+.quan-rule > span {
+  display: grid;
+  gap: 2px;
+}
+.quan-rule small {
+  font-size: 9px;
+  color: #93a985;
+}
+.quan-rule select {
+  max-width: 230px;
+  font-size: 10px;
+  color: #cadbbc;
+  background: #293725;
+  border: 1px solid #4a5c3c;
+  border-radius: 5px;
+  padding: 6px 7px;
+}
+.quan-rule input[type='checkbox'] {
+  width: 17px;
+  height: 17px;
+  accent-color: #b9d989;
+  flex-shrink: 0;
+}
+.quan-rules-note {
+  margin: 0;
+  font-size: 9px;
+  color: #93a985;
+}
+.quan-rules-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.quan-rules-actions .button {
+  padding: 8px 14px;
+  font-size: 11px;
+}
+.quan-rules-summary {
+  margin: 0 0 14px;
+  font-size: 9px;
+  text-align: center;
+  color: #8ea47f;
+}
+.quan-board {
+  position: relative;
+}
+.quan-tag {
+  display: block;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #fff1c4;
+}
+.quan-pit.sowing {
+  background: #c2a46f;
+  border-color: #fff3c4;
+  box-shadow:
+    inset 0 0 14px #fff0b04d,
+    0 0 0 2px #fff3c499;
+}
+.quan-pit.capture-flash {
+  animation: quan-capture 0.55s ease-out;
+  border-color: #ffcf7a;
+}
+.quan-pit.young-flash {
+  border-color: #e28e6d;
+  box-shadow: 0 0 0 2px #e28e6d99;
+}
+.quan-pit.last-origin {
+  border-style: dashed;
+  border-color: #f4e6b5;
+}
+.quan-pit.last-captured {
+  box-shadow:
+    inset 0 0 0 2px #e9a35f,
+    inset 0 3px 6px #694b3866;
+}
+.quan-last-dir {
+  position: absolute;
+  top: 3px;
+  font-size: 10px;
+  line-height: 1;
+  color: #fff3c4;
+  text-shadow: 0 1px 2px #6a4b25;
+}
+.quan-last-dir.left {
+  left: 5px;
+}
+.quan-last-dir.right {
+  right: 5px;
+}
+.quan-arrows {
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 -11px;
+  pointer-events: none;
+}
+.quan-arrow {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: #47391f;
+  background: #f4e7bd;
+  border: 1px solid #fff8dc;
+  border-radius: 50%;
+  box-shadow: 0 3px 8px #3b2a1480;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.quan-arrow:hover,
+.quan-arrow:focus-visible {
+  background: #fffbe6;
+  outline: 2px solid #b9d989;
+  outline-offset: 1px;
+}
+.quan-hand {
+  z-index: 4;
+  align-self: start;
+  justify-self: center;
+  transform: translateY(-45%);
+  padding: 2px 7px;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+  color: #3f321b;
+  background: #fff3c4;
+  border-radius: 999px;
+  box-shadow: 0 2px 6px #3b2a1480;
+  pointer-events: none;
+}
+.quan-gain {
+  z-index: 5;
+  align-self: center;
+  justify-self: center;
+  font-size: 17px;
+  font-weight: 800;
+  color: #fff6c8;
+  text-shadow:
+    0 2px 3px #5d3f17,
+    0 0 8px #e9a35f;
+  pointer-events: none;
+  animation: quan-rise 0.9s ease-out forwards;
+}
+.quan-gain.is-warning {
+  font-size: 10px;
+  color: #ffd9c9;
+  text-shadow: 0 1px 2px #5d2a17;
+}
+.quan-skip-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 0 2px;
+  background: transparent;
+  border: 0;
+  border-radius: inherit;
+  cursor: pointer;
+}
+@keyframes quan-capture {
+  0% {
+    background: #f3c77a;
+  }
+  100% {
+    background: #95774f;
+  }
+}
+@keyframes quan-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.8);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0) scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-26px) scale(1);
+  }
+}
 .sow-button {
   font-size: 10px;
   padding: 9px 13px;
@@ -1377,6 +1613,50 @@
   }
   .horse-token {
     font-size: 16px;
+  }
+}
+@media (max-width: 600px) {
+  .quan-workspace .game-toolbar {
+    flex-wrap: wrap;
+    row-gap: 10px;
+  }
+  .quan-workspace .game-toolbar .game-stat:nth-of-type(2) {
+    margin-right: auto;
+  }
+  .quan-workspace .game-toolbar .game-mode {
+    margin-left: 0;
+  }
+  .quan-rules-toggle {
+    min-height: 32px;
+    padding: 6px 9px;
+    font-size: 10px;
+  }
+  .quan-rules-panel {
+    padding: 12px;
+  }
+  .quan-rule {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+  .quan-rule-check {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .quan-rule select {
+    max-width: none;
+    width: 100%;
+  }
+  .quan-arrow {
+    width: 24px;
+    height: 24px;
+  }
+  .quan-arrows {
+    margin: 0 -8px;
+  }
+  .quan-hand {
+    font-size: 9px;
+    padding: 1px 5px;
   }
 }
 @media (max-width: 600px) {
