@@ -32,7 +32,8 @@
       if (p.y < 135 || p.y > 650) return;
       ctx.save(); ctx.translate(p.x, p.y); ctx.scale(scale, scale);
       ctx.fillStyle = '#19332940'; ctx.beginPath(); ctx.ellipse(0, 9, 18, 8, 0, 0, TAU); ctx.fill();
-      ctx.rotate(subject.lean || 0);
+      // World lean uses Y up; Canvas uses Y down, so its rotation is reversed.
+      ctx.rotate(-(subject.lean || 0));
       const sprint = subject.sprinting ? 1 : 0, phase = subject.pedalPhase || 0;
       const sway = reduced ? 0 : Math.sin(phase) * sprint * 1.5;
       // Two tires stay on the road; rotating highlights follow travelled distance.

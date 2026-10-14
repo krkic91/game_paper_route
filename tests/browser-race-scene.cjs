@@ -1,5 +1,5 @@
 // version v1.0
-/* Renderer regressions using real WebGL and deterministic injected race states.
+/* Renderer regressions using native Canvas/WebGL and deterministic race states.
  * Start scripts/serve.js, then run with the Playwright tooling on NODE_PATH.
  * These fixtures do not replace the real-input tests in browser-race.cjs. */
 'use strict';
@@ -13,7 +13,7 @@ const engines = (process.env.RACE_BROWSERS || 'chromium,webkit').split(',');
 mkdirSync(join(output, 'screenshots'), { recursive: true });
 const report = {
   environment: 'Headless desktop browser engines on Windows, 1180 x 820. No physical iPhone/iPad or virtual machine.',
-  coverage: 'Actual mounted Three.js renderer. Real start/pause/resume/close and camera button clicks; independently constructed RaceLogic fixture states are drawn with the game scope paused. Fixture screenshots show injected scenes, not a completed human-input race, and their HUD remains the paused live game HUD.',
+  coverage: 'Native Canvas screen-space lean checks for player/rivals; actual mounted Three.js renderer. Real start/pause/resume/close and camera button clicks; independently constructed RaceLogic fixture states are drawn with the game scope paused. Fixture screenshots show injected scenes, not a completed human-input race, and their HUD remains the paused live game HUD.',
   runs: [],
 };
 function save() { writeFileSync(join(output, 'results.json'), JSON.stringify(report, null, 2)); }
@@ -26,6 +26,36 @@ async function run(browser, engine) {
   try {
     await page.goto(base);
     await page.waitForFunction(() => window.Arcade3D && window.RaceLogic);
+    const canvasLean = await page.evaluate(() => {
+      const results = [];
+      for (const steer of [-1, 0, 1]) for (const reducedMotion of [false, true]) {
+        const state = window.RaceLogic.createRace(() => 0), rivals = state.rivals;
+        state.obstacles = []; state.rivals = []; state.speed = 12;
+        if (steer) for (let i = 0; i < 60; i++) window.RaceLogic.stepRace(state, 1 / 120, { steer });
+        state.rivals = rivals;
+        rivals.forEach((rival, i) => Object.assign(rival, { distance: state.distance + 6 + i * 5, lean: state.lean }));
+        const canvas = document.createElement('canvas'); canvas.width = 900; canvas.height = 550;
+        const ctx = canvas.getContext('2d'), ellipse = ctx.ellipse, riders = [];
+        let groundX;
+        ctx.ellipse = function (x, y, rx, ry, ...rest) {
+          // Measure actual native Canvas transforms of the unrotated ground
+          // shadow and the helmet, rather than asserting an angle formula.
+          const point = this.getTransform().transformPoint({ x, y });
+          if (rx === 18 && ry === 8) groundX = point.x;
+          if (rx === 9 && ry === 10) riders.push({ groundX, headX: point.x });
+          return ellipse.call(this, x, y, rx, ry, ...rest);
+        };
+        window.createRace2D({ ctx }).draw(state, { reducedMotion }, 0);
+        if (riders.length !== 4) throw new Error('Expected player and three visible rivals in Canvas lean check');
+        for (const { groundX, headX } of riders) {
+          const delta = headX - groundX;
+          if (steer ? delta * steer <= .1 : Math.abs(delta) > .001)
+            throw new Error(`Canvas rider leans against steering: steer=${steer}, reducedMotion=${reducedMotion}, head-ground=${delta}`);
+        }
+        results.push({ steer, reducedMotion, riders });
+      }
+      return results;
+    });
     await page.evaluate(async () => {
       const A = window.Arcade3D;
       await A.load();
@@ -216,7 +246,7 @@ async function run(browser, engine) {
     assert.ok(resources.geometry > 10 && resources.texture >= 5);
     assert.ok(disposed.sceneDisposed && disposed.lost && disposed.live === 0, 'Close releases WebGL scene and context');
     assert.deepEqual(errors, [], 'No JavaScript, shader or WebGL console errors');
-    return { fixtures, animation, effects, camera, disposed };
+    return { canvasLean, fixtures, animation, effects, camera, disposed };
   } finally { await context.close(); }
 }
 
