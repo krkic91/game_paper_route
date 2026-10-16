@@ -1,0 +1,136 @@
+/* version v1.0 */
+.monopoly-workspace { --mp-ink: #e7eddc; --mp-muted: #9cae93; color: var(--mp-ink); }
+.monopoly-workspace .game-toolbar { justify-content: space-between; gap: 16px; }
+.monopoly-heading { display: grid; gap: 3px; }
+.monopoly-heading > span, .monopoly-section-label { color: var(--mp-muted); font-size: 10px; letter-spacing: .14em; font-weight: 700; }
+.monopoly-heading > strong { font-size: 27px; letter-spacing: -.04em; line-height: 1.2; }
+.monopoly-heading > strong > span { color: #b9d68d; }
+.monopoly-mode { text-align: right; display: grid; gap: 5px; font-size: 12px; }
+.monopoly-mode > span { color: var(--mp-muted); font-size: 11px; }
+.monopoly-workspace .game-board-area { align-items: flex-start; }
+.monopoly-layout { width: 100%; max-width: 1000px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, 280px); align-items: start; gap: 16px; }
+.monopoly-map-column, .monopoly-side { min-width: 0; }
+.monopoly-board { width: 100%; aspect-ratio: 1; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-template-rows: repeat(7, minmax(0, 1fr)); gap: 3px; padding: 4px; border: 1px solid #516248; border-radius: 14px; background: #162319; overflow: hidden; }
+.monopoly-tile { appearance: none; position: relative; display: flex; flex-direction: column; align-items: center; min-width: 0; min-height: 0; gap: 2px; padding: 0 2px 3px; border: 1px solid #52634b; border-radius: 4px; background: #e9ecdb; color: #263c30; cursor: pointer; overflow: hidden; font-family: inherit; box-shadow: inset 0 -3px var(--owner, transparent); }
+.monopoly-tile:focus-visible { outline: 3px solid white; outline-offset: -3px; z-index: 2; }
+.monopoly-tile[aria-pressed="true"] { border-color: #f0cb77; outline: 2px solid #f0cb77; outline-offset: -2px; }
+.monopoly-tile.has-current { background: #fff8d8; }
+.monopoly-tile-group { flex: 0 0 auto; width: calc(100% + 4px); line-height: 12px; font-size: 9px; font-weight: 800; color: #14291c; background: var(--district); }
+.monopoly-tile-name { font-size: clamp(8px, 1vw, 11px); font-weight: 750; line-height: 1.12; overflow-wrap: anywhere; }
+.monopoly-tile-value { font-size: 9px; font-weight: 700; line-height: 1.05; }
+.monopoly-tile-start, .monopoly-tile-parking { background: #d5dfbe; }
+.monopoly-tile-jail, .monopoly-tile-go-jail { background: #e5c9ad; }
+.monopoly-tile-chance .monopoly-tile-group { background: #b6a0cb; }
+.monopoly-tile-tax .monopoly-tile-group { background: #e0b87f; }
+.monopoly-tokens { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 1px; margin-top: auto; min-height: 12px; }
+.monopoly-tokens i { width: 12px; height: 12px; border-radius: 50%; background: var(--player); color: #192719; border: 1px solid #324832; box-shadow: 0 1px 1px #0004; font-size: 8px; line-height: 10px; text-align: center; font-style: normal; font-weight: 800; }
+.monopoly-center { grid-column: 2 / 7; grid-row: 2 / 7; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 10px; padding: 12px; border-radius: 8px; overflow: hidden; background: radial-gradient(ellipse at 50% 25%, #334b30, #213724 70%); }
+.monopoly-center-kicker { font-size: 9px; letter-spacing: .13em; color: #bdccaa; }
+.monopoly-center-title { font-size: clamp(20px, 3vw, 35px); line-height: 1.1; letter-spacing: -.04em; font-weight: 750; }
+.monopoly-city { display: flex; align-items: flex-end; justify-content: center; gap: 5px; width: 80%; height: 58px; border-bottom: 1px solid #7c9a60; }
+.monopoly-city i { display: block; width: 22px; height: 30px; border: 1px solid #9db880; border-radius: 3px 3px 0 0; background: repeating-linear-gradient(0deg, #a2bc7c66 0 3px, transparent 3px 9px); }
+.monopoly-city i:nth-child(2n) { height: 47px; width: 26px; }
+.monopoly-city i:nth-child(3) { height: 58px; width: 30px; }
+.monopoly-city i:nth-child(5) { height: 38px; }
+.monopoly-round { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .05em; padding: 5px 10px; border: 1px solid #71845b; border-radius: 20px; color: #cfddb6; }
+.monopoly-dice { display: flex; gap: 8px; }
+.monopoly-dice span { display: grid; place-items: center; width: 40px; height: 40px; background: #f4efd8; color: #30412c; border-radius: 7px; box-shadow: 0 3px 0 #0c180c77; font-size: 37px; line-height: 1; }
+.monopoly-dice.is-rolling span { animation: monopoly-roll .18s ease-in-out infinite alternate; }
+.monopoly-dice.is-rolling span:last-child { animation-direction: alternate-reverse; }
+@keyframes monopoly-roll { from { transform: rotate(-10deg) translateY(-2px); } to { transform: rotate(10deg) translateY(2px); } }
+.monopoly-current { font-size: 13px; }
+.monopoly-center > small { color: #b3c3a3; font-size: 10px; line-height: 1.4; }
+.monopoly-board-note { font-size: 11px; color: var(--mp-muted); line-height: 1.5; margin: 8px 2px 0; }
+.monopoly-side { display: grid; gap: 12px; }
+.monopoly-players { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+.monopoly-player { display: grid; grid-template-columns: 18px 1fr; column-gap: 5px; row-gap: 3px; border: 1px solid #465340; border-radius: 9px; padding: 10px; background: #233123; min-width: 0; }
+.monopoly-player.is-current { border-color: var(--player); background: #30412c; }
+.monopoly-player.is-bankrupt { opacity: .55; }
+.monopoly-player-marker { grid-row: span 2; width: 17px; height: 17px; display: grid; place-items: center; font-size: 10px; font-weight: 800; border-radius: 50%; background: var(--player); color: #1b2c1c; }
+.monopoly-player > strong { font-size: 12px; }
+.monopoly-player > b { font-size: 17px; font-variant-numeric: tabular-nums; }
+.monopoly-player > b > small { font-size: 10px; color: #b8c6a8; font-weight: 500; }
+.monopoly-player > span:last-of-type, .monopoly-player > small { grid-column: 1 / -1; color: #c1ceb2; font-size: 10px; }
+.monopoly-player > small { color: #9fb092; }
+.monopoly-turn-panel, .monopoly-detail { border: 1px solid #4b5942; border-radius: 11px; padding: 14px; min-width: 0; background: #263425; }
+.monopoly-turn-panel { background: #2d3d28; }
+.monopoly-turn-panel > strong { display: block; margin-top: 7px; font-size: 17px; line-height: 1.25; }
+.monopoly-turn-panel > p { color: #c4d0b6; font-size: 12px; line-height: 1.6; margin: 8px 0 12px; }
+.monopoly-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+.monopoly-workspace .control-button { min-height: 42px; font-size: 12px; line-height: 1.3; touch-action: manipulation; }
+.monopoly-actions .control-button { flex: 1 1 auto; }
+.monopoly-workspace .monopoly-primary { background: #bdd78e; color: #21351e; border: 1px solid #cbe5a1; }
+.monopoly-workspace .control-button:disabled { opacity: .42; cursor: default; }
+.monopoly-workspace [hidden] { display: none !important; }
+.monopoly-detail > label { display: block; font-size: 10px; font-weight: 700; letter-spacing: .12em; color: var(--mp-muted); margin-bottom: 7px; }
+.monopoly-detail > select { display: block; width: 100%; min-width: 0; min-height: 42px; border: 1px solid #647257; border-radius: 6px; padding: 8px; font: inherit; font-size: 13px; background: #1d2d20; color: #e6efda; }
+.monopoly-detail [data-monopoly-detail] > strong { display: block; margin-top: 12px; font-size: 17px; }
+.monopoly-detail p { font-size: 12px; color: #c0ceb3; line-height: 1.6; margin: 7px 0; }
+.monopoly-detail-group { margin-top: 12px; padding-left: 8px; border-left: 4px solid var(--district); font-size: 11px; color: #d8e4c7; }
+.monopoly-detail dl { display: grid; gap: 6px; margin: 10px 0 12px; }
+.monopoly-detail dl > div { display: flex; justify-content: space-between; gap: 10px; font-size: 11px; }
+.monopoly-detail dt { color: #aebfa0; }
+.monopoly-detail dd { margin: 0; font-weight: 700; text-align: right; }
+.monopoly-detail [data-monopoly-detail] > small { display: block; font-size: 11px; color: #c3cfb6; margin-bottom: 8px; }
+.monopoly-detail > button { width: 100%; }
+.monopoly-last-action { grid-column: 1 / -1; margin: 0; border-left: 3px solid #a8c781; padding: 9px 12px; font-size: 12px; line-height: 1.5; color: #dbe5ce; background: #243423; }
+.monopoly-workspace .game-controls { align-items: flex-start; justify-content: flex-start; gap: 10px 18px; max-width: 1000px; }
+.monopoly-speed { display: flex; align-items: center; min-height: 40px; gap: 7px; color: #d3dfc5; font-size: 12px; cursor: pointer; }
+.monopoly-speed input { width: 17px; height: 17px; accent-color: #b9d68d; }
+.monopoly-history, .monopoly-rules { min-width: 0; color: #c1cfb3; font-size: 12px; }
+.monopoly-history summary, .monopoly-rules summary { cursor: pointer; min-height: 40px; padding: 12px 0; }
+.monopoly-history[open], .monopoly-rules[open] { flex: 1 1 100%; }
+.monopoly-history ol { margin: 5px 0 0; padding-left: 22px; display: grid; gap: 5px; max-height: 210px; overflow: auto; line-height: 1.5; }
+.monopoly-rules p { max-width: 780px; line-height: 1.7; margin: 5px 0 12px; }
+@media (max-width: 900px) {
+  .monopoly-layout { max-width: 660px; grid-template-columns: minmax(0, 1fr); }
+  .monopoly-side { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .monopoly-players { grid-column: 1 / -1; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .monopoly-turn-panel { align-self: start; }
+  .monopoly-tile-name { font-size: 11px; }
+}
+@media (max-width: 540px) {
+  .monopoly-workspace { padding: 12px 10px !important; gap: 12px; }
+  .monopoly-workspace .game-toolbar { gap: 9px; padding-bottom: 10px; }
+  .monopoly-heading > span { font-size: 8px; letter-spacing: .08em; }
+  .monopoly-heading > strong { font-size: 24px; }
+  .monopoly-mode { font-size: 11px; max-width: 140px; }
+  .monopoly-mode > span { font-size: 9px; line-height: 1.4; }
+  .monopoly-board { gap: 2px; padding: 3px; border-radius: 9px; }
+  .monopoly-tile { gap: 1px; padding-bottom: 2px; }
+  .monopoly-tile-name { font-size: 8px; line-height: 1.06; }
+  .monopoly-tile-group { line-height: 9px; font-size: 7px; }
+  .monopoly-tile-value { font-size: 7px; }
+  .monopoly-tokens { min-height: 9px; }
+  .monopoly-tokens i { width: 9px; height: 9px; line-height: 7px; font-size: 6px; }
+  .monopoly-center { padding: 9px 6px; gap: 8px; }
+  .monopoly-center-kicker { font-size: 6px; letter-spacing: .1em; }
+  .monopoly-center-title { font-size: 25px; }
+  .monopoly-city { height: 35px; gap: 4px; }
+  .monopoly-city i { height: 18px; width: 15px; }
+  .monopoly-city i:nth-child(2n) { height: 29px; width: 17px; }
+  .monopoly-city i:nth-child(3) { height: 35px; width: 19px; }
+  .monopoly-city i:nth-child(5) { height: 23px; }
+  .monopoly-round { font-size: 9px; padding: 4px 9px; }
+  .monopoly-dice span { width: 29px; height: 29px; font-size: 28px; }
+  .monopoly-current { font-size: 10px; }
+  .monopoly-center > small { font-size: 8px; }
+  .monopoly-board-note { font-size: 10px; }
+  .monopoly-side { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .monopoly-players { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .monopoly-player { padding: 9px; }
+  .monopoly-turn-panel, .monopoly-detail { padding: 13px; }
+  .monopoly-actions .control-button { min-height: 46px; font-size: 13px; }
+  .monopoly-detail > select { font-size: 16px; }
+  .monopoly-workspace .game-controls { gap: 4px 15px; }
+}
+@media (max-width: 360px) {
+  .monopoly-center { gap: 5px; }
+  .monopoly-center-title { font-size: 21px; }
+  .monopoly-city { display: none; }
+  .monopoly-center-kicker { font-size: 6px; }
+  .monopoly-tile-name { font-size: 7px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .monopoly-dice.is-rolling span { animation: none; }
+}

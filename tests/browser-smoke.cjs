@@ -6,7 +6,7 @@ const { existsSync, mkdirSync } = require('node:fs');
 const { join, resolve } = require('node:path');
 const { pathToFileURL } = require('node:url');
 const { tmpdir } = require('node:os');
-const { chromium } = require('playwright');
+const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 const base = process.env.TEST_URL || 'http://127.0.0.1:4173';
 const shots = process.env.SCREENSHOTS || join(tmpdir(), 'tram-choi-screenshots');
 mkdirSync(shots, { recursive: true });
@@ -56,18 +56,25 @@ async function noOverflow(page) {
     watch(page);
     await page.goto(base);
     await page.locator('.game-card').first().waitFor();
-    assert.equal(await page.locator('.game-card').count(), 14);
+    assert.equal(await page.locator('.game-card').count(), 20);
     await noOverflow(page);
     await page.screenshot({ path: join(shots, 'desktop-home.png'), fullPage: true });
+    await page.locator('[data-filter="card"]').click();
+    assert.equal(await page.locator('.game-card').count(), 3);
+    await page.locator('#search').fill('uno');
+    assert.equal(await page.locator('.game-card').count(), 1);
+    assert.equal(await page.locator('.game-card').getAttribute('data-game'), 'uno');
+    assert.equal(await page.locator('[data-game="uno"] [data-edition="3d"]').count(), 0);
+    await page.locator('#search').fill('');
     await page.locator('[data-filter="board"]').click();
-    assert.equal(await page.locator('.game-card').count(), 5);
+    assert.equal(await page.locator('.game-card').count(), 7);
     await page.locator('#search').fill('o an quan');
     assert.equal(await page.locator('.game-card').count(), 1);
     assert.equal(await page.locator('.game-card').getAttribute('data-game'), 'quan');
     await page.locator('#search').fill('khong-co-tro-nay');
     assert.equal(await page.locator('#empty-state').isVisible(), true);
     await page.locator('#clear-filters').click();
-    assert.equal(await page.locator('.game-card').count(), 14);
+    assert.equal(await page.locator('.game-card').count(), 20);
     await page.locator('[data-favorite="pool"]').click();
     await page.locator('[data-view="favorites"]').click();
     assert.equal(await page.locator('.game-card').count(), 1);
@@ -82,7 +89,7 @@ async function noOverflow(page) {
     await close(page);
     await page.locator('[data-view="favorites"]').click();
     await page.locator('.brand').click();
-    assert.equal(await page.locator('.game-card').count(), 14);
+    assert.equal(await page.locator('.game-card').count(), 20);
 
     await open(page, 'caro');
     assert.equal(await page.locator('.caro-cell').count(), 225);
@@ -297,6 +304,12 @@ async function noOverflow(page) {
       'puppies',
       'chess',
       'xiangqi',
+      'uno',
+      'domino',
+      'monopoly',
+      'tienlen',
+      'xidach',
+      'werewolf',
       'memory',
       'pool',
       'race',
@@ -342,7 +355,7 @@ async function noOverflow(page) {
     ]) {
       await mobile.setViewportSize(viewport);
       await noOverflow(mobile);
-      for (const id of ['caro', 'ludo', 'quan', 'sudoku', 'puppies', 'chess', 'xiangqi', 'pool', 'race']) {
+      for (const id of ['caro', 'ludo', 'quan', 'sudoku', 'puppies', 'chess', 'xiangqi', 'uno', 'pool', 'race']) {
         await open(mobile, id);
         await noOverflow(mobile);
         assert.ok(
@@ -360,7 +373,10 @@ async function noOverflow(page) {
     watch(offline);
     await offline.goto(pathToFileURL(resolve(__dirname, '../index.html')).href);
     await offline.locator('.game-card').first().waitFor();
-    assert.equal(await offline.locator('.game-card').count(), 14);
+    assert.equal(await offline.locator('.game-card').count(), 20);
+    await open(offline, 'uno');
+    assert.equal(await offline.locator('#player-title').textContent(), 'UNO');
+    await close(offline);
     await open(offline, '2048');
     assert.equal(await offline.locator('.number-tile').count(), 16);
     await close(offline);
@@ -420,7 +436,7 @@ async function noOverflow(page) {
     await restricted.close();
     assert.deepEqual(errors, [], 'no browser errors');
     console.log(
-      'Browser checks passed: all 14 games, game rules, AI turns, pause/restart, favorites, search, persistence, mobile, and file://.',
+      'Browser checks passed: all 20 games, game rules, AI turns, pause/restart, favorites, search, persistence, mobile, and file://.',
     );
     console.log(`Screenshots: ${shots}`);
   } finally {

@@ -1,7 +1,7 @@
 <!-- version v1.0 -->
 # Trạm Chơi
 
-**Một trang, 14 game chơi được ngay.** Cổng mini game tiếng Việt, giữ nguyên **Delivery Dash** và bổ sung game thể thao, bàn cờ, arcade, trí tuệ. Caro có chế độ online hai người khác thiết bị qua máy chủ Node.js. Không có tài khoản, quảng cáo hay bước build.
+**Một trang, 20 game chơi được ngay.** Cổng mini game tiếng Việt, giữ nguyên **Delivery Dash** và bổ sung game thể thao, bàn cờ, bài, nhập vai, arcade, trí tuệ. Caro có chế độ online hai người khác thiết bị qua máy chủ Node.js. Không có tài khoản, quảng cáo hay bước build.
 
 ## Chạy dự án
 
@@ -37,6 +37,12 @@ python -m http.server 4173
 | **Cờ tướng**        | Đấu máy Dễ/Vừa / 2 người cùng thiết bị · 2D   | Phối hợp Xe, Pháo, Mã; chiếu bí hoặc khiến đối thủ hết nước đi. |
 | **Cờ cá ngựa**      | Bạn + 3 máy / 2 người / 4 người cùng thiết bị | Tung xúc xắc, xuất chuồng, đá ngựa và đưa đủ 4 ngựa về đích.      |
 | **Ô ăn quan**       | Đấu máy (Dễ/Thường/Khó) / 2 người cùng thiết bị | Chọn ô dân, bấm mũi tên trên ô để rải; có hiệu ứng rải và luật tùy chọn. |
+| **UNO**             | Bạn đấu 3 máy · 2D                            | Ghép màu/ký hiệu, dùng lá chức năng, hô UNO và đánh hết bài.       |
+| **Domino**          | Bạn đấu 3 máy · 2D                            | Nối quân ở hai đầu; hết quân hoặc ít chấm nhất khi khóa bàn.     |
+| **Cờ tỷ phú**       | Bạn đấu 3 máy · 2D · tối đa 30 vòng           | Mua đất, thu thuê, nâng cấp và giữ ngân quỹ trên bàn 24 ô.        |
+| **Tiến lên miền Nam** | Bạn đấu 3 máy · 2D                          | Ghép bộ, chặn bài, chặt heo và đánh hết 13 lá trước.              |
+| **Xì dách**         | Bạn đấu nhà cái máy · 2D                      | Rút hoặc dằn, tìm xì bàn/xì dách/ngũ linh và tránh quắc.          |
+| **Ma sói**          | Bạn đấu 7 máy · 2D                            | Vai bí mật, năng lực ban đêm, thảo luận và bỏ phiếu ban ngày.     |
 | **Bida bỏ túi**     | Luyện tập 1 người                             | Ngắm từ bi trắng, chọn lực, đánh đủ 15 bi màu vào 6 lỗ.           |
 | **Rắn săn mồi**     | 1 người                                       | Ăn trái cây, tránh tường và thân mình trên bàn 20 × 20.           |
 | **2048**            | 1 người                                       | Trượt và gộp số; đạt 2048 có thể chơi tiếp.                       |
@@ -53,14 +59,16 @@ python -m http.server 4173
 - **Ô ăn quan:** 50 dân, 2 quan, mỗi quan 10 điểm. Có rải tiếp và ăn liên hoàn. Hàng sắp đi trống sẽ rải lại 5 dân và trừ 5 điểm. Ván kết thúc khi hai ô quan hoàn toàn trống, rồi thu dân còn lại ở hàng mình. Nút **Luật chơi** bật thêm luật tùy chọn (chốt cho cả ván, lưu trên thiết bị): *quan non* (ô quan dưới 5 dân chưa được ăn), *thiếu điểm* (cho điểm âm / vay 5 điểm của đối thủ, cuối ván trả / kết thúc ván), *ô quan trống* (tính như ô trống / vẫn chặn lượt). Ô **Đi trước** chọn bạn hay máy (hoặc Người 1 / Người 2) đi nước đầu, được lưu trên thiết bị; đổi giữa ván sẽ hỏi rồi bắt đầu ván mới. Máy có 3 mức: Dễ (ham ăn, đôi khi đi sai), Thường (nhìn 2 nước), Khó (alpha-beta 5 nước). Nước đi được phát lại từng bước, có thể tua nhanh; phím tắt 1–5 chọn ô, ← → rải, Esc bỏ chọn.
 - **Bida luyện tập:** có va chạm, bật băng, ma sát, vào lỗ và đặt lại bi trắng. Không dùng luật đấu 8-ball; bi đen có thể vào lỗ ở bất kỳ lượt nào. Mỗi bi màu +100, mỗi cú đánh −5, lỗi bi trắng −50, dọn bàn +500.
 - **Caro online:** tạo phòng riêng, chia sẻ mã/link, cả hai sẵn sàng rồi chơi trên hai thiết bị. Máy chủ xác nhận lượt và kết quả. Chơi tiếp cần cả hai đồng ý và đổi X/O; chuyển 2D/3D giữ nguyên ván.
+- **UNO:** bộ 108 lá, 7 lá mỗi người, bạn đấu 3 máy. Bạn đi trước với lá số mở đầu; mỗi ván tính riêng. Không cộng dồn +2/+4; chỉ cho đánh +4 khi không có màu đang chơi, nên không có thách thức +4. Xem [luật và hướng dẫn UNO](docs/uno.md).
+- **Năm game mới:** xem quy ước cụ thể của [Domino](docs/domino.md), [Cờ tỷ phú](docs/monopoly.md), [Tiến lên miền Nam](docs/tienlen.md), [Xì dách](docs/xidach.md) và [Ma sói](docs/werewolf.md). Đây là các bản chơi tại chỗ với máy. [Phân công và phạm vi triển khai](docs/table-games-plan.md) ghi rõ phần việc của từng sub-agent.
 - Các chế độ nhiều người của **Cờ cá ngựa** và **Ô ăn quan** là chơi chung thiết bị.
 
 Luật và điều khiển chi tiết luôn có trong nút **ⓘ Hướng dẫn** của mỗi game.
 
 ## Tính năng trang
 
-- Thư viện 14 game với hình minh họa riêng, bố cục tương thích máy tính và điện thoại; 10 game có thêm bản 3D. Cờ vua, Cờ tướng, Sudoku và Xếp cún dùng bản 2D.
-- Tìm kiếm tiếng Việt có dấu hoặc không dấu; lọc theo Arcade, Thể thao, Bàn cờ, Trí tuệ.
+- Thư viện 20 game với hình minh họa riêng, bố cục tương thích máy tính và điện thoại; 10 game có thêm bản 3D. Cờ vua, Cờ tướng, UNO, Domino, Cờ tỷ phú, Tiến lên miền Nam, Xì dách, Ma sói, Sudoku và Xếp cún dùng bản 2D.
+- Tìm kiếm tiếng Việt có dấu hoặc không dấu; lọc theo Arcade, Thể thao, Bàn cờ, Bài, Nhập vai, Trí tuệ.
 - Sắp xếp theo đề xuất, tên hoặc game mới chơi.
 - Đánh dấu **yêu thích**, danh sách **chơi gần đây**, **kỷ lục riêng cho từng game**.
 - Chơi ngẫu nhiên trong danh sách đang lọc; nếu danh sách trống, chọn từ toàn bộ thư viện.
@@ -223,6 +231,8 @@ games/
   xiangqi-logic.js       Luật cờ tướng, hoàn tác và máy tính nước
   royal.js              Giao diện hai bàn cờ, quân SVG, phong cấp và lượt máy
   royal.css             Bàn cờ và giao diện responsive
+  uno-logic.js          Bộ bài, luật UNO, hình phạt, lượt máy và điểm cuối ván
+  uno.js / uno.css      Bàn UNO, chọn màu, hô UNO và giao diện cảm ứng
   online.js             Kết nối Caro online, phiên và khôi phục kết nối
   caro-online-ui.js     Giao diện phòng, sẵn sàng và chơi tiếp
   action.js             Bida, rắn, phá gạch
@@ -255,6 +265,8 @@ tests/browser-puppies.cjs  Xếp cún trên Chromium/WebKit và màn hình cảm
 tests/chess.test.cjs     Perft, nhập thành, bắt tốt qua đường, phong cấp, kết quả
 tests/xiangqi.test.cjs   Chân mã, ngòi pháo, cung/sông, chiếu, bí nước, AI
 tests/browser-royal.cjs  Hai bàn cờ trên Chromium/WebKit, cảm ứng và lifecycle
+tests/uno.test.cjs       Luật UNO, bộ bài, lượt chơi và AI
+tests/browser-uno.cjs    UNO trên Chromium/WebKit, cảm ứng và vòng đời game
 ```
 
 ## Kiểm thử
@@ -266,7 +278,7 @@ npm run check
 npm test
 ```
 
-Bộ kiểm thử kiểm tra thắng/thua, luật di chuyển, AI, va chạm, bảo toàn điểm ô ăn quan, sinh ô mới, lật thẻ, pause và giải phóng tài nguyên; đồng thời kiểm tra máy chủ/client Caro online, Sudoku, Xếp cún, Cờ vua và Cờ tướng. Các bài kiểm thử Delivery Dash ban đầu vẫn được giữ lại. Sau khi bổ sung hai bàn cờ ngày 06/10/2026: **123 bài kiểm thử đạt**.
+Bộ kiểm thử kiểm tra thắng/thua, luật di chuyển, AI, va chạm, bảo toàn điểm ô ăn quan, sinh ô mới, lật thẻ, pause và giải phóng tài nguyên; đồng thời kiểm tra máy chủ/client Caro online, Sudoku, Xếp cún, Cờ vua, Cờ tướng và UNO. Các bài kiểm thử Delivery Dash ban đầu vẫn được giữ lại.
 
 ### Kiểm tra trình duyệt (tùy chọn)
 
@@ -290,9 +302,10 @@ npm run test:puppies
 npm run test:royal
 npm run test:race
 npm run test:race:scene
+npm run test:uno:browser
 ```
 
-Trên Windows, script tự dùng Edge nếu có. Có thể chỉ định `BROWSER_PATH` (đường dẫn executable) và `TEST_URL` nếu cần. Kiểm thử mở cả 14 game, chơi các lượt mẫu, kiểm tra AI, tìm kiếm không dấu, yêu thích, lưu kỷ lục, tạm dừng/chơi lại, màn hình điện thoại và mở trực tiếp `file://`. Ảnh chụp lưu trong thư mục tạm `tram-choi-screenshots`, hoặc đường dẫn do biến `SCREENSHOTS` chỉ định.
+Trên Windows, script tự dùng Edge nếu có. Có thể chỉ định `BROWSER_PATH` (đường dẫn executable) và `TEST_URL` nếu cần. Kiểm thử mở cả 15 game, chơi các lượt mẫu, kiểm tra AI, tìm kiếm không dấu, yêu thích, lưu kỷ lục, tạm dừng/chơi lại, màn hình điện thoại và mở trực tiếp `file://`. Ảnh chụp lưu trong thư mục tạm `tram-choi-screenshots`, hoặc đường dẫn do biến `SCREENSHOTS` chỉ định.
 
 `test:sudoku` chạy Chromium và WebKit: kiểm tra đề có một đáp án bằng bộ giải độc lập,
 nhập số/ghi chú, hoàn tác, hỗ trợ, lưu/khôi phục ván, tạm dừng, hoàn thành và các viewport

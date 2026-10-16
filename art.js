@@ -30,6 +30,7 @@
       '<circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6m2 3a5 5 0 0 1 3 5v2"/>',
     flag: '<path d="M5 22V3m0 0c5-4 9 4 15 0v11c-6 4-10-4-15 0"/>',
     dice: '<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M7 7h.01M17 7h.01M12 12h.01M7 17h.01M17 17h.01" stroke-width="3"/>',
+    cards: '<path d="m5 17-2-11a2 2 0 0 1 1.6-2.3L13 2"/><rect x="7" y="5" width="14" height="17" rx="2"/><path d="m14 9 3 4-3 4-3-4 3-4Z"/>',
     puzzle:
       '<path d="M8 3H3v5a3 3 0 1 1 0 6v7h7a3 3 0 1 1 6 0h5v-7a3 3 0 1 1 0-6V3h-7a3 3 0 1 1-6 0Z"/>',
     sort: '<path d="M4 6h16M4 12h11M4 18h6"/>',
@@ -91,6 +92,44 @@
     return html;
   }
   function cover(id) {
+    if (id === 'domino') {
+      const dots = (value, cy) => {
+        const points = { 0: [], 1: [[0, 0]], 2: [[-13, -13], [13, 13]], 3: [[-13, -13], [0, 0], [13, 13]], 4: [[-13, -13], [13, -13], [-13, 13], [13, 13]], 5: [[-13, -13], [13, -13], [0, 0], [-13, 13], [13, 13]], 6: [[-13, -16], [13, -16], [-13, 0], [13, 0], [-13, 16], [13, 16]] };
+        return points[value].map(([x, y]) => `<circle cx="${x + 34}" cy="${y + cy}" r="4.5" fill="#32483e"/>`).join('');
+      };
+      const tiles = [[70, 62, -19, 6, 3], [168, 40, 7, 3, 5], [258, 72, 24, 5, 2]].map(([x, y, a, b, c]) => `<g transform="translate(${x} ${y}) rotate(${a} 34 66)"><rect y="5" width="68" height="132" rx="10" fill="#415d4e"/><rect width="68" height="132" rx="10" fill="#f6efd8"/><path d="M10 66h48" stroke="#b8b7a0" stroke-width="2"/>${dots(b, 33)}${dots(c, 99)}<circle cx="34" cy="66" r="2" fill="#958d70"/></g>`).join('');
+      return scene(tiles, '#8ead99', '<circle cx="370" cy="30" r="100" fill="#a9c2a7"/><circle cx="15" cy="250" r="100" fill="#789f8b"/>');
+    }
+    if (id === 'monopoly') {
+      let border = '';
+      const hues = ['#d68b71', '#a8b97e', '#83aabd', '#bba3c3', '#e0ba71', '#82b3a1'];
+      for (let i = 0; i < 6; i++) border += `<rect x="${72 + i * 42}" y="40" width="38" height="28" rx="3" fill="${hues[i]}"/><rect x="${72 + i * 42}" y="186" width="38" height="28" rx="3" fill="${hues[5 - i]}"/>`;
+      const buildings = [[121, 108, 46, 70, '#82a68b'], [178, 80, 50, 98, '#d99575'], [239, 123, 40, 55, '#8baabd']].map(([x, y, w, h, color]) => `<g><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="${color}"/><path d="m${x - 5} ${y} ${w / 2 + 5}-${w / 2} ${w / 2 + 5} ${w / 2}" fill="#405e54"/><path d="M${x + 12} ${y + 18}h7m10 0h7m-24 16h7m10 0h7" stroke="#f9e9c6" stroke-width="7"/><rect x="${x + w / 2 - 5}" y="${y + h - 18}" width="10" height="18" fill="#456553"/></g>`).join('');
+      return scene(`<rect x="58" y="28" width="282" height="200" rx="15" fill="#f5e9ce"/>${border}<rect x="85" y="77" width="230" height="100" rx="6" fill="#c4d4b3"/>${buildings}<g transform="translate(43 135) rotate(-12)"><rect width="42" height="42" rx="8" fill="#fff4dc"/><g fill="#526c60"><circle cx="12" cy="12" r="3"/><circle cx="30" cy="12" r="3"/><circle cx="21" cy="21" r="3"/><circle cx="12" cy="30" r="3"/><circle cx="30" cy="30" r="3"/></g></g>`, '#cfb891');
+    }
+    if (id === 'tienlen' || id === 'xidach') {
+      const specs = id === 'tienlen'
+        ? [[65, 60, -19, '3', '♠'], [132, 43, -7, '4', '♣'], [198, 44, 8, '5', '♦'], [259, 65, 22, '2', '♥']]
+        : [[109, 48, -13, 'A', '♥'], [213, 48, 14, 'K', '♠']];
+      const cards = specs.map(([x, y, angle, rank, suit]) => {
+        const ink = ['♥', '♦'].includes(suit) ? '#ba5c50' : '#334a45';
+        return `<g transform="translate(${x} ${y}) rotate(${angle} 40 69)"><rect y="5" width="80" height="138" rx="10" fill="#263d3540"/><rect width="80" height="138" rx="10" fill="#fff2d8"/><text x="12" y="25" font-size="19" font-family="sans-serif" font-weight="700" fill="${ink}">${rank}</text><text x="40" y="89" text-anchor="middle" font-family="serif" font-size="52" fill="${ink}">${suit}</text><text x="67" y="126" text-anchor="end" font-size="19" font-family="sans-serif" font-weight="700" fill="${ink}">${rank}</text></g>`;
+      }).join('');
+      const badge = id === 'xidach' ? '<circle cx="318" cy="187" r="30" fill="#e4bc6f" stroke="#f9e0a1" stroke-width="5"/><text x="318" y="198" text-anchor="middle" font-family="sans-serif" font-size="29" font-weight="750" fill="#745c39">21</text>' : '';
+      return scene(cards + badge, id === 'tienlen' ? '#b49c87' : '#6e9588', '<circle cx="30" cy="20" r="90" fill="#f4e2bc" opacity=".18"/><circle cx="390" cy="240" r="95" fill="#304d43" opacity=".13"/>');
+    }
+    if (id === 'werewolf') {
+      return scene('<circle cx="289" cy="66" r="35" fill="#f1e5b9"/><circle cx="304" cy="54" r="31" fill="#58657f"/><path d="M0 217 40 123l35 94 45-106 50 106 58-86 52 86 60-106 60 106v33H0z" fill="#324b55"/><path d="M69 190 108 151l39 39v41H69zM271 196l32-34 32 34v35h-64z" fill="#938a81"/><path d="m58 192 50-48 50 48m104 7 41-43 41 43" fill="none" stroke="#293c4b" stroke-width="10" stroke-linejoin="round"/><path d="M93 195h14v20H93m201-15h13v17h-13" fill="#efd29b"/><path d="m154 105 4-50 34 29 23 1 33-28-5 51 9 39-43 46-50-40z" fill="#293b4c"/><path d="m169 111 22 8-12 9zm64 0-23 8 13 9z" fill="#eed99b"/><path d="m191 148 13 8 12-8-13-8z" fill="#90a1a5"/>', '#58657f', '<g fill="#dce5c5"><circle cx="55" cy="43" r="2"/><circle cx="115" cy="25" r="1.5"/><circle cx="348" cy="105" r="2"/><circle cx="28" cy="103" r="1.5"/><circle cx="229" cy="30" r="1.5"/></g>');
+    }
+    if (id === 'uno') {
+      const cards = [
+        [74, 54, -20, '#d97561', '7'],
+        [132, 39, -7, '#dcb660', '↺'],
+        [192, 39, 8, '#6caa96', '+2'],
+        [250, 54, 22, '#739eb8', '4'],
+      ].map(([x, y, angle, color, label]) => `<g transform="translate(${x} ${y}) rotate(${angle} 40 72)"><rect y="5" width="80" height="136" rx="12" fill="#594b4640"/><rect width="80" height="136" rx="12" fill="#fff4dc"/><rect x="5" y="5" width="70" height="126" rx="9" fill="${color}"/><ellipse cx="40" cy="68" rx="29" ry="42" transform="rotate(26 40 68)" fill="none" stroke="#fff4dc" stroke-width="2.5" opacity=".8"/><text x="40" y="81" text-anchor="middle" fill="#fff4dc" font-size="${label === '+2' ? 32 : 42}" font-weight="800" font-family="sans-serif">${label}</text><text x="12" y="25" fill="#fff4dc" font-size="13" font-weight="700" font-family="sans-serif">${label}</text></g>`).join('');
+      return scene(cards, '#e6c8ac', '<circle cx="35" cy="30" r="88" fill="#efdcc1"/><circle cx="383" cy="235" r="98" fill="#cbb7a5"/><path d="m48 190 9-9m-4 27h16m273-159 11-11m-4 28h13" stroke="#fff0cd" stroke-width="4" stroke-linecap="round"/>');
+    }
     if (id === 'chess') {
       const squares = Array.from({ length: 64 }, (_, i) => `<rect x="${i % 8 * 22}" y="${Math.floor(i / 8) * 22}" width="22" height="22" fill="${(i % 8 + Math.floor(i / 8)) % 2 ? '#668371' : '#ecedd6'}"/>`).join('');
       const pieces = [[4, 'bK'], [0, 'bR'], [7, 'bR'], [9, 'bP'], [12, 'bP'], [14, 'bP'], [21, 'bN'], [35, 'wN'], [42, 'wB'], [49, 'wP'], [52, 'wP'], [54, 'wP'], [59, 'wQ'], [60, 'wK']].map(([i, piece]) => `<g transform="translate(${i % 8 * 22 + 1} ${Math.floor(i / 8) * 22 + 1}) scale(.3125)">${window.ArcadeRoyalArt.chessPiece(piece)}</g>`).join('');

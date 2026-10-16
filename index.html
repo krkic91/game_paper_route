@@ -8,7 +8,7 @@
     <meta name="caro-websocket-url" content="" />
     <meta
       name="description"
-      content="Trạm Chơi — 14 game nhỏ, cả kho niềm vui. Chơi Delivery Dash, đua xe đạp, caro, cờ cá ngựa, ô ăn quan, bida, sudoku, xếp cún và nhiều hơn nữa. Miễn phí, không cần tài khoản."
+      content="Trạm Chơi — 20 game nhỏ, cả kho niềm vui. Chơi Domino, Cờ tỷ phú, Tiến lên miền Nam, Xì dách, Ma sói, UNO, Caro và nhiều hơn nữa. Miễn phí, không cần tài khoản."
     />
     <title>Trạm Chơi — Góc nhỏ, vui lớn.</title>
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
@@ -17,6 +17,12 @@
     <link rel="stylesheet" href="games/sudoku.css" />
     <link rel="stylesheet" href="games/puppies.css" />
     <link rel="stylesheet" href="games/royal.css" />
+    <link rel="stylesheet" href="games/uno.css" />
+    <link rel="stylesheet" href="games/domino.css" />
+    <link rel="stylesheet" href="games/monopoly.css" />
+    <link rel="stylesheet" href="games/tienlen.css" />
+    <link rel="stylesheet" href="games/xidach.css" />
+    <link rel="stylesheet" href="games/werewolf.css" />
     <link rel="stylesheet" href="games/3d/three.css" />
     <link rel="stylesheet" href="games/race.css" />
     <script src="art.js" defer></script>
@@ -27,6 +33,12 @@
     <script src="games/puppies-logic.js" defer></script>
     <script src="games/chess-logic.js" defer></script>
     <script src="games/xiangqi-logic.js" defer></script>
+    <script src="games/uno-logic.js" defer></script>
+    <script src="games/domino-logic.js" defer></script>
+    <script src="games/monopoly-logic.js" defer></script>
+    <script src="games/tienlen-logic.js" defer></script>
+    <script src="games/xidach-logic.js" defer></script>
+    <script src="games/werewolf-logic.js" defer></script>
     <script src="games/layouts.js" defer></script>
     <script src="games/shared.js" defer></script>
     <script src="games/online.js" defer></script>
@@ -35,6 +47,12 @@
     <script src="games/sudoku.js" defer></script>
     <script src="games/puppies.js" defer></script>
     <script src="games/royal.js" defer></script>
+    <script src="games/uno.js" defer></script>
+    <script src="games/domino.js" defer></script>
+    <script src="games/monopoly.js" defer></script>
+    <script src="games/tienlen.js" defer></script>
+    <script src="games/xidach.js" defer></script>
+    <script src="games/werewolf.js" defer></script>
     <script src="games/action.js" defer></script>
     <script src="games/race-audio.js" defer></script>
     <script src="games/race-2d.js" defer></script>
@@ -53,7 +71,7 @@
       <nav class="main-nav">
         <button class="nav-item active" data-view="all" aria-current="page">
           <span data-icon="grid"></span><span class="nav-text">Khám phá</span
-          ><span class="nav-count">14</span>
+          ><span class="nav-count">20</span>
         </button>
         <button class="nav-item" data-view="favorites">
           <span data-icon="heart"></span><span class="nav-text">Yêu thích</span
@@ -117,7 +135,7 @@
             </h1>
           </div>
           <div class="free-note">
-            <span class="connection-dot"></span>14 trò chơi · 2D &amp; 3D · Miễn phí
+            <span class="connection-dot"></span>20 trò chơi · 2D &amp; 3D · Miễn phí
           </div>
         </section>
 
@@ -140,7 +158,7 @@
               </div>
             </div>
             <div id="hero-art" class="hero-art" aria-hidden="true"></div>
-            <span class="hero-number" aria-hidden="true">01 / 14</span>
+            <span class="hero-number" aria-hidden="true">01 / 20</span>
           </article>
           <article class="together-card">
             <div class="together-top">
@@ -165,7 +183,7 @@
             <div class="section-heading-title">
               <span class="section-icon" data-icon="gamepad"></span>
               <h2 id="library-title">Tất cả trò chơi</h2>
-              <span id="result-count" class="count-badge">14</span>
+              <span id="result-count" class="count-badge">20</span>
             </div>
             <label class="sort-control"
               ><span data-icon="sort"></span
@@ -176,17 +194,21 @@
               </select></label
             >
           </div>
-          <div class="library-edition-row"><span>CHỌN KHÔNG GIAN CHƠI</span><div class="edition-switch" role="group" aria-label="Phiên bản game trong thư viện"><button data-library-edition="2d" aria-pressed="true">2D <span>Cổ điển</span></button><button data-library-edition="3d" aria-pressed="false"><span data-icon="cube"></span>3D <span>Không gian mới</span></button></div><small id="edition-library-note">14 game · Giữ trọn bản nguyên bản</small></div>
+          <div class="library-edition-row"><span>CHỌN KHÔNG GIAN CHƠI</span><div class="edition-switch" role="group" aria-label="Phiên bản game trong thư viện"><button data-library-edition="2d" aria-pressed="true">2D <span>Cổ điển</span></button><button data-library-edition="3d" aria-pressed="false"><span data-icon="cube"></span>3D <span>Không gian mới</span></button></div><small id="edition-library-note">20 game · Giữ trọn bản nguyên bản</small></div>
           <div class="filter-row">
             <div class="category-filters" role="group" aria-label="Lọc theo thể loại">
               <button class="filter-chip active" data-filter="all" aria-pressed="true">
-                Tất cả<span>14</span></button
+                Tất cả<span>20</span></button
               ><button class="filter-chip" data-filter="arcade" aria-pressed="false">
                 <span data-icon="bolt"></span>Arcade</button
               ><button class="filter-chip" data-filter="sport" aria-pressed="false">
                 <span data-icon="flag"></span>Thể thao</button
               ><button class="filter-chip" data-filter="board" aria-pressed="false">
                 <span data-icon="dice"></span>Bàn cờ</button
+              ><button class="filter-chip" data-filter="card" aria-pressed="false">
+                <span data-icon="cards"></span>Bài</button
+              ><button class="filter-chip" data-filter="social" aria-pressed="false">
+                <span data-icon="users"></span>Nhập vai</button
               ><button class="filter-chip" data-filter="puzzle" aria-pressed="false">
                 <span data-icon="puzzle"></span>Trí tuệ
               </button>
