@@ -1,0 +1,70 @@
+/* version v1.0 */
+.werewolf-workspace { --ww-ink: #f2eef9; min-width: 0; flex: 0 0 auto; gap: 16px; padding: 20px 24px; color: var(--ww-ink); background: radial-gradient(ellipse at 80% 5%, #504569, #211f35 70%); }
+.werewolf-workspace.is-day { background: radial-gradient(ellipse at 80% 5%, #58625b, #292e37 70%); }
+.werewolf-workspace .game-toolbar { justify-content: space-between; gap: 10px; max-width: 820px; min-height: 0; border-color: #d5c4f02a; }
+.werewolf-heading { display: flex; flex-direction: column; gap: 4px; }
+.werewolf-heading small { font-size: 9px; letter-spacing: 1.8px; color: #d0c1e7; }
+.werewolf-heading strong { font-size: 32px; line-height: 1.1; }
+.werewolf-heading strong span { color: #e4c68b; }
+.werewolf-clock { display: flex; flex-direction: column; text-align: right; gap: 5px; }
+.werewolf-clock strong { color: #f6d99b; font-size: 14px; }
+.werewolf-clock span { font-size: 11px; color: #d2cadd; }
+.werewolf-workspace .game-board-area { min-width: 0; flex: 0 0 auto; }
+.werewolf-village { width: min(100%, 820px); min-width: 0; }
+.werewolf-role { display: flex; align-items: center; gap: 14px; padding: 16px 20px; border: 1px solid #c4b3df55; border-radius: 18px; background: #ffffff08; }
+.werewolf-moon { display: grid; place-items: center; font-size: 58px; line-height: 1; width: 60px; flex-shrink: 0; color: #f6d99b; }
+.werewolf-role small { display: block; color: #c9bedb; font-size: 9px; letter-spacing: 1px; margin-bottom: 5px; }
+.werewolf-role strong { display: block; font-size: 20px; color: #f5dcaa; }
+.werewolf-role p { margin: 7px 0 0; font-size: 12px; line-height: 1.5; color: #ded7e8; }
+.werewolf-prompt { min-height: 1.6em; font-size: 13px; line-height: 1.6; text-align: center; margin: 18px 0 14px; color: #f0e5d4; }
+.werewolf-seats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.werewolf-person { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 132px; min-width: 0; padding: 12px 5px; border: 1px solid #c8bad06b; border-radius: 15px; background: #ffffff0a; color: #f0eaf9; font: inherit; appearance: none; -webkit-appearance: none; touch-action: manipulation; -webkit-tap-highlight-color: transparent; cursor: pointer; }
+.werewolf-person:not(:disabled):hover { border-color: #f3d18f; background: #f3d18f14; }
+.werewolf-person:disabled { cursor: default; opacity: 1; }
+.werewolf-person.is-selected { outline: 2px solid #f3d18f; outline-offset: 2px; background: #f3d18f1c; }
+.werewolf-person.is-ally .werewolf-avatar { color: #ffd0bb; background: #744c5c; }
+.werewolf-person.is-eliminated { opacity: .53; border-style: dashed; }
+.werewolf-avatar { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: #655a80; color: #fff2d9; font-weight: 750; }
+.werewolf-person strong { font-size: 13px; }
+.werewolf-person > span:not(.werewolf-avatar) { font-size: 11px; color: #dfd4ec; }
+.werewolf-person small { min-height: 1.3em; font-size: 9px; color: #bdb2cc; text-align: center; }
+.werewolf-actions { display: flex; justify-content: center; gap: 10px; margin: 18px 0; }
+.werewolf-workspace .control-button { min-height: 44px; min-width: 120px; border-color: #c6b0dd; background: #e8d7b6; color: #2c2435; }
+.werewolf-workspace [hidden] { display: none !important; }
+.werewolf-notebook { padding: 12px 15px; margin-bottom: 16px; border: 1px solid #d5bd8255; border-radius: 12px; background: #b8996a15; }
+.werewolf-notebook strong { font-size: 12px; color: #eed19a; }
+.werewolf-notebook p { margin: 7px 0 0; font-size: 12px; line-height: 1.6; color: #e9dcc7; }
+.werewolf-discussion { padding: 14px 17px; border: 1px solid #bcaed42b; border-radius: 15px; background: #00000012; }
+.werewolf-discussion h3 { margin: 0 0 10px; font-size: 12px; color: #dacee9; }
+.werewolf-discussion ul { padding-left: 18px; margin: 0; color: #c7bfd3; font-size: 11px; line-height: 1.6; }
+.werewolf-discussion li + li { margin-top: 6px; }
+.werewolf-workspace .game-controls { max-width: 820px; justify-content: center; gap: 12px 24px; }
+.werewolf-workspace details { max-width: 100%; font-size: 12px; color: #d2c8df; }
+.werewolf-workspace details[open] { flex: 1 0 100%; }
+.werewolf-workspace summary { min-height: 42px; padding: 10px 0; cursor: pointer; }
+.werewolf-workspace details p, .werewolf-history ol { line-height: 1.7; }
+.werewolf-history ol { padding-left: 20px; margin: 8px 0; overflow-wrap: anywhere; }
+.werewolf-workspace .game-status { color: #c8bed4; max-width: 820px; }
+.werewolf-person:focus-visible, .werewolf-workspace button:focus-visible, .werewolf-workspace summary:focus-visible { outline: 3px solid #f6d99b; outline-offset: 3px; }
+@media (max-width: 600px) {
+  .werewolf-workspace { padding: 15px 12px; gap: 12px; }
+  .werewolf-heading strong { font-size: 27px; }
+  .werewolf-heading small { font-size: 8px; letter-spacing: 1px; }
+  .werewolf-clock span { font-size: 10px; }
+  .werewolf-role { padding: 12px; gap: 8px; }
+  .werewolf-moon { width: 37px; font-size: 43px; }
+  .werewolf-role p { font-size: 11px; }
+  .werewolf-seats { gap: 7px; }
+  .werewolf-person { min-height: 115px; padding: 10px 3px; border-radius: 10px; gap: 5px; }
+  .werewolf-person strong { font-size: 11px; }
+  .werewolf-person > span:not(.werewolf-avatar) { font-size: 9px; }
+  .werewolf-person small { font-size: 8px; }
+  .werewolf-avatar { width: 30px; height: 30px; font-size: 12px; }
+  .werewolf-prompt { font-size: 12px; }
+  .werewolf-discussion { padding: 12px; }
+}
+@media (max-width: 350px) {
+  .werewolf-seats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .werewolf-person { min-height: 103px; }
+  .werewolf-heading strong { font-size: 24px; }
+}

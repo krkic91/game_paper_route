@@ -278,7 +278,7 @@ npm run check
 npm test
 ```
 
-Bộ kiểm thử kiểm tra thắng/thua, luật di chuyển, AI, va chạm, bảo toàn điểm ô ăn quan, sinh ô mới, lật thẻ, pause và giải phóng tài nguyên; đồng thời kiểm tra máy chủ/client Caro online, Sudoku, Xếp cún, Cờ vua, Cờ tướng và UNO. Các bài kiểm thử Delivery Dash ban đầu vẫn được giữ lại.
+Bộ kiểm thử kiểm tra thắng/thua, luật di chuyển, AI, va chạm, bảo toàn điểm ô ăn quan, sinh ô mới, lật thẻ, pause và giải phóng tài nguyên; đồng thời kiểm tra máy chủ/client Caro online, Sudoku, Xếp cún, Cờ vua, Cờ tướng, UNO và năm game bàn/bài mới. Chạy riêng năm game mới bằng `npm run test:table`. Các bài kiểm thử Delivery Dash ban đầu vẫn được giữ lại.
 
 ### Kiểm tra trình duyệt (tùy chọn)
 
@@ -303,9 +303,19 @@ npm run test:royal
 npm run test:race
 npm run test:race:scene
 npm run test:uno:browser
+npm run test:table:browser
 ```
 
-Trên Windows, script tự dùng Edge nếu có. Có thể chỉ định `BROWSER_PATH` (đường dẫn executable) và `TEST_URL` nếu cần. Kiểm thử mở cả 15 game, chơi các lượt mẫu, kiểm tra AI, tìm kiếm không dấu, yêu thích, lưu kỷ lục, tạm dừng/chơi lại, màn hình điện thoại và mở trực tiếp `file://`. Ảnh chụp lưu trong thư mục tạm `tram-choi-screenshots`, hoặc đường dẫn do biến `SCREENSHOTS` chỉ định.
+Trên Windows, script tự dùng Edge nếu có. Có thể chỉ định `BROWSER_PATH` (đường dẫn executable) và `TEST_URL` nếu cần. Bộ smoke mở cả 20 game, chơi các lượt mẫu, kiểm tra AI, tìm kiếm không dấu, yêu thích, lưu kỷ lục, tạm dừng/chơi lại, màn hình điện thoại và mở trực tiếp `file://`. Ảnh chụp lưu trong thư mục tạm `tram-choi-screenshots`, hoặc đường dẫn do biến `SCREENSHOTS` chỉ định.
+
+`test:table:browser` kiểm tra riêng Domino, Cờ tỷ phú, Tiến lên miền Nam, Xì dách
+và Ma sói trên Chromium/WebKit: hành động hợp lệ, kết quả ván, thông tin bí mật,
+tạm dừng, chơi lại, đóng khi có lượt máy đang chờ và mở trực tiếp `file://`.
+Các viewport là 320 × 740, 390 × 844, 820 × 1180, 1366 × 900; màn hình nhỏ dùng
+DPR 2 và thao tác chạm. Có thể chọn `TABLE_BROWSERS=webkit` hoặc `chromium`,
+`TABLE_GAMES=domino,monopoly,tienlen,xidach,werewolf`, `TABLE_FUNCTIONAL_ONLY=1`
+hoặc `TABLE_RESPONSIVE_ONLY=1`. Ảnh và báo cáo ở `test-results/table-games`,
+hoặc thư mục `SCREENSHOTS`. Xem [báo cáo kiểm thử năm game](docs/table-games-testing.md).
 
 `test:sudoku` chạy Chromium và WebKit: kiểm tra đề có một đáp án bằng bộ giải độc lập,
 nhập số/ghi chú, hoàn tác, hỗ trợ, lưu/khôi phục ván, tạm dừng, hoàn thành và các viewport

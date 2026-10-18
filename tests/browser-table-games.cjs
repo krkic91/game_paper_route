@@ -33,10 +33,10 @@ async function reachable(locator, label) {
   await locator.scrollIntoViewIfNeeded();
   const info = await locator.evaluate(el => {
     const r = el.getBoundingClientRect(), hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
-    return { width: r.width, height: r.height, hit: hit === el || el.contains(hit) };
+    return { width: r.width, height: r.height, x: r.x, y: r.y, hit: hit === el || el.contains(hit), covering: hit?.className };
   });
   assert.ok(info.width >= 38 && info.height >= 38, `${label}: touch target ${info.width}x${info.height}`);
-  assert.ok(info.hit, `${label}: control is reachable`);
+  assert.ok(info.hit, `${label}: control is reachable: ${JSON.stringify(info)}`);
 }
 async function install(page, id) {
   await page.goto(base);
@@ -77,6 +77,29 @@ async function install(page, id) {
       if (id === 'monopoly' && fixture === 'win') {
         s.round = 30; s.current = 0; s.phase = 'end';
         for (let i = 1; i < 4; i++) { s.players[i].bankrupt = true; s.players[i].cash = 0; }
+      }
+      if (id === 'xidach') {
+        const pool = original.createDeck();
+        const take = ([suit, rank]) => pool.splice(pool.findIndex(card => card.suit === suit && card.rank === rank), 1)[0];
+        const win = fixture === 'win', five = fixture === 'five';
+        s.hands.player = (five ? [['spades', 2], ['clubs', 2], ['diamonds', 2], ['hearts', 2]] : win ? [['spades', 10], ['clubs', 8]] : [['spades', 7], ['clubs', 5]]).map(take);
+        s.hands.dealer = (five ? [['spades', 10], ['clubs', 6]] : win ? [['diamonds', 10], ['hearts', 6]] : [['diamonds', 9], ['hearts', 7]]).map(take);
+        const draws = (five ? [['spades', 3], ['clubs', 3]] : win ? [['spades', 9]] : [['spades', 4], ['diamonds', 5]]).map(take);
+        s.deck = pool.concat(draws.reverse()); s.phase = 'player'; s.outcome = null; s.reason = ''; s.score = 0;
+      }
+      if (id === 'werewolf') {
+        const roles = ['seer', 'wolf', 'wolf', 'guard', 'villager', 'villager', 'villager', 'villager'];
+        s.players.forEach((player, index) => { player.role = roles[index]; });
+        s.actions = { 1: { type: 'kill', target: 0 }, 2: { type: 'kill', target: 0 }, 3: { type: 'protect', target: 0 } };
+        if (fixture === 'win') {
+          s.phase = 'day'; s.players[2].alive = false; s.actions = {};
+          for (const player of s.players) if (player.id && player.alive) s.actions[player.id] = { type: 'vote', target: player.id === 1 ? 0 : 1 };
+        }
+        if (fixture === 'guard') {
+          s.players[0].role = 'guard'; s.players[3].role = 'seer'; s.guardLast = 0;
+          s.actions = { 1: { type: 'kill', target: 4 }, 2: { type: 'kill', target: 4 }, 3: { type: 'inspect', target: 1 } };
+        }
+        if (fixture === 'spectator') { s.players[0].alive = false; }
       }
       window.__tableState = s;
       return s;
@@ -154,10 +177,51 @@ async function functional(page, id) {
     await restart(page, 'win');
     await page.locator('[data-monopoly-end]').click();
     assert.equal((await state(page)).winner, 0);
-  } else throw new Error(`Functional coverage not implemented yet: ${id}`);
-  await page.locator('.result-overlay').waitFor();
+  } else if (id === 'xidach') {
+    assert.equal(await page.locator('[data-xidach-stand]').isDisabled(), true);
+    assert.equal(await page.locator('.xidach-card-back').count(), 1);
+    assert.equal(await page.locator('[data-xidach-hand="dealer"] [aria-label="7 cơ"]').count(), 0, 'hole card is absent from the DOM');
+    await page.locator('[data-xidach-hit]').click();
+    assert.equal((await state(page)).hands.player.length, 3);
+    assert.equal(await page.locator('[data-xidach-stand]').isEnabled(), true);
+    await pauseAction(page, '[data-xidach-stand]');
+    await page.waitForFunction(() => window.__tableState.phase === 'done');
+    assert.equal((await state(page)).outcome, 'loss');
+    assert.equal(await page.locator('.xidach-card-back').count(), 0);
+    await restart(page, 'win');
+    await page.locator('[data-xidach-stand]').focus();
+    await page.keyboard.press('Enter');
+    await page.waitForFunction(() => window.__tableState.phase === 'done');
+    assert.equal((await state(page)).outcome, 'win');
+  } else if (id === 'werewolf') {
+    assert.equal(await page.locator('[data-ww-role]').textContent(), 'Tiên tri');
+    for (let i = 1; i < 8; i++) assert.equal(await page.locator(`[data-ww-identity="${i}"]`).textContent(), 'Chưa rõ vai');
+    assert.equal(await page.locator('[data-ww-confirm]').isDisabled(), true);
+    await page.locator('[data-ww-target="1"]').click();
+    await pauseAction(page, '[data-ww-confirm]');
+    await page.waitForFunction(() => window.__tableState.phase === 'day');
+    assert.equal((await state(page)).knowledge[0][1], true);
+    assert.match(await page.locator('[data-ww-knowledge]').textContent(), /Máy 1: là sói/);
+    assert.equal(await page.locator('[data-ww-identity="1"]').textContent(), 'Chưa rõ vai', 'inspection stays in private notebook');
+    assert.equal(await page.locator('[data-ww-discussion] li').count(), 7);
+    await restart(page, 'guard');
+    assert.equal(await page.locator('[data-ww-target="0"]').isDisabled(), true, 'cannot repeat guard target');
+    await page.locator('[data-ww-target="4"]').click();
+    await page.locator('[data-ww-confirm]').click();
+    await page.waitForFunction(() => window.__tableState.phase === 'day');
+    assert.equal((await state(page)).players[4].alive, true);
+    await restart(page, 'spectator');
+    await page.waitForFunction(() => window.__tableState.turn >= 2, null, { timeout: 10000 });
+    await restart(page, 'win');
+    await page.locator('[data-ww-target="1"]').click();
+    await page.locator('[data-ww-confirm]').focus();
+    await page.keyboard.press('Enter');
+    await page.waitForFunction(() => window.__tableState.phase === 'over');
+    assert.equal((await state(page)).winner, 'village');
+  } else throw new Error(`Unknown game: ${id}`);
+  await page.locator(id === 'xidach' ? '[data-xidach-result]' : '.result-overlay').waitFor();
   await page.evaluate(() => { window.__fixture = 'opening'; });
-  await page.locator('[data-again]').click();
+  await page.locator(id === 'xidach' ? '[data-xidach-next]' : '[data-again]').click();
   await page.locator('.result-overlay').waitFor({ state: 'hidden' });
   await page.screenshot({ path: join(output, `${page.__engine}-${id}-desktop.png`) });
 }
@@ -181,7 +245,29 @@ async function responsiveAction(page, id, touch) {
     await press('[data-monopoly-decline]');
     await page.locator('[data-monopoly-inspect]').selectOption('23');
     assert.match(await page.locator('[data-monopoly-detail]').textContent(), /Quảng Trường/);
-  } else throw new Error(`Responsive coverage not implemented yet: ${id}`);
+    await press('.monopoly-speed');
+    assert.equal(await page.locator('[data-monopoly-fast]').isChecked(), true);
+    await press('.monopoly-rules summary');
+    assert.equal(await page.locator('.monopoly-rules').getAttribute('open'), '');
+  } else if (id === 'xidach') {
+    await press('[data-xidach-hit]');
+    await press('[data-xidach-stand]');
+    await page.waitForFunction(() => window.__tableState.phase === 'done');
+    await reachable(page.locator('[data-xidach-next]'), 'xidach next round');
+    await restart(page, 'five');
+    await press('[data-xidach-hit]');
+    await page.waitForFunction(() => window.__tableState.phase === 'done');
+    assert.equal((await state(page)).outcome, 'win');
+    assert.equal(await page.locator('[data-xidach-hand="player"] .xidach-card').count(), 5);
+    const handBox = await page.locator('[data-xidach-hand="player"]').evaluate(el => ({ width: el.clientWidth, scroll: el.scrollWidth }));
+    assert.ok(handBox.scroll <= handBox.width + 1, 'five cards fit the hand');
+    await reachable(page.locator('[data-xidach-next]'), 'xidach five-card next round');
+  } else if (id === 'werewolf') {
+    await press('[data-ww-target="1"]');
+    await press('[data-ww-confirm]');
+    await page.waitForFunction(() => window.__tableState.phase === 'day');
+    assert.match(await page.locator('[data-ww-knowledge]').textContent(), /Máy 1: là sói/);
+  } else throw new Error(`Unknown game: ${id}`);
 }
 
 async function run(browser, engine, id, profile, full) {
@@ -202,15 +288,48 @@ async function run(browser, engine, id, profile, full) {
     await page.screenshot({ path: join(output, label + '.png') });
     await restart(page);
     // Retain the old state to prove closing cannot run any queued bot callbacks.
-    await page.evaluate(() => { window.__closedRound = window.__tableState; window.__closedJson = JSON.stringify(window.__closedRound); });
-    await page.locator('#close-game').click();
-    await page.waitForTimeout(900);
+    await page.evaluate(id => {
+      const click = selector => document.querySelector(selector).click();
+      if (id === 'domino') click('[data-domino-tile="6-6"]');
+      if (id === 'tienlen') { click('[data-tl-hint]'); click('[data-tl-play]'); }
+      if (id === 'monopoly') click('[data-monopoly-roll]');
+      if (id === 'xidach') { click('[data-xidach-hit]'); click('[data-xidach-stand]'); }
+      if (id === 'werewolf') { click('[data-ww-target="1"]'); click('[data-ww-confirm]'); }
+      window.__closedRound = window.__tableState; window.__closedJson = JSON.stringify(window.__closedRound);
+      click('#close-game');
+    }, id);
+    await page.waitForTimeout(1000);
     assert.equal(await page.locator('#game-stage').innerHTML(), '');
     assert.equal(await page.evaluate(() => JSON.stringify(window.__closedRound) === window.__closedJson), true);
     assert.deepEqual(errors, [], label);
     report.runs.push({ engine, id, ...profile, touch, full }); save();
     console.log(`PASS ${label}${full ? ' functional' : ' responsive'}`);
+  } catch (error) {
+    await page.screenshot({ path: join(output, label + '-failure.png') }).catch(() => {});
+    throw error;
   } finally { await context.close(); }
+}
+async function offline(browser, engine) {
+  const page = await browser.newPage(), errors = watch(page);
+  try {
+    await page.goto(pathToFileURL(join(__dirname, '../index.html')).href);
+    await page.waitForFunction(() => document.querySelectorAll('.game-card').length === 20);
+    for (const id of games) {
+      await open(page, id);
+      await page.locator('#close-game').click();
+    }
+    await page.locator('[data-filter="social"]').click();
+    assert.equal(await page.locator('.game-card').count(), 1);
+    assert.equal(await page.locator('.game-card').getAttribute('data-game'), 'werewolf');
+    await page.locator('[data-filter="card"]').click();
+    assert.equal(await page.locator('.game-card').count(), 3);
+    await page.locator('#search').fill('tien len');
+    assert.equal(await page.locator('.game-card').count(), 1);
+    assert.equal(await page.locator('.game-card').getAttribute('data-game'), 'tienlen');
+    assert.deepEqual(errors, []);
+    report.runs.push({ engine, offline: true, games }); save();
+    console.log(`PASS ${engine} offline and library filters`);
+  } finally { await page.close(); }
 }
 (async () => {
   save();
@@ -218,6 +337,7 @@ async function run(browser, engine, id, profile, full) {
     const browser = await { chromium, webkit }[engine].launch({ headless: true, ...(engine === 'chromium' && existsSync(edge) ? { executablePath: process.env.BROWSER_PATH || edge } : {}) });
     report.versions ||= {}; report.versions[engine] = browser.version(); save();
     try {
+      if (process.env.TABLE_RESPONSIVE_ONLY !== '1') await offline(browser, engine);
       for (const id of games) {
         if (process.env.TABLE_RESPONSIVE_ONLY !== '1') await run(browser, engine, id, { width: 1366, height: 900 }, true);
         if (process.env.TABLE_FUNCTIONAL_ONLY !== '1') for (const profile of profiles) await run(browser, engine, id, profile, false);

@@ -1,0 +1,63 @@
+/* version v1.0 */
+.xidach-workspace { --xd-gold: #e8c887; --xd-cream: #fff6df; max-width: 900px; margin-inline: auto; width: 100%; flex: 1 0 auto; }
+.xidach-workspace *, .xidach-workspace *::before, .xidach-workspace *::after { box-sizing: border-box; }
+/* Keep the whole table in flow so shorter screens scroll instead of covering the controls. */
+.xidach-workspace .game-board-area { flex: 1 0 auto; min-height: auto; }
+.xidach-workspace .game-toolbar { justify-content: space-between; gap: 12px; }
+.xidach-heading { display: grid; gap: 3px; }
+.xidach-heading > small { font-size: 9px; letter-spacing: 1.4px; color: #a7b4a0; }
+.xidach-heading > strong { font-size: 26px; line-height: 1.2; color: var(--xd-cream); }
+.xidach-heading > strong span { color: var(--xd-gold); margin-left: 9px; }
+.xidach-session { display: flex; gap: 18px; }
+.xidach-session .game-stat { min-width: 34px; }
+.xidach-playfield { width: 100%; min-width: 0; align-self: flex-start; }
+.xidach-table { padding: 20px 22px 14px; border: 1px solid #6d7853; border-radius: 25px; color: #eaf0e2; background: radial-gradient(ellipse at 50% 40%, #285645 0, #183f35 65%, #123028 100%); box-shadow: inset 0 0 0 5px #1a352b, inset 0 0 0 6px #54734b, 0 12px 32px #0002; }
+.xidach-seat { max-width: 520px; margin-inline: auto; }
+.xidach-seat-title { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 13px; }
+.xidach-seat-title strong { color: #f6efdb; font-size: 15px; }
+.xidach-seat-title strong small { font-weight: 400; margin-left: 6px; color: #acc7b4; }
+.xidach-seat-title > span { text-align: right; color: #e4d5a8; }
+.xidach-hand { display: flex; justify-content: center; gap: 10px; min-height: 104px; }
+.xidach-card { position: relative; flex: 0 1 74px; aspect-ratio: 5 / 7; width: 74px; min-width: 0; max-width: 74px; border-radius: 8px; background: #fffaf0; color: #25362f; box-shadow: 0 4px 9px #0004; border: 1px solid #e2d8c3; overflow: hidden; }
+.xidach-card.is-red { color: #b3353e; }
+.xidach-corner { position: absolute; top: 5px; left: 6px; font: 700 17px/1.05 Georgia, serif; display: grid; text-align: center; }
+.xidach-corner small { font-size: 13px; }
+.xidach-corner-bottom { top: auto; left: auto; right: 6px; bottom: 5px; transform: rotate(180deg); }
+.xidach-pip { position: absolute; inset: 0; display: grid; place-items: center; font: 35px Georgia, serif; }
+.xidach-card-back { display: grid; place-items: center; background: repeating-linear-gradient(45deg, #3d535a 0 5px, #2d454d 5px 10px); border: 4px solid #f1e6d1; color: #ead3a2; }
+.xidach-card-back > span { display: grid; place-items: center; width: 76%; height: 78%; border: 1px solid #d7c49c; border-radius: 4px; font-size: 35px; }
+.xidach-table-middle { position: relative; text-align: center; padding: 20px 0 23px; margin: 6px 0; }
+.xidach-table-mark { font: italic 700 68px/1 Georgia, serif; color: #a9c39a16; position: absolute; inset: 0; pointer-events: none; }
+.xidach-table-middle > p { margin: 0 0 6px; font-weight: 700; color: var(--xd-gold); font-size: 15px; position: relative; }
+.xidach-table-middle > small { color: #adbfac; font-size: 11px; position: relative; }
+.xidach-ace-note { min-height: 16px; margin: 11px 0 0; text-align: center; color: #c0cfb9; font-size: 11px; line-height: 1.5; }
+.xidach-workspace .game-controls { justify-content: center; gap: 10px; }
+.xidach-workspace .control-button { min-height: 44px; touch-action: manipulation; }
+.xidach-workspace .xidach-hit { background: #e7c888; color: #282c20; border: 1px solid #f0dca9; min-width: 120px; }
+.xidach-workspace .xidach-stand { background: #314d40; color: #f5eedb; border: 1px solid #6b8364; min-width: 120px; }
+.xidach-workspace .control-button:disabled { opacity: 0.4; cursor: default; }
+.xidach-workspace button:focus-visible, .xidach-rules summary:focus-visible { outline: 3px solid #f4d99e; outline-offset: 3px; }
+.xidach-rules { width: 100%; color: #bcc8b5; font-size: 12px; line-height: 1.6; }
+.xidach-rules > summary { cursor: pointer; padding: 9px 4px; text-align: center; }
+.xidach-rules > p { margin: 5px 0 9px; padding: 0 6px; }
+.xidach-round-result { margin-top: 13px; border: 1px solid #738260; border-radius: 12px; padding: 14px 17px; background: #273c2f; text-align: center; }
+.xidach-round-result[hidden] { display: none; }
+.xidach-round-result > strong { font-size: 21px; color: #f5dfac; }
+.xidach-round-result > p { margin: 8px 0 12px; color: #d0d8c9; font-size: 13px; line-height: 1.6; }
+.xidach-round-result .control-button { background: #e7c888; color: #282c20; }
+@media (max-width: 520px) {
+  .xidach-workspace { padding: 12px 10px !important; gap: 12px; }
+  .xidach-heading > strong { font-size: 23px; }
+  .xidach-heading > small { font-size: 8px; letter-spacing: 0.7px; }
+  .xidach-session { gap: 13px; }
+  .xidach-table { padding: 17px 12px 13px; border-radius: 19px; }
+  .xidach-hand { gap: 5px; min-height: 82px; }
+  .xidach-card { max-width: 63px; flex-basis: 63px; }
+  .xidach-seat-title { font-size: 11px; gap: 5px; }
+  .xidach-seat-title strong { font-size: 14px; }
+  .xidach-corner { left: 4px; top: 4px; font-size: 14px; }
+  .xidach-corner small { font-size: 10px; }
+  .xidach-corner-bottom { left: auto; top: auto; right: 4px; bottom: 4px; }
+  .xidach-pip { font-size: 27px; }
+  .xidach-table-middle { padding: 15px 0 18px; }
+}
