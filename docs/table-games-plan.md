@@ -42,4 +42,13 @@ Tiền trong Cờ tỷ phú là tài nguyên của ván chơi; các game bài d�
   tạm dừng, chơi lại, đóng/mở và thao tác chạm. Đây là mô phỏng trên Windows,
   không phải thử trên thiết bị iOS thật.
 
-Trạng thái kiểm chứng thực tế được ghi ở báo cáo kiểm thử khi các game hoàn thành.
+Chi tiết môi trường, phạm vi và cách chạy lại được ghi trong
+[báo cáo kiểm thử năm game](table-games-testing.md).
+
+## Hoàn thành ngày 18/10/2026
+
+Đủ năm game trong thư viện 20 game, có hướng dẫn và kết quả/chơi lại.
+72 kiểm thử luật đạt, gồm 2.200 ván tự động; 52 trường hợp trình duyệt đạt
+trên Chromium/WebKit. Đã sửa lỗi nội dung bàn che điều khiển ở Xì dách và
+Cờ tỷ phú, rồi kiểm tra lại cả hai engine. UNO và vòng đời chung cũng đã
+qua kiểm tra hồi quy. Đây là các bản chơi với máy theo phạm vi đã chọn.

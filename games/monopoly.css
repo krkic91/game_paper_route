@@ -1,5 +1,5 @@
 /* version v1.0 */
-.monopoly-workspace { --mp-ink: #e7eddc; --mp-muted: #9cae93; color: var(--mp-ink); }
+.monopoly-workspace { --mp-ink: #e7eddc; --mp-muted: #9cae93; color: var(--mp-ink); flex: 1 0 auto; }
 .monopoly-workspace .game-toolbar { justify-content: space-between; gap: 16px; }
 .monopoly-heading { display: grid; gap: 3px; }
 .monopoly-heading > span, .monopoly-section-label { color: var(--mp-muted); font-size: 10px; letter-spacing: .14em; font-weight: 700; }
@@ -7,7 +7,8 @@
 .monopoly-heading > strong > span { color: #b9d68d; }
 .monopoly-mode { text-align: right; display: grid; gap: 5px; font-size: 12px; }
 .monopoly-mode > span { color: var(--mp-muted); font-size: 11px; }
-.monopoly-workspace .game-board-area { align-items: flex-start; }
+/* Keep the tall board and side panels in flow above the speed/rules controls. */
+.monopoly-workspace .game-board-area { align-items: flex-start; flex: 1 0 auto; min-height: auto; }
 .monopoly-layout { width: 100%; max-width: 1000px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, 280px); align-items: start; gap: 16px; }
 .monopoly-map-column, .monopoly-side { min-width: 0; }
 .monopoly-board { width: 100%; aspect-ratio: 1; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-template-rows: repeat(7, minmax(0, 1fr)); gap: 3px; padding: 4px; border: 1px solid #516248; border-radius: 14px; background: #162319; overflow: hidden; }
