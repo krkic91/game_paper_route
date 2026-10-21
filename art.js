@@ -92,6 +92,37 @@
     return html;
   }
   function cover(id) {
+    if (id === 'battleship') {
+      const grid = Array.from({ length: 9 }, (_, i) => `<path d="M${80 + i * 28} 25v196M80 ${25 + i * 24.5}h224"/>`).join('');
+      return scene(`<g stroke="#c2e0dd" opacity=".35">${grid}</g><g transform="translate(142 54) rotate(23 45 65)"><path d="M8 20h74l-4 105-33 28-33-28Z" fill="#e7e4c9"/><path d="M27 30h36v74H27z" fill="#647f80"/><path d="M36 50h18v28H36zm0 42h18v19H36z" fill="#a6b5a4"/></g><circle cx="284" cy="75" r="24" fill="none" stroke="#efbd77" stroke-width="3"/><path d="M284 43v64m-32-32h64" stroke="#efbd77" stroke-width="3"/><path d="m42 203 20-6 20 6 20-6m175 0 20 6 20-6 20 6" fill="none" stroke="#b7d8cc" stroke-width="4"/>`, '#527d89');
+    }
+    if (id === 'minesweeper') {
+      const cells = Array.from({ length: 25 }, (_, i) => { const x = 100 + i % 5 * 39, y = 27 + Math.floor(i / 5) * 39; return `<rect x="${x}" y="${y}" width="35" height="35" rx="5" fill="${[7, 12, 17, 18].includes(i) ? '#eee9ce' : '#789c83'}"/>${[7, 17, 18].includes(i) ? `<text x="${x + 17}" y="${y + 25}" text-anchor="middle" fill="#426f84" font-size="24" font-weight="700">${i === 17 ? 2 : 1}</text>` : ''}`; }).join('');
+      return scene(`${cells}<path d="M195 107v30m0-30 22 8-22 8" fill="#d88369" stroke="#485b50" stroke-width="3" stroke-linejoin="round"/><path d="M186 138h19" stroke="#485b50" stroke-width="4"/>`, '#b6c6a3');
+    }
+    if (id === 'tower') {
+      const towers = [[107, 86, '#e2b66f'], [236, 157, '#a6ccdb'], [301, 80, '#d89779']].map(([x, y, color]) => `<g transform="translate(${x} ${y})"><ellipse cy="30" rx="23" ry="9" fill="#476443"/><path d="M-17 25v-40h34v40Z" fill="${color}"/><path d="M-23-16v-15h11v8h8v-8H7v8h8v-8h9v15Z" fill="${color}"/><path d="M-4 22V4q4-8 8 0v18" fill="#4f6152"/></g>`).join('');
+      return scene(`<path d="M-10 180H65V45h120v160h140V130h85" fill="none" stroke="#e2c693" stroke-width="30" stroke-linejoin="round"/>${towers}<g fill="#b55f57" stroke="#f3d3ae" stroke-width="2"><circle cx="34" cy="180" r="11"/><circle cx="65" cy="145" r="11"/><circle cx="65" cy="105" r="11"/></g>`, '#8ca47a');
+    }
+    if (id === 'onet') {
+      const marks = ['●', '◆', '▲', '★', '▲', '●', '★', '◆', '●', '▲', '◆', '★'];
+      const cells = marks.map((mark, i) => `<g transform="translate(${94 + i % 4 * 55} ${46 + Math.floor(i / 4) * 55})"><rect width="47" height="47" rx="9" fill="#faf0d6"/><text x="24" y="33" text-anchor="middle" font-size="29" fill="${['#cf8266', '#799f99', '#9e88b9'][i % 3]}">${mark}</text></g>`).join('');
+      return scene(`${cells}<path d="M117 68H68V123h102" fill="none" stroke="#547f64" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>`, '#d2c4a2');
+    }
+    if (id === 'blocks') {
+      const positions = [[0, 5, 0], [1, 5, 0], [1, 4, 0], [2, 4, 0], [2, 5, 1], [3, 5, 1], [4, 5, 1], [4, 4, 1], [5, 5, 2], [5, 4, 2], [5, 3, 2], [5, 2, 2], [1, 0, 3], [2, 0, 3], [3, 0, 3], [2, 1, 3]];
+      const colors = ['#8eac8a', '#e4b873', '#81b1c2', '#b89bc2'];
+      return scene(`<rect x="83" y="15" width="234" height="222" rx="12" fill="#4f5b6e"/>${positions.map(([x, y, c]) => `<rect x="${99 + x * 34}" y="${27 + y * 34}" width="31" height="31" rx="4" fill="${colors[c]}" stroke="#eef0d6" stroke-opacity=".25" stroke-width="2"/>`).join('')}`, '#8f9db0');
+    }
+    if (id === 'reversi') {
+      let cells = '';
+      for (let i = 0; i < 64; i++) cells += `<rect x="${103 + i % 8 * 24}" y="${29 + Math.floor(i / 8) * 24}" width="22" height="22" rx="2" fill="#709782"/>`;
+      const disks = [[2, 2, 0], [3, 2, 1], [4, 2, 1], [3, 3, 0], [4, 3, 1], [3, 4, 1], [4, 4, 0], [5, 4, 0], [5, 5, 1]].map(([x, y, c]) => `<circle cx="${114 + x * 24}" cy="${40 + y * 24}" r="9" fill="${c ? '#f6ecd5' : '#2d4140'}" stroke="#385b4d" stroke-width="2"/>`).join('');
+      return scene(`<rect x="96" y="22" width="204" height="204" rx="8" fill="#e3d9b4"/>${cells}${disks}`, '#a6bba2');
+    }
+    if (id === 'jungle') {
+      return scene('<path d="M0 177q80-65 154 7t246-12v78H0Z" fill="#789b72"/><path d="M138 250q75-80 38-138t20-112h59q-52 77-9 126t-31 124" fill="#8ebfc6"/><g transform="translate(75 76)"><circle cx="48" cy="54" r="51" fill="#b78053"/><circle cx="48" cy="56" r="36" fill="#e9bb6c"/><circle cx="35" cy="49" r="4" fill="#455043"/><circle cx="62" cy="49" r="4" fill="#455043"/><path d="m41 63 7 8 8-8" fill="#755b49"/><path d="M37 80q12 8 23-1" fill="none" stroke="#755b49" stroke-width="3"/></g><g transform="translate(263 117)"><circle cx="16" cy="12" r="17" fill="#baa99c"/><circle cx="57" cy="12" r="17" fill="#baa99c"/><ellipse cx="37" cy="39" rx="34" ry="31" fill="#d7c6b3"/><circle cx="25" cy="33" r="3" fill="#46514a"/><circle cx="48" cy="33" r="3" fill="#46514a"/><path d="m31 47 6 7 6-7" fill="#9e7a6b"/><path d="M4 75q-25 0-19-28" fill="none" stroke="#bba596" stroke-width="5"/></g>', '#becb9e');
+    }
     if (id === 'domino') {
       const dots = (value, cy) => {
         const points = { 0: [], 1: [[0, 0]], 2: [[-13, -13], [13, 13]], 3: [[-13, -13], [0, 0], [13, 13]], 4: [[-13, -13], [13, -13], [-13, 13], [13, 13]], 5: [[-13, -13], [13, -13], [0, 0], [-13, 13], [13, 13]], 6: [[-13, -16], [13, -16], [-13, 0], [13, 0], [-13, 16], [13, 16]] };

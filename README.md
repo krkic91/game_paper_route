@@ -1,7 +1,7 @@
 <!-- version v1.0 -->
 # Trạm Chơi
 
-**Một trang, 20 game chơi được ngay.** Cổng mini game tiếng Việt, giữ nguyên **Delivery Dash** và bổ sung game thể thao, bàn cờ, bài, nhập vai, arcade, trí tuệ. Caro có chế độ online hai người khác thiết bị qua máy chủ Node.js. Không có tài khoản, quảng cáo hay bước build.
+**Một trang, 27 game chơi được ngay.** Cổng mini game tiếng Việt, giữ nguyên **Delivery Dash** và bổ sung game thể thao, bàn cờ, bài, nhập vai, chiến thuật, arcade, trí tuệ. Caro có chế độ online hai người khác thiết bị qua máy chủ Node.js. Không có tài khoản, quảng cáo hay bước build.
 
 ## Chạy dự án
 
@@ -30,6 +30,13 @@ python -m http.server 4173
 
 | Game                | Chế độ                                        | Cách chơi chính                                                   |
 | ------------------- | --------------------------------------------- | ----------------------------------------------------------------- |
+| **Hải chiến** | Bạn đấu máy · 2D | Xếp đội tàu, dò tọa độ và đánh chìm đối thủ. |
+| **Dò mìn** | 1 người · 3 mức · thử thách ngày | Mở các ô an toàn bằng suy luận và cắm cờ. |
+| **Thủ thành** | 1 người · 3 bản đồ | Xây, nâng cấp tháp và chặn 12 đợt quái. |
+| **Nối thú** | 1 người · theo màn | Ghép cặp qua đường có tối đa hai lần rẽ. |
+| **Xếp gạch rơi** | 1 người | Xoay/giữ khối, xóa hàng và nối combo. |
+| **Cờ lật** | Đấu máy / 2 người cùng thiết bị | Kẹp và lật quân, giành nhiều quân khi hết nước. |
+| **Cờ Thú** | Đấu máy / 2 người cùng thiết bị | Phối hợp tám loại thú, sông, bẫy và hang. |
 | **Delivery Dash**   | 1 người                                       | Lái xe giao báo, né chướng ngại, hoàn thành tuyến đường gốc.      |
 | **Đua xe đạp**      | Bạn đấu 3 đối thủ máy · 2D/3D                  | Đua 1 km qua cua/dốc; quán tính, phanh, thả trôi, núp gió và nước rút. |
 | **Caro**            | Đấu máy / 2 người cùng thiết bị / online       | Bàn 15 × 15, nối từ 5 quân theo hàng ngang, dọc hoặc chéo.        |
@@ -51,6 +58,11 @@ python -m http.server 4173
 | **Lật thẻ trí nhớ** | 1 người                                       | Tìm 8 cặp trái cây trên 16 thẻ với ít lần lật nhất.               |
 | **Phá gạch**        | 1 người                                       | Đỡ bóng, phá 50 viên gạch với 3 mạng.                             |
 
+Bảy game mới dùng bản 2D. Xem [phân công triển khai](docs/seven-games-plan.md)
+và luật từng game: [Hải chiến](docs/battleship.md), [Dò mìn](docs/minesweeper.md),
+[Thủ thành](docs/tower.md), [Nối thú](docs/onet.md), [Xếp gạch rơi](docs/blocks.md),
+[Cờ lật](docs/reversi.md), [Cờ Thú](docs/jungle.md).
+
 ### Các biến thể luật được sử dụng
 
 - **Caro tự do:** từ 5 quân là thắng, kể cả bị chặn hai đầu; không có nước cấm Renju. Máy ưu tiên thắng, chặn nước thắng rồi đánh giá thế cờ.
@@ -67,7 +79,7 @@ Luật và điều khiển chi tiết luôn có trong nút **ⓘ Hướng dẫn*
 
 ## Tính năng trang
 
-- Thư viện 20 game với hình minh họa riêng, bố cục tương thích máy tính và điện thoại; 10 game có thêm bản 3D. Cờ vua, Cờ tướng, UNO, Domino, Cờ tỷ phú, Tiến lên miền Nam, Xì dách, Ma sói, Sudoku và Xếp cún dùng bản 2D.
+- Thư viện 27 game với hình minh họa riêng, bố cục tương thích máy tính và điện thoại; 10 game có thêm bản 3D. Bảy game mới dùng bản 2D như mô tả trong bảng.
 - Tìm kiếm tiếng Việt có dấu hoặc không dấu; lọc theo Arcade, Thể thao, Bàn cờ, Bài, Nhập vai, Trí tuệ.
 - Sắp xếp theo đề xuất, tên hoặc game mới chơi.
 - Đánh dấu **yêu thích**, danh sách **chơi gần đây**, **kỷ lục riêng cho từng game**.
@@ -280,6 +292,18 @@ npm test
 
 Bộ kiểm thử kiểm tra thắng/thua, luật di chuyển, AI, va chạm, bảo toàn điểm ô ăn quan, sinh ô mới, lật thẻ, pause và giải phóng tài nguyên; đồng thời kiểm tra máy chủ/client Caro online, Sudoku, Xếp cún, Cờ vua, Cờ tướng, UNO và năm game bàn/bài mới. Chạy riêng năm game mới bằng `npm run test:table`. Các bài kiểm thử Delivery Dash ban đầu vẫn được giữ lại.
 
+Chạy riêng luật bảy game mới bằng `npm run test:expansion`.
+
+`npm run test:expansion:browser` mở thư viện 27 game qua HTTP và `file://`,
+rồi kiểm tra riêng bảy game trên Chromium/WebKit ở 320×740, 390×844,
+820×1180 và 1366×900. Chọn game bằng `EXPANSION_GAMES` (danh sách id cách
+nhau bằng dấu phẩy), engine bằng `EXPANSION_BROWSERS`; dùng
+`EXPANSION_FUNCTIONAL_ONLY=1` hoặc `EXPANSION_RESPONSIVE_ONLY=1` để chọn nhóm
+kiểm tra. Nếu Playwright được cài ở thư mục riêng, đặt `PLAYWRIGHT_MODULE`
+đến module đó và `PLAYWRIGHT_BROWSERS_PATH` đến runtime tương ứng.
+Ảnh/báo cáo mặc định ở `test-results/expansion-<id>` và
+`test-results/expansion/library`; `SCREENSHOTS` thay đổi thư mục đầu ra.
+
 ### Kiểm tra trình duyệt (tùy chọn)
 
 Xem [hướng dẫn Đua xe đạp và kiểm thử](docs/race.md) cho phanh/thả trôi, núp gió,
@@ -304,9 +328,10 @@ npm run test:race
 npm run test:race:scene
 npm run test:uno:browser
 npm run test:table:browser
+npm run test:expansion:browser
 ```
 
-Trên Windows, script tự dùng Edge nếu có. Có thể chỉ định `BROWSER_PATH` (đường dẫn executable) và `TEST_URL` nếu cần. Bộ smoke mở cả 20 game, chơi các lượt mẫu, kiểm tra AI, tìm kiếm không dấu, yêu thích, lưu kỷ lục, tạm dừng/chơi lại, màn hình điện thoại và mở trực tiếp `file://`. Ảnh chụp lưu trong thư mục tạm `tram-choi-screenshots`, hoặc đường dẫn do biến `SCREENSHOTS` chỉ định.
+Trên Windows, script tự dùng Edge nếu có. Có thể chỉ định `BROWSER_PATH` (đường dẫn executable) và `TEST_URL` nếu cần. Bộ smoke mở cả 27 game, chơi các lượt mẫu, kiểm tra AI, tìm kiếm không dấu, yêu thích, lưu kỷ lục, tạm dừng/chơi lại, màn hình điện thoại và mở trực tiếp `file://`. Ảnh chụp lưu trong thư mục tạm `tram-choi-screenshots`, hoặc đường dẫn do biến `SCREENSHOTS` chỉ định.
 
 `test:table:browser` kiểm tra riêng Domino, Cờ tỷ phú, Tiến lên miền Nam, Xì dách
 và Ma sói trên Chromium/WebKit: hành động hợp lệ, kết quả ván, thông tin bí mật,

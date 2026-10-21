@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   const Art = window.ArcadeArt;
-  const categories = { arcade: 'Arcade', sport: 'Thể thao', board: 'Bàn cờ', card: 'Bài', social: 'Nhập vai', puzzle: 'Trí tuệ' };
+  const categories = { arcade: 'Arcade', sport: 'Thể thao', board: 'Bàn cờ', card: 'Bài', social: 'Nhập vai', puzzle: 'Trí tuệ', strategy: 'Chiến thuật' };
   const categoryColors = {
     arcade: '#bdcf91',
     sport: '#91b8bd',
@@ -10,8 +10,58 @@
     card: '#dc9d89',
     social: '#b5abd0',
     puzzle: '#b7a5d0',
+    strategy: '#b0c59a',
   };
   const games = [
+    {
+      id: 'battleship', title: 'Hải chiến', category: 'board', players: 'Bạn đấu máy', badge: 'MỚI', supports3d: false,
+      description: 'Giấu đội tàu, dò mục tiêu và làm chủ mặt biển.', keywords: 'hai chien battleship tàu chiến bắn tọa độ',
+      intro: 'Hai hạm đội, một vùng biển bí mật. Xếp tàu của bạn rồi tìm đội tàu đối phương qua từng phát bắn.',
+      instructions: ['Xếp đội tàu trên biển của bạn; có thể xoay tàu hoặc dùng cách xếp ngẫu nhiên.', 'Khi đã sẵn sàng, chọn ô trên biển đối phương để bắn. Trúng hoặc trượt đều được đánh dấu.', 'Dựa vào các ô đã bắn để tìm và đánh chìm toàn bộ tàu đối phương trước khi mất hạm đội.', 'Chọn độ khó để thay đổi cách máy dò tìm. Vị trí tàu chưa bị bắn của đối thủ được giữ kín.'],
+      variant: 'Bản 2D một người đấu máy, chơi tại chỗ. Không cần kết nối máy chủ.',
+    },
+    {
+      id: 'minesweeper', title: 'Dò mìn', category: 'puzzle', players: '1 người', badge: 'MỚI', supports3d: false,
+      description: 'Đọc những con số, tìm lối đi an toàn.', keywords: 'do min minesweeper logic cắm cờ suy luận',
+      intro: 'Mỗi con số cho biết số mìn xung quanh. Mở các ô an toàn và đánh dấu những vị trí bạn đã suy luận ra.',
+      instructions: ['Chạm ô để mở. Số trong ô là số mìn ở tám ô xung quanh.', 'Dùng chế độ Cắm cờ trên điện thoại, hoặc nhấp phải trên máy tính.', 'Mở hết các ô không có mìn để thắng. Ô mở đầu an toàn; bàn được kiểm tra giải bằng suy luận.', 'Chọn một trong ba mức khó hoặc thử thách ngày. Tạm dừng cũng dừng đồng hồ.'],
+      variant: 'Ba kích thước bàn, sinh đề có kiểm chứng suy luận. Thử thách ngày dùng ngày hiển thị trên thiết bị.',
+    },
+    {
+      id: 'tower', title: 'Thủ thành', category: 'strategy', players: '1 người', badge: 'MỚI', supports3d: false,
+      description: 'Dựng tháp, giữ đường và chặn từng đợt quái.', keywords: 'thu thanh tower defense phòng thủ xây tháp quái boss',
+      intro: 'Chọn vị trí xây tháp và phối hợp các loại vũ khí. Mỗi đợt quái là một bài toán mới về tầm bắn và ngân quỹ.',
+      instructions: ['Chọn bản đồ, chọn vị trí xây rồi chọn loại tháp phù hợp với số xu đang có.', 'Tháp tên, băng và pháo có vai trò khác nhau. Chọn tháp để xem, nâng cấp hoặc bán.', 'Bấm bắt đầu đợt khi đã chuẩn bị xong. Hạ quái nhận xu; quái lọt đường làm mất mạng.', 'Vượt qua 12 đợt để thắng. Có thể đổi tốc độ và tạm dừng để quan sát.'],
+      variant: 'Ba bản đồ, đường đi cố định và 12 đợt quái. Xu chỉ dùng để xây dựng trong ván.',
+    },
+    {
+      id: 'onet', title: 'Nối thú', category: 'puzzle', players: '1 người', badge: 'MỚI', supports3d: false,
+      description: 'Tìm một cặp, nối một đường, dọn sạch bàn.', keywords: 'noi thu onet nối hình ghép cặp thú',
+      intro: 'Các cặp thú đang chờ được nối lại. Tìm đường đi qua khoảng trống để dọn sạch bàn trước khi hết giờ.',
+      instructions: ['Chọn hai hình giống nhau. Đường nối đi ngang/dọc và rẽ tối đa hai lần.', 'Đường có thể vòng ra ngoài mép bàn nhưng không đi xuyên ô còn hình hoặc ô bị chặn.', 'Dùng gợi ý hoặc xáo trộn khi cần. Theo dõi mục tiêu và ô khóa ở mỗi màn.', 'Dọn hết các cặp để qua màn; thời gian và bố trí thay đổi theo độ khó.'],
+      variant: '24 cấp, ba kích thước bàn, ô đóng băng, gợi ý, xáo trộn và thử thách thời gian.',
+    },
+    {
+      id: 'blocks', title: 'Xếp gạch rơi', category: 'arcade', players: '1 người', badge: 'MỚI', supports3d: false,
+      description: 'Xoay đúng khối, lấp đầy hàng và nối combo.', keywords: 'xep gach roi blocks tetris khối xếp hình',
+      intro: 'Các khối rơi nhanh dần. Sắp xếp khoảng trống, giữ một khối để dành và hoàn thành nhiều hàng cùng lúc.',
+      instructions: ['Di chuyển và xoay khối bằng bàn phím hoặc các nút cảm ứng trên màn hình.', 'Bóng mờ cho biết vị trí đáp. Dùng thả nhanh để đặt khối ngay.', 'Có thể giữ một khối để dùng sau. Xếp kín hàng ngang để xóa hàng và ghi điểm.', 'Liên tiếp xóa hàng tạo combo. Ván kết thúc khi không còn chỗ cho khối mới.'],
+      variant: 'Bản xếp khối 2D, túi bảy loại khối, giữ khối, bóng vị trí rơi và tốc độ tăng dần.',
+    },
+    {
+      id: 'reversi', title: 'Cờ lật', category: 'board', players: '1–2 người', badge: 'MỚI', supports3d: false,
+      description: 'Kẹp một hàng quân, đổi thế cả bàn cờ.', keywords: 'co lat reversi othello đen trắng chiến thuật',
+      intro: 'Mỗi nước đặt quân có thể lật ngược thế trận. Giữ góc, hạn chế nước của đối phương và giành nhiều quân khi kết thúc.',
+      instructions: ['Đặt quân vào ô trống để kẹp quân đối phương giữa quân mới và quân của bạn.', 'Các quân bị kẹp theo hàng ngang, dọc hoặc chéo sẽ đổi màu.', 'Không có nước hợp lệ phải bỏ lượt. Khi cả hai cùng hết nước, bên nhiều quân hơn thắng.', 'Chọn đấu máy hoặc hai người cùng thiết bị. Dùng gợi ý để xem nước đi và lý do.'],
+      variant: 'Luật Othello trên bàn 8 × 8, có bỏ lượt, hòa và nhiều mức máy.',
+    },
+    {
+      id: 'jungle', title: 'Cờ Thú', category: 'board', players: '1–2 người', badge: 'MỚI', supports3d: false,
+      description: 'Vượt sông, đặt bẫy và tiến vào hang đối thủ.', keywords: 'co thu jungle dou shou qi động vật chuột voi hổ sư tử',
+      intro: 'Tám loài thú với sức mạnh và khả năng riêng. Phối hợp địa hình để mở đường vào hang đối phương.',
+      instructions: ['Chọn một quân rồi chọn ô được đánh dấu để đi hoặc bắt quân.', 'Quân mạnh bắt quân yếu hoặc bằng cấp; Chuột và Voi có quy tắc đặc biệt.', 'Chuột có thể xuống sông. Hổ và Sư tử nhảy qua sông nếu không có Chuột chắn đường.', 'Vào hang đối thủ hoặc khiến đối thủ hết nước hợp lệ để thắng. Xem luật trong game để hiểu bẫy và bắt quân ở bờ nước.'],
+      variant: 'Bàn 7 × 9, đấu máy hoặc hai người cùng thiết bị. Luật cấp thú, sông, bẫy và hòa được ghi rõ trong game.',
+    },
     {
       id: 'delivery',
       title: 'Delivery Dash',

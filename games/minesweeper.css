@@ -1,0 +1,38 @@
+/* version v1.0 */
+.minesweeper-workspace { min-width: 0; flex: 0 0 auto; padding: 22px 24px; gap: 16px; color: #ebf1e1; background: radial-gradient(ellipse at 25% 0%, #304e48, #142e2b 75%); }
+.minesweeper-workspace .game-toolbar { max-width: 760px; justify-content: space-between; gap: 14px; min-height: 0; padding-bottom: 15px; border-color: #668c7955; }
+.ms-heading { display: flex; flex-direction: column; gap: 5px; }
+.ms-heading small { font-size: 9px; letter-spacing: 1.5px; color: #b9cdb8; }
+.ms-heading strong { font-size: 35px; letter-spacing: -1px; line-height: 1.1; }
+.ms-heading strong span { color: #e7c984; }
+.ms-stats { display: flex; gap: 18px; }
+.ms-stats span { display: flex; flex-direction: column; gap: 5px; font-size: 8px; letter-spacing: 1px; color: #b6cbb6; }
+.ms-stats b { font: 700 25px ui-monospace, monospace; letter-spacing: -1px; color: #f3dcaa; }
+.minesweeper-workspace .game-board-area { flex: 0 0 auto; min-width: 0; }
+.ms-panel { width: min(100%, 760px); min-width: 0; padding: 16px; background: #10282399; border: 1px solid #71978766; border-radius: 20px; box-shadow: 0 12px 35px #071e2544; }
+.ms-board-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 2px 16px; }
+.ms-board-heading span { font-size: 9px; letter-spacing: 1px; color: #c5d4bf; }
+.ms-board-heading strong { font-size: 11px; color: #e9dab0; text-align: right; }
+.ms-scroll { max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; padding: 4px 3px 10px; scrollbar-width: thin; scrollbar-color: #88ad93 #183a32; }
+.ms-grid { display: grid; grid-template-columns: repeat(var(--ms-size), 40px); gap: 4px; width: max-content; margin: 0 auto; }
+.ms-cell { display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 1px solid #709682; border-radius: 6px; background: linear-gradient(#729582, #638674); box-shadow: 0 2px 0 #375e4f; color: #193c38; font: 800 21px ui-rounded, system-ui, sans-serif; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; appearance: none; }
+.ms-cell:not(.is-open):hover { background: #93b39a; }
+.ms-cell:focus-visible { outline: 3px solid #f8d574; outline-offset: 0; z-index: 1; }
+.ms-cell.is-open { background: #e9e6cd; border-color: #c6ccb2; box-shadow: none; cursor: default; }
+.ms-cell[data-number="1"] { color: #23699a; }.ms-cell[data-number="2"] { color: #2b6a3a; }.ms-cell[data-number="3"] { color: #a33c36; }.ms-cell[data-number="4"] { color: #5c478d; }.ms-cell[data-number="5"] { color: #874e25; }.ms-cell[data-number="6"] { color: #1a7171; }.ms-cell[data-number="7"] { color: #3d4050; }.ms-cell[data-number="8"] { color: #5d6269; }
+.ms-cell.is-flagged { color: #ffe1a2; background: #3b6553; }
+.ms-cell.is-mine { color: #552f24; background: #ddb38e; }.ms-cell.is-hit, .ms-cell.is-wrong { color: white; background: #b95548; }
+.ms-board-note { margin: 9px 0 0; color: #b4c8b6; font-size: 10px; line-height: 1.6; text-align: center; }
+.minesweeper-workspace .game-controls { max-width: 760px; flex-direction: column; gap: 13px; }
+.ms-settings { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 12px; width: 100%; }
+.ms-settings > label:first-child { display: flex; flex-direction: column; gap: 5px; font-size: 10px; color: #bfd0bd; }
+.ms-settings select { max-width: 100%; min-height: 44px; border: 1px solid #759784; border-radius: 8px; padding: 7px 11px; background: #24493d; color: #f0ecd5; font: inherit; font-size: 12px; }
+.ms-daily { display: flex; align-items: center; gap: 8px; min-height: 44px; font-size: 12px; color: #e2e6ce; cursor: pointer; }
+.ms-daily input { width: 18px; height: 18px; accent-color: #e8cd8a; }
+.ms-actions { display: flex; width: 100%; gap: 10px; justify-content: center; }
+.minesweeper-workspace .control-button { min-height: 44px; flex: 1 1 0; max-width: 190px; border-color: #799d85; color: #e3e9d6; background: #2e5143; }
+.minesweeper-workspace .control-button[aria-pressed="true"] { background: #f1d9a3; border-color: #f1d9a3; color: #264b3e; }
+.ms-rules { width: 100%; font-size: 12px; color: #bed0bb; }.ms-rules summary { min-height: 42px; padding: 12px 0; cursor: pointer; }.ms-rules p { margin: 8px 0; line-height: 1.7; }
+.minesweeper-workspace .game-status { max-width: 760px; color: #d9dfc9; }
+@media (min-width: 900px) { .ms-grid { grid-template-columns: repeat(var(--ms-size), 44px); }.ms-cell { width: 44px; height: 44px; } }
+@media (max-width: 600px) { .minesweeper-workspace { padding: 14px 10px; gap: 12px; }.ms-panel { padding: 10px 6px; border-radius: 13px; }.ms-heading strong { font-size: 28px; }.ms-heading small { font-size: 7px; letter-spacing: .8px; }.ms-stats { gap: 10px; }.ms-stats b { font-size: 21px; }.ms-stats span { font-size: 7px; letter-spacing: .3px; }.ms-grid { gap: 3px; }.ms-board-heading { margin-bottom: 12px; gap: 6px; }.ms-board-heading span { font-size: 8px; letter-spacing: .3px; }.ms-board-heading strong { font-size: 10px; }.ms-settings { gap: 5px; }.ms-settings select { font-size: 11px; }.ms-daily { font-size: 11px; }.ms-board-note { font-size: 9px; } }

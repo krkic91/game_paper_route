@@ -1,0 +1,49 @@
+/* version v1.0 */
+.blocks-workspace { flex: 0 0 auto; min-width: 0; min-height: 100%; padding: 22px; gap: 16px; color: #e8eee7; background: radial-gradient(ellipse at 50% 15%, #344352, #1c2b38 75%); }
+.blocks-workspace .game-toolbar { width: min(100%, 550px); min-height: 0; padding: 0 0 14px; gap: 12px; border-color: #afc1c72c; justify-content: space-between; }
+.blocks-heading { display: flex; flex-direction: column; gap: 6px; }
+.blocks-heading > span { font-size: 8px; letter-spacing: 2px; color: #a9bbc0; }
+.blocks-heading > strong { font-size: 23px; font-weight: 850; letter-spacing: -1px; white-space: nowrap; }
+.blocks-heading > strong > span { color: #eed379; margin-left: 8px; }
+.blocks-stats { display: flex; gap: 18px; }
+.blocks-stats .game-stat { min-width: 0; text-align: right; }
+.blocks-stats .game-stat small { color: #a9bbc0; font-size: 9px; }
+.blocks-stats .game-stat strong { color: #f3dfac; font-size: 20px; }
+.blocks-workspace .game-board-area { flex: 0 0 auto; min-width: 0; min-height: auto; width: 100%; }
+.blocks-playfield { display: flex; align-items: flex-start; justify-content: center; gap: 20px; width: min(100%, 430px); margin: auto; }
+.blocks-well { position: relative; flex: 0 1 280px; min-width: 0; border: 5px solid #425362; border-radius: 8px; box-shadow: 0 14px 32px #0b141c45; }
+.blocks-well canvas { display: block; width: 100%; height: auto; aspect-ratio: 1 / 2; border-radius: 3px; }
+.blocks-well-label { position: absolute; bottom: -17px; right: 0; font-size: 8px; letter-spacing: 2px; color: #93a5af; }
+.blocks-sidebar { flex: 0 0 94px; min-width: 0; display: flex; flex-direction: column; gap: 18px; }
+.blocks-preview-panel { background: #17263270; border: 1px solid #a1b2c229; padding: 10px 7px; border-radius: 12px; }
+.blocks-preview-panel > span { display: block; font-size: 8px; letter-spacing: 1.2px; color: #b3c1c7; margin-bottom: 12px; text-align: center; }
+.blocks-preview-panel > small { display: block; min-height: 24px; margin-top: 9px; text-align: center; font-size: 9px; line-height: 1.4; color: #a9bac2; }
+[data-blocks-next] { display: grid; gap: 22px; }
+.blocks-mini { display: grid; grid-template-columns: repeat(4, 15px); grid-template-rows: repeat(2, 15px); justify-content: center; gap: 2px; }
+.blocks-mini i { border-radius: 2px; background: var(--block-color); box-shadow: inset 0 2px 0 #ffffff44; }
+.blocks-mini-empty { display: flex; align-items: center; height: 32px; color: #6c8291; }
+.blocks-combo { font-size: 11px; line-height: 1.6; color: #eed379; text-align: center; margin: 0; }
+.blocks-workspace .game-controls { flex: 0 0 auto; display: flex; flex-direction: column; gap: 10px; width: min(100%, 440px); padding-top: 12px; }
+.blocks-touch-controls { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; width: 100%; }
+.blocks-action.control-button { display: flex; flex-direction: column; gap: 2px; min-height: 52px; min-width: 0; padding: 5px; border: 1px solid #7d919c60; border-radius: 9px; background: #435868; color: #f3f1df; touch-action: none; user-select: none; -webkit-user-select: none; }
+.blocks-action strong { font-size: 23px; line-height: 1; font-weight: 650; }
+.blocks-action span { font-size: 9px; white-space: nowrap; }
+.blocks-action[data-blocks-action="drop"] { grid-column: span 2; background: #e0c27d; color: #243341; border-color: #e0c27d; }
+.blocks-action.is-held { transform: translateY(1px); background: #5c788b; }
+.blocks-action:disabled { opacity: 0.4; }
+.blocks-key-guide { margin: 0; color: #a8bac3; font-size: 10px; line-height: 1.7; text-align: center; }
+.blocks-workspace .game-status { max-width: 520px; color: #bac9ce; font-size: 11px; line-height: 1.6; }
+@media (max-width: 500px) {
+  .blocks-workspace { padding: 14px 12px; gap: 12px; }
+  .blocks-workspace .game-toolbar { flex-wrap: wrap; gap: 12px; padding-bottom: 10px; }
+  .blocks-heading > strong { font-size: 20px; }
+  .blocks-heading > span { font-size: 7px; letter-spacing: 1px; }
+  .blocks-stats { gap: 13px; }
+  .blocks-stats .game-stat strong { font-size: 18px; }
+  .blocks-playfield { gap: 9px; }
+  .blocks-sidebar { flex-basis: 70px; gap: 12px; }
+  .blocks-preview-panel { padding: 8px 3px; }
+  .blocks-mini { grid-template-columns: repeat(4, 12px); grid-template-rows: repeat(2, 12px); gap: 2px; }
+  .blocks-preview-panel > span { font-size: 7px; letter-spacing: 0.8px; }
+  .blocks-workspace .game-controls { padding-top: 8px; }
+}

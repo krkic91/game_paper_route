@@ -1,0 +1,62 @@
+/* version v1.0 */
+.jungle-workspace { padding: 20px; gap: 14px; min-width: 0; flex: 0 0 auto; color: #edf1d5; background: radial-gradient(ellipse at 50% 20%, #31493c, #142a28 85%); }
+.jungle-workspace .game-toolbar { gap: 14px; justify-content: space-between; min-height: 0; width: 100%; max-width: 850px; }
+.jungle-heading { display: flex; flex-direction: column; gap: 4px; }
+.jungle-heading small { color: #b3c6ad; font-size: 9px; letter-spacing: 1.3px; }
+.jungle-heading strong { font-size: 29px; letter-spacing: -1px; }
+.jungle-heading strong span { color: #e5c27c; }
+.jungle-settings { display: flex; flex-wrap: wrap; gap: 8px; }
+.jungle-settings label { display: flex; flex-direction: column; gap: 4px; font-size: 10px; color: #ced8c3; }
+.jungle-settings select { min-height: 40px; max-width: 100%; border: 1px solid #718475; border-radius: 8px; padding: 8px; background: #243d33; color: #f5f2dc; font: inherit; font-size: 12px; }
+.jungle-workspace .game-board-area { flex: 0 0 auto; width: 100%; min-width: 0; }
+.jungle-table { width: min(100%, 540px); min-width: 0; }
+.jungle-turn { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.jungle-turn strong { font-size: 14px; color: #f2d696; }
+.jungle-turn > span { font-size: 11px; color: #c2d0be; text-align: right; }
+.jungle-board { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; width: 100%; border: 6px solid #9a855d; border-radius: 12px; padding: 3px; background: #5d674e; box-shadow: 0 8px 30px #0003; }
+.jungle-cell { position: relative; isolation: isolate; aspect-ratio: 1; min-width: 0; min-height: 0; width: 100%; padding: 2px; border: 0; border-radius: 5px; display: grid; place-items: center; background: #cbd2a3; color: #43563c; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.jungle-cell:disabled { cursor: default; opacity: 1; }
+.jungle-cell.is-water { background: repeating-linear-gradient(170deg, #85c2c4 0 9px, #93cdca 10px 12px); color: #366f78; }
+.jungle-cell.is-trap { background: #e4c395; }
+.jungle-cell.is-den.side-0 { background: #dcab94; color: #9c473d; }
+.jungle-cell.is-den.side-1 { background: #9bbdb6; color: #336873; }
+.jungle-terrain { font-size: clamp(20px, 4vw, 37px); line-height: 1; opacity: .85; }
+.jungle-animal { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; border-radius: 50%; color: #963d31; background: #fff1d6; box-shadow: 0 2px 0 #8f6c4a; --animal-fill: #f8d9a1; }
+.piece-1 .jungle-animal { color: #245d75; background: #eff5e8; --animal-fill: #c4e1d0; }
+.jungle-animal svg { display: block; width: 69%; height: 69%; max-width: 44px; }
+.jungle-animal > span { font-size: clamp(8px, 1.4vw, 11px); line-height: 1; font-weight: 800; white-space: nowrap; }
+.jungle-animal b { position: absolute; right: 0; top: -1px; border-radius: 50%; background: currentColor; width: 16px; height: 16px; font-size: 11px; line-height: 16px; color: #fff8e6; background: #a34c38; text-align: center; }
+.piece-1 .jungle-animal b { background: #356f80; }
+.jungle-cell.is-last { box-shadow: inset 0 0 0 2px #a17231; }
+.jungle-cell.is-selected { box-shadow: inset 0 0 0 3px #fff3a0, 0 0 0 1px #fff3a0; background: #f3cc63; }
+.jungle-cell:focus-visible { outline: 3px solid #fff; outline-offset: -3px; z-index: 1; }
+.jungle-target { position: absolute; width: 24%; height: 24%; border-radius: 50%; background: #294a37b8; pointer-events: none; }
+.has-piece .jungle-target { inset: 1px; width: auto; height: auto; border: 3px solid #eb8a39; background: transparent; }
+.jungle-cell.is-hint { outline: 3px solid #fff19a; outline-offset: -3px; }
+.jungle-legend { display: flex; flex-wrap: wrap; gap: 7px 15px; justify-content: center; padding: 10px 0 7px; font-size: 10px; color: #d5dbc1; }
+.jungle-legend > span { display: inline-flex; align-items: center; gap: 5px; }
+.jungle-water-key { width: 12px; height: 12px; border-radius: 3px; background: #89c8c8; }
+.jungle-captured { font-size: 11px; color: #c9d4c0; text-align: center; line-height: 1.6; min-height: 18px; }
+.jungle-workspace .game-controls { flex-wrap: wrap; width: min(100%, 650px); gap: 8px; }
+.jungle-workspace .control-button { min-height: 42px; color: #f2e5bc; border-color: #718373; background: #1b332b; }
+.jungle-rules { width: 100%; border-top: 1px solid #72877366; padding-top: 8px; font-size: 12px; line-height: 1.65; color: #d0dcc4; }
+.jungle-rules summary { cursor: pointer; min-height: 36px; display: list-item; padding: 6px 0; }
+.jungle-rules p { margin: 5px 0 9px; }
+.jungle-workspace .game-status { max-width: 650px; min-height: 34px; color: #cfdbc1; }
+@media (max-width: 600px) {
+  .jungle-workspace { padding: 12px 8px; gap: 10px; }
+  .jungle-workspace .game-toolbar { flex-direction: column; align-items: stretch; gap: 10px; padding-bottom: 10px; }
+  .jungle-heading { flex-direction: row; align-items: center; justify-content: space-between; }
+  .jungle-heading strong { font-size: 25px; order: -1; }
+  .jungle-heading small { font-size: 8px; letter-spacing: .5px; }
+  .jungle-settings { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .75fr) minmax(0, 1fr); gap: 5px; }
+  .jungle-settings label { min-width: 0; }
+  .jungle-settings select { font-size: 11px; padding: 6px 3px; width: 100%; }
+  .jungle-board { border-width: 3px; padding: 2px; gap: 2px; border-radius: 8px; }
+  .jungle-cell { padding: 1px; border-radius: 3px; }
+  .jungle-animal b { width: 12px; height: 12px; line-height: 12px; font-size: 9px; right: -1px; }
+  .jungle-animal svg { width: 65%; height: 65%; }
+  .jungle-animal > span { font-size: 8px; }
+  .jungle-turn strong { font-size: 12px; }
+  .jungle-turn > span { font-size: 10px; }
+}

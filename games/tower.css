@@ -1,0 +1,44 @@
+/* version v1.0 */
+.tower-workspace { color:#e7eedf; flex:1 0 auto; }
+.tower-workspace .game-toolbar { justify-content:space-between; gap:14px; }
+.tower-heading { display:grid; gap:4px; }
+.tower-heading small { font-size:10px; letter-spacing:.12em; color:#a7bb99; }
+.tower-heading strong { font-size:29px; letter-spacing:-.04em; line-height:1.1; }
+.tower-heading strong span { color:#c2d595; }
+.tower-stats { display:flex; gap:20px; }
+.tower-stats .game-stat { min-width:45px; }
+.tower-workspace .game-board-area { align-items:flex-start; flex:1 0 auto; min-height:auto; }
+.tower-layout { display:grid; grid-template-columns:minmax(0,1fr) 250px; gap:16px; width:100%; max-width:1150px; align-items:start; }
+.tower-map-column { min-width:0; }
+.tower-map { position:relative; border:2px solid #71835e; border-radius:15px; overflow:hidden; background:#d8e4c5; width:100%; aspect-ratio:9/5; }
+.tower-map canvas { display:block; width:100%; height:100%; }
+.tower-map-name { position:absolute; bottom:8px; left:12px; font-size:10px; font-weight:800; letter-spacing:.07em; background:#fff9; color:#405236; padding:4px 7px; border-radius:5px; pointer-events:none; }
+.tower-pads { position:absolute; inset:0; pointer-events:none; }
+.tower-pads button { appearance:none; position:absolute; transform:translate(-50%,-50%); width:34px; height:34px; border-radius:50%; border:2px solid #f7f6e6; background:#425442; color:white; font-weight:800; font-size:13px; font-family:inherit; cursor:pointer; pointer-events:auto; box-shadow:0 2px 4px #0003; padding:0; }
+.tower-pads button.has-tower { background:var(--pad-color); border-color:#fffc; }
+.tower-pads button[aria-pressed=true] { outline:3px solid #e6b64b; outline-offset:2px; }
+.tower-pads button:focus-visible { outline:3px solid white; outline-offset:3px; }
+.tower-wave-info { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-top:10px; font-size:11px; color:#aebfa2; }
+.tower-wave-info strong { color:#d9e8c4; }
+.tower-panel { min-width:0; background:#233326; border:1px solid #42563c; padding:14px; border-radius:14px; display:grid; gap:10px; }
+.tower-panel label { font-size:10px; letter-spacing:.1em; color:#afc39e; font-weight:800; }
+.tower-panel select,.tower-map-choice select { width:100%; min-width:0; min-height:42px; border:1px solid #647656; border-radius:7px; padding:8px 10px; background:#17271c; color:#edf4e7; font:inherit; font-size:12px; }
+.tower-detail { min-height:72px; }
+.tower-detail > strong { display:flex; flex-wrap:wrap; justify-content:space-between; gap:5px; font-size:14px; }
+.tower-detail > strong span { color:#c9dba7; font-size:11px; }
+.tower-detail p,.tower-tip { margin:7px 0 0; color:#b3c3a8; font-size:11px; line-height:1.6; }
+.tower-detail dl { margin:9px 0 0; display:grid; gap:5px; font-size:11px; }
+.tower-detail dl div { display:flex; justify-content:space-between; gap:8px; }
+.tower-detail dt { color:#aabd9b; }.tower-detail dd { margin:0; font-weight:700; }
+.tower-build { display:grid; gap:8px; }.tower-build[hidden],.tower-management[hidden] { display:none; }
+.tower-build button { display:grid; grid-template-columns:27px minmax(0,1fr) 25px; gap:8px; align-items:center; padding:10px 8px; border:1px solid #58734a; background:#31492f; color:#edf4df; border-radius:9px; text-align:left; cursor:pointer; font-family:inherit; min-height:66px; }
+.tower-build button i { font-size:23px; font-style:normal; color:#dbe9c7; background:var(--tower-color); border-radius:7px; text-align:center; }
+.tower-build button span { display:grid; gap:4px; }.tower-build button strong { font-size:12px; }.tower-build button small { font-size:10px; color:#bfd0b1; line-height:1.4; }.tower-build button b { font-size:12px; text-align:center; }.tower-build button b small { display:block; }
+.tower-workspace button:disabled { opacity:.45; cursor:not-allowed; }.tower-workspace button:focus-visible,.tower-workspace select:focus-visible { outline:2px solid #e4d88c; outline-offset:3px; }
+.tower-management { display:grid; gap:8px; }.tower-management button,.tower-start { min-height:44px; width:100%; justify-content:center; font-size:12px; }
+.tower-start { background:#c4d897; color:#26351f; border-color:#c4d897; font-weight:800; }
+.tower-workspace .game-controls { justify-content:flex-start; align-items:center; gap:12px; flex-wrap:wrap; }
+.tower-map-choice { display:flex; align-items:center; gap:8px; font-size:11px; color:#b8c8a8; max-width:100%; }.tower-map-choice select { width:180px; }
+.tower-rules { flex-basis:100%; color:#b7c7a8; font-size:11px; line-height:1.7; }.tower-rules summary { cursor:pointer; width:fit-content; min-height:32px; padding:5px 0; color:#dce7cd; }.tower-rules p { margin:6px 0; max-width:850px; }
+@media(max-width:1000px) { .tower-layout { grid-template-columns:minmax(0,1fr); }.tower-panel { grid-template-columns:minmax(0,1fr) minmax(0,1fr); }.tower-panel > label,.tower-panel > select,.tower-detail,.tower-tip { grid-column:1/-1; }.tower-build { grid-column:1/-1; grid-template-columns:repeat(3,minmax(0,1fr)); }.tower-build button { grid-template-columns:23px minmax(0,1fr); }.tower-build button b { grid-column:2; display:flex; gap:4px; }.tower-management { grid-column:1/-1; grid-template-columns:1fr 1fr; }.tower-start { grid-column:1/-1; }.tower-detail { min-height:0; } }
+@media(max-width:560px) { .tower-workspace .game-toolbar { flex-wrap:wrap; }.tower-heading strong { font-size:25px; }.tower-stats { gap:17px; }.tower-stats .game-stat strong { font-size:18px; }.tower-layout { gap:11px; }.tower-panel { padding:11px; }.tower-build { grid-template-columns:minmax(0,1fr); }.tower-build button { grid-template-columns:27px minmax(0,1fr) 30px; min-height:60px; }.tower-build button b { grid-column:auto; display:block; }.tower-pads button { width:29px; height:29px; font-size:11px; }.tower-map-name { font-size:8px; padding:2px 5px; bottom:5px; left:6px; }.tower-wave-info { font-size:10px; }.tower-management { grid-template-columns:1fr; }.tower-map-choice { width:100%; }.tower-map-choice select { flex:1; }.tower-tip { font-size:10px; } }

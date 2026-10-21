@@ -67,3 +67,48 @@ Mở http://127.0.0.1:4173.
  không cần thực hiện mục 1, mục 2 thì chia làm 2 option gợi ý hiện tại vẫn giữ nguyên và thêm gợi ý theo kiểu suy luận như bạn đã đề xuất. Các mục còn lại từ
  mục 3 trở đi thực hiện như đề xuất
 
+------------------------------------
+ Kết luận ngắn: Nên bổ sung, nhưng không phải thêm cho nhiều. 27 game đã phủ gần hết thể loại "kinh điển". Nên thêm 4–5 game lấp 4 khoảng
+ trống lớn, ưu tiên độ quen thuộc + chơi nhanh + tái sử dụng hạ tầng.
+
+ Bảng phủ hiện tại:
+ - Bàn cờ 10, Bài 3, Arcade 4, Trí tuệ 6, Thể thao 2, Nhập vai 1, Chiến thuật 1
+ - Thiếu: game ghép 3/bắn bóng, cờ đam, game chữ tiếng Việt, game thể thao nhanh (sút bóng), game âm nhạc, game thư giãn (câu cá/xếp hình),
+   game dân gian khác ngoài Ô ăn quan, biến thể cờ úp.
+
+ Đề xuất ưu tiên:
+
+ Nhóm A — nên làm ngay (4 game):
+ 1. Cờ đam (Draughts) — board 1–2 người. Quen với mọi lứa tuổi, đặc biệt ông bà/bố mẹ; đối xứng với Cờ vua/Cờ tướng; AI minimax tái dùng từ
+    chess-logic; bàn 8x8 + quân tròn, art nhẹ. Effort M. Đây là "lỗ hổng" rõ nhất.
+ 2. Kim cương / Ghép 3 (Match-3) — puzzle 1 người. Thể loại phổ cập nhất cho gia đình, nữ giới, trẻ em; chơi 3–5 phút; không cần AI; nội
+    dung vô hạn bằng sinh bàn. Effort M. Dùng icon trái cây/đá quý có sẵn trong art.js.
+ 3. Phỏm — card vs 3 máy. Rất Việt Nam, đặc biệt miền Bắc; chiến thuật, gần gũi; tái dùng UI bài của Tiến lên/UNO; AI cần viết luật +
+    heuristic. Effort M–L. Nếu muốn rẻ hơn: Sâm lốc (luật đơn giản hơn), Mậu binh (so bài, ít AI).
+ 4. Sút bóng luân lưu (Penalty) — sport 1–2 người. Ai cũng biết, hợp World Cup/SEA Games, 1 chạm, rất hợp mobile; đối trọng vui với Đua
+    xe/Bida. Effort S–M.
+
+ Nhóm B — đáng làm nếu muốn bản sắc/depth (chọn 1–2):
+ 5. Đuổi hình bắt chữ / Nối chữ tiếng Việt — rất Việt, gia đình, giáo dục; nhưng cần kho 150–300 câu (content-heavy). Effort M+L.
+ 6. Cờ tướng úp / Cờ úp — không phải game mới, chỉ là mode của Cờ tướng: giấu quân, lật khi va chạm. Rất quen với người chơi cờ VN, chi phí
+ thấp, tăng replay. Effort S nếu làm mode.
+ 7. Piano tiles / Âm nhạc — quen giới trẻ, WebAudio rẻ, nhưng bản quyền nhạc; dùng nhạc dân ca/public domain. Effort S–M.
+ 8. Câu cá thư giãn — quen, chill, hợp gia đình; cơ chế thanh lực + bộ sưu tập cá. Effort M.
+ 9. Xếp hình jigsaw / Tô màu — all ages, thư giãn; nhưng ít tái chơi và cần asset. Effort M.
+ 10. Cờ gánh — bản sắc dân gian VN, nhưng luật ít người biết, AI khó. Effort M–L.
+
+ Không nên thêm:
+ - Bầu cua/Xóc đĩa/Tài xỉu: dính cờ bạc, không phù hợp định vị "gia đình, không quảng cáo".
+ - Thêm biến thể cờ vua/cờ tướng/caro na ná: làm loãng thư viện.
+ - Game theo trend cần server/live-service (nông trại, nuôi thú, nấu ăn nhiều màn): scope lớn, khó bảo trì cho trang tĩnh.
+ - Clone Flappy/Pac-Man/Among Us: quen nhưng bản quyền/nhạt; nếu làm thì làm bản gốc lấy cảm hứng.
+ - Match-3 copy Candy Crush với asset thương mại: tránh.
+
+ Chi phí thật: mỗi game cần 7 file + metadata + cover SVG + README/package + test logic + test browser 5 viewport. Với 27 game hiện tại, nên
+ giới hạn 4 game/đợt và làm đúng checklist docs/seven-games-plan.md.
+
+ Đề xuất đợt tới: 4 game: Cờ đam, Ghép 3, Sút bóng luân lưu, Phỏm. Nếu muốn "thân thuộc Việt" hơn thì đổi Phỏm -> Đuổi hình bắt chữ. Thêm
+ mode Cờ tướng úp như bonus rẻ.
+
+ Câu hỏi: Bạn muốn tôi (a) lên kế hoạch chi tiết 4 game này theo đúng format docs, (b) bắt tay làm 1 game trước (tôi đề xuất Cờ đam hoặc
+ Ghép 3), hay (c) chỉ dừng ở tư vấn?
