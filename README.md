@@ -1,7 +1,7 @@
 <!-- version v1.0 -->
 # Trạm Chơi
 
-**Một trang, 27 game chơi được ngay.** Cổng mini game tiếng Việt, giữ nguyên **Delivery Dash** và bổ sung game thể thao, bàn cờ, bài, nhập vai, chiến thuật, arcade, trí tuệ. Caro có chế độ online hai người khác thiết bị qua máy chủ Node.js. Không có tài khoản, quảng cáo hay bước build.
+**Một trang, 28 game chơi được ngay.** Cổng mini game tiếng Việt, giữ nguyên **Delivery Dash** và bổ sung game thể thao, bàn cờ, bài, nhập vai, chiến thuật, arcade, trí tuệ. Caro có chế độ online hai người khác thiết bị qua máy chủ Node.js. Không có tài khoản, quảng cáo hay bước build.
 
 ## Chạy dự án
 
@@ -79,8 +79,8 @@ Luật và điều khiển chi tiết luôn có trong nút **ⓘ Hướng dẫn*
 
 ## Tính năng trang
 
-- Thư viện 27 game với hình minh họa riêng, bố cục tương thích máy tính và điện thoại; 10 game có thêm bản 3D. Bảy game mới dùng bản 2D như mô tả trong bảng.
-- Tìm kiếm tiếng Việt có dấu hoặc không dấu; lọc theo Arcade, Thể thao, Bàn cờ, Bài, Nhập vai, Trí tuệ.
+- Thư viện 28 game với hình minh họa riêng, bố cục tương thích máy tính và điện thoại; 10 game có thêm bản 3D. Bảy game mới dùng bản 2D như mô tả trong bảng.
+- Tìm kiếm tiếng Việt có dấu hoặc không dấu; lọc theo Arcade, Thể thao, Bàn cờ, Bài, Nhập vai, Chiến thuật, Trí tuệ.
 - Sắp xếp theo đề xuất, tên hoặc game mới chơi.
 - Đánh dấu **yêu thích**, danh sách **chơi gần đây**, **kỷ lục riêng cho từng game**.
 - Chơi ngẫu nhiên trong danh sách đang lọc; nếu danh sách trống, chọn từ toàn bộ thư viện.
@@ -96,6 +96,8 @@ Luật và điều khiển chi tiết luôn có trong nút **ⓘ Hướng dẫn*
 | `P`                     | Tạm dừng / tiếp tục game                                   |
 | `R`                     | Chơi lại game hiện tại                                     |
 | `Esc`                   | Quay lại thư viện (thoát toàn màn hình trước nếu đang bật) |
+
+Riêng Hải chiến, khi tiêu điểm ở bàn trong pha xếp tàu, `R` dùng để xoay tàu. Nút Chơi lại trên thanh game vẫn bắt đầu ván mới.
 
 Game hành động có nút cảm ứng. Rắn và 2048 hỗ trợ vuốt. Bàn cờ hỗ trợ chạm/click; caro còn hỗ trợ mũi tên và Enter. Chế độ chơi đang chọn được giữ khi bấm Chơi lại. Trong Caro online, phím `P` không tạm dừng ván; `R` gửi yêu cầu chơi tiếp khi ván đã kết thúc. Rời phòng trong ván có xác nhận và tính là bỏ cuộc.
 
@@ -292,9 +294,9 @@ npm test
 
 Bộ kiểm thử kiểm tra thắng/thua, luật di chuyển, AI, va chạm, bảo toàn điểm ô ăn quan, sinh ô mới, lật thẻ, pause và giải phóng tài nguyên; đồng thời kiểm tra máy chủ/client Caro online, Sudoku, Xếp cún, Cờ vua, Cờ tướng, UNO và năm game bàn/bài mới. Chạy riêng năm game mới bằng `npm run test:table`. Các bài kiểm thử Delivery Dash ban đầu vẫn được giữ lại.
 
-Chạy riêng luật bảy game mới bằng `npm run test:expansion`.
+Chạy riêng luật bảy game mới bằng `npm run test:expansion`. Xem [báo cáo kiểm thử bảy game](docs/seven-games-testing.md) để biết phạm vi, kết quả và môi trường thực tế.
 
-`npm run test:expansion:browser` mở thư viện 27 game qua HTTP và `file://`,
+`npm run test:expansion:browser` mở thư viện 28 game qua HTTP và `file://`,
 rồi kiểm tra riêng bảy game trên Chromium/WebKit ở 320×740, 390×844,
 820×1180 và 1366×900. Chọn game bằng `EXPANSION_GAMES` (danh sách id cách
 nhau bằng dấu phẩy), engine bằng `EXPANSION_BROWSERS`; dùng
@@ -331,7 +333,7 @@ npm run test:table:browser
 npm run test:expansion:browser
 ```
 
-Trên Windows, script tự dùng Edge nếu có. Có thể chỉ định `BROWSER_PATH` (đường dẫn executable) và `TEST_URL` nếu cần. Bộ smoke mở cả 27 game, chơi các lượt mẫu, kiểm tra AI, tìm kiếm không dấu, yêu thích, lưu kỷ lục, tạm dừng/chơi lại, màn hình điện thoại và mở trực tiếp `file://`. Ảnh chụp lưu trong thư mục tạm `tram-choi-screenshots`, hoặc đường dẫn do biến `SCREENSHOTS` chỉ định.
+Trên Windows, script tự dùng Edge nếu có. Có thể chỉ định `BROWSER_PATH` (đường dẫn executable) và `TEST_URL` nếu cần. Bộ smoke mở cả 28 game, chơi các lượt mẫu, kiểm tra AI, tìm kiếm không dấu, yêu thích, lưu kỷ lục, tạm dừng/chơi lại, màn hình điện thoại và mở trực tiếp `file://`. Ảnh chụp lưu trong thư mục tạm `tram-choi-screenshots`, hoặc đường dẫn do biến `SCREENSHOTS` chỉ định.
 
 `test:table:browser` kiểm tra riêng Domino, Cờ tỷ phú, Tiến lên miền Nam, Xì dách
 và Ma sói trên Chromium/WebKit: hành động hợp lệ, kết quả ván, thông tin bí mật,

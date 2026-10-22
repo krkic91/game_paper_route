@@ -1,7 +1,7 @@
 {
   "name": "tram-choi",
   "version": "2.0.0",
-  "description": "Cổng 27 mini game tiếng Việt: bàn cờ, bài, giải đố, thủ thành, Caro online và Delivery Dash. Không cần bước build.",
+  "description": "Cổng 28 mini game tiếng Việt: bàn cờ, bài, giải đố, thủ thành, Caro online và Delivery Dash. Không cần bước build.",
   "private": true,
   "scripts": {
     "start": "node scripts/serve.js",

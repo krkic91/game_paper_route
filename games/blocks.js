@@ -20,6 +20,12 @@
     const canvas = $('[data-blocks-board]'), context = canvas.getContext('2d');
     const ratio = Math.min(window.devicePixelRatio || 1, 2), cell = 28;
     canvas.width = 280 * ratio; canvas.height = 560 * ratio; context.scale(ratio, ratio);
+    // Size the well from the visible stage, including the library's header/footer.
+    // Observing its parent avoids a feedback loop with the game's own content height.
+    const stage = host.closest('.stage-wrapper') || host;
+    function fitStage() { ui.workspace.style.setProperty('--blocks-stage-height', `${stage.clientHeight}px`); }
+    const resizeObserver = new ResizeObserver(fitStage);
+    resizeObserver.observe(stage); scope.cleanup(() => resizeObserver.disconnect()); fitStage();
     function tile(x, y, kind, ghost = false) {
       if (y < 0) return;
       const px = x * cell + 2, py = y * cell + 2;

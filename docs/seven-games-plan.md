@@ -39,3 +39,16 @@ mở được. Kiểm tra Chromium/WebKit ở các viewport 320×740, 390×844,
 820×1180, 1366×900, gồm thao tác chạm, tràn ngang, vùng bấm bị che,
 tạm dừng và hủy timer khi đóng. Đây là mô phỏng trên Windows, không phải
 máy ảo hay thiết bị iOS thật. Ghi kết quả thực tế sau khi hoàn tất.
+
+## Trạng thái hoàn thành · 22/10/2026
+
+Đã tích hợp đủ bảy game và 42 file riêng của các agent, hình bìa, bộ lọc,
+hướng dẫn, đường dẫn mở game và lệnh kiểm thử. Thư viện hiện có 27 game.
+Kiểm tra luật bảy game đạt 87/87 bài; nhóm hồi quy luật cũ/vòng đời đạt
+62/62 bài. Kiểm tra trình duyệt đạt 70 lượt game và 8 lượt thư viện.
+
+Đã xử lý xung đột phím R của Hải chiến, kích thước bàn Xếp gạch, độ tương
+phản Cờ lật và các chờ thời gian không ổn định trong test WebKit. Xem
+[báo cáo kiểm thử](seven-games-testing.md) cho môi trường, phạm vi và cách
+chạy lại. Hải chiến chơi với máy; Cờ lật và Cờ Thú có thêm chế độ hai người
+cùng thiết bị, đúng phạm vi bản đầu ở trên.

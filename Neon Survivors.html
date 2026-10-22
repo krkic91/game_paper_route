@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- version v1.0 -->
 <html lang="vi">
   <head>
     <meta charset="utf-8" />
@@ -6,9 +7,6 @@
     <meta name="color-scheme" content="dark" />
     <link rel="icon" href="data:," />
     <title>Neon Survivors</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
     <style>
       :root{
         --bg:#04040d;
@@ -38,7 +36,7 @@
       #xpbar-wrap{ position:absolute; top:0; left:0; right:0; height:14px; background:rgba(255,255,255,.06); border-bottom:1px solid rgba(34,211,238,.35); }
       #xpbar{ height:100%; width:0%; background:linear-gradient(90deg,var(--cyan),var(--violet),var(--pink)); box-shadow:0 0 12px rgba(167,139,250,.8); transition:width .15s; }
       #lvl-badge{
-        position:absolute; top:20px; left:12px; font-family:"Orbitron"; font-weight:700; font-size:15px;
+        position:absolute; top:20px; left:12px; font-family:"Orbitron","Trebuchet MS",system-ui,sans-serif; font-weight:700; font-size:15px;
         color:var(--cyan); text-shadow:0 0 8px var(--cyan);
       }
       #hpbar-wrap{ position:absolute; top:44px; left:12px; width:min(240px,44vw); height:16px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.18); border-radius:4px; overflow:hidden; }
@@ -46,7 +44,7 @@
       #hptext{ position:absolute; top:44px; left:16px; font-size:12px; font-weight:700; line-height:16px; letter-spacing:.5px; text-shadow:0 1px 3px #000; }
       #timer{
         position:absolute; top:18px; left:50%; transform:translateX(-50%);
-        font-family:"Orbitron"; font-weight:900; font-size:clamp(20px,4.5vw,30px); letter-spacing:2px;
+        font-family:"Orbitron","Trebuchet MS",system-ui,sans-serif; font-weight:900; font-size:clamp(20px,4.5vw,30px); letter-spacing:2px;
         color:#fff; text-shadow:0 0 14px var(--cyan),0 0 40px rgba(34,211,238,.5);
       }
       #stats-tr{ position:absolute; top:20px; right:12px; text-align:right; font-weight:700; font-size:15px; line-height:1.35; }
@@ -56,18 +54,18 @@
         position:absolute; right:14px; top:38%; text-align:center; opacity:0; transition:opacity .2s;
       }
       #combo.on{ opacity:1; }
-      #combo .mult{ font-family:"Orbitron"; font-weight:900; font-size:clamp(26px,6vw,42px); color:var(--gold); text-shadow:0 0 16px rgba(255,210,62,.9); }
+      #combo .mult{ font-family:"Orbitron","Trebuchet MS",system-ui,sans-serif; font-weight:900; font-size:clamp(26px,6vw,42px); color:var(--gold); text-shadow:0 0 16px rgba(255,210,62,.9); }
       #combo .lbl{ font-size:12px; letter-spacing:3px; color:var(--dim); font-weight:700; }
       #combo-bar{ width:74px; height:5px; background:rgba(255,255,255,.12); margin:5px auto 0; border-radius:3px; overflow:hidden; }
       #combo-fill{ height:100%; width:100%; background:var(--gold); }
       #bossbar-wrap{ position:absolute; top:64px; left:50%; transform:translateX(-50%); width:min(520px,80vw); display:none; }
       #bossbar-wrap.on{ display:block; }
-      #bossbar-wrap .bl{ text-align:center; font-family:"Orbitron"; font-size:12px; letter-spacing:3px; color:var(--danger); text-shadow:0 0 8px var(--danger); margin-bottom:3px; }
+      #bossbar-wrap .bl{ text-align:center; font-family:"Orbitron","Trebuchet MS",system-ui,sans-serif; font-size:12px; letter-spacing:3px; color:var(--danger); text-shadow:0 0 8px var(--danger); margin-bottom:3px; }
       #bossbar{ height:12px; background:rgba(255,255,255,.08); border:1px solid rgba(255,71,87,.6); border-radius:4px; overflow:hidden; }
       #bossfill{ height:100%; width:100%; background:linear-gradient(90deg,#ff4757,#ff2d95); transition:width .15s; }
       #fever-tag{
         position:absolute; top:100px; left:50%; transform:translateX(-50%); display:none;
-        font-family:"Orbitron"; font-weight:700; letter-spacing:2px; font-size:14px; color:var(--lime);
+        font-family:"Orbitron","Trebuchet MS",system-ui,sans-serif; font-weight:700; letter-spacing:2px; font-size:14px; color:var(--lime);
         text-shadow:0 0 12px var(--lime);
       }
       #fever-tag.on{ display:block; }
@@ -80,7 +78,7 @@
       #btn-mute{ bottom:70px; right:16px; }
       #banner{
         position:fixed; top:26%; left:50%; transform:translate(-50%,-50%) scale(.9); z-index:8;
-        font-family:"Orbitron"; font-weight:900; font-size:clamp(22px,6vw,44px); letter-spacing:3px; text-align:center;
+        font-family:"Orbitron","Trebuchet MS",system-ui,sans-serif; font-weight:900; font-size:clamp(22px,6vw,44px); letter-spacing:3px; text-align:center;
         color:#fff; opacity:0; pointer-events:none; transition:opacity .3s, transform .3s; white-space:nowrap;
       }
       #banner.show{ opacity:1; transform:translate(-50%,-50%) scale(1); }
@@ -102,12 +100,12 @@
         padding:clamp(16px,3.5vw,30px); width:min(880px,100%); max-height:100%; overflow-y:auto;
       }
       h1.title{
-        font-family:"Orbitron"; font-weight:900; text-align:center; margin:0 0 2px;
+        font-family:"Orbitron","Trebuchet MS",system-ui,sans-serif; font-weight:900; text-align:center; margin:0 0 2px;
         font-size:clamp(30px,7vw,54px); letter-spacing:3px; color:#fff;
         text-shadow:0 0 10px var(--cyan),0 0 34px var(--pink),0 0 70px rgba(255,45,149,.5);
       }
       .subtitle{ text-align:center; color:var(--dim); font-weight:600; letter-spacing:1px; margin:0 0 18px; font-size:clamp(13px,2.6vw,16px); }
-      .sec-title{ font-family:"Orbitron"; font-size:13px; letter-spacing:3px; color:var(--cyan); margin:18px 0 10px; text-transform:uppercase; }
+      .sec-title{ font-family:"Orbitron","Trebuchet MS",system-ui,sans-serif; font-size:13px; letter-spacing:3px; color:var(--cyan); margin:18px 0 10px; text-transform:uppercase; }
       .char-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
       @media (max-width:640px){ .char-grid{ grid-template-columns:1fr; } }
       .char-card{
@@ -117,16 +115,16 @@
       .char-card:hover{ border-color:rgba(34,211,238,.6); }
       .char-card.sel{ border-color:var(--cyan); background:rgba(34,211,238,.09); box-shadow:0 0 18px rgba(34,211,238,.25); }
       .char-card .glyph{ font-size:34px; line-height:1; }
-      .char-card h3{ font-family:"Orbitron"; margin:8px 0 4px; font-size:16px; letter-spacing:1px; }
+      .char-card h3{ font-family:"Orbitron","Trebuchet MS",system-ui,sans-serif; margin:8px 0 4px; font-size:16px; letter-spacing:1px; }
       .char-card p{ margin:0; color:var(--dim); font-size:13.5px; font-weight:600; line-height:1.45; }
       .char-card .statline{ margin-top:8px; font-size:12.5px; font-weight:700; color:var(--text); }
       .shop-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; }
       .shop-item{ border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:12px; background:rgba(255,255,255,.03); }
-      .shop-item h4{ margin:0 0 3px; font-size:15px; font-family:"Orbitron"; letter-spacing:.5px; }
+      .shop-item h4{ margin:0 0 3px; font-size:15px; font-family:"Orbitron","Trebuchet MS",system-ui,sans-serif; letter-spacing:.5px; }
       .shop-item p{ margin:0 0 8px; color:var(--dim); font-size:12.5px; font-weight:600; min-height:30px; }
       .shop-item .pips{ font-size:11px; letter-spacing:2px; color:var(--cyan); margin-bottom:8px; }
       button.buy, button.big-btn, button.ghost-btn{
-        font-family:"Orbitron"; font-weight:700; letter-spacing:1px; cursor:pointer; border-radius:9px;
+        font-family:"Orbitron","Trebuchet MS",system-ui,sans-serif; font-weight:700; letter-spacing:1px; cursor:pointer; border-radius:9px;
         border:1px solid var(--gold); background:rgba(255,210,62,.12); color:var(--gold); padding:8px 10px; font-size:13px; width:100%;
       }
       button.buy:disabled{ opacity:.35; cursor:not-allowed; }
@@ -143,7 +141,7 @@
 
       /* Level up */
       #levelup .panel{ width:min(760px,100%); }
-      #levelup h2{ font-family:"Orbitron"; text-align:center; margin:0 0 4px; font-size:clamp(22px,5vw,32px); color:var(--gold); text-shadow:0 0 16px rgba(255,210,62,.7); letter-spacing:2px; }
+      #levelup h2{ font-family:"Orbitron","Trebuchet MS",system-ui,sans-serif; text-align:center; margin:0 0 4px; font-size:clamp(22px,5vw,32px); color:var(--gold); text-shadow:0 0 16px rgba(255,210,62,.7); letter-spacing:2px; }
       #levelup .subtitle{ margin-bottom:14px; }
       .lv-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
       @media (max-width:640px){ .lv-grid{ grid-template-columns:1fr; } }
@@ -155,19 +153,19 @@
       .lv-card .tag{ font-size:11px; font-weight:700; letter-spacing:2px; color:var(--cyan); }
       .lv-card .tag.evo{ color:var(--gold); }
       .lv-card .tag.new{ color:var(--pink); }
-      .lv-card h3{ font-family:"Orbitron"; margin:6px 0 5px; font-size:16px; }
+      .lv-card h3{ font-family:"Orbitron","Trebuchet MS",system-ui,sans-serif; margin:6px 0 5px; font-size:16px; }
       .lv-card p{ margin:0; color:var(--dim); font-weight:600; font-size:13.5px; line-height:1.45; }
       .lv-card .glyph{ font-size:28px; }
 
       .end-stats{ display:grid; grid-template-columns:repeat(2,1fr); gap:8px; max-width:420px; margin:16px auto; }
       .end-stats div{ background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); border-radius:10px; padding:10px; text-align:center; }
-      .end-stats .v{ font-family:"Orbitron"; font-size:22px; font-weight:700; }
+      .end-stats .v{ font-family:"Orbitron","Trebuchet MS",system-ui,sans-serif; font-size:22px; font-weight:700; }
       .end-stats .k{ color:var(--dim); font-size:12px; letter-spacing:2px; font-weight:700; }
       .btn-row{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:8px; }
       .btn-row .big-btn{ margin:0; }
-      #gameover h2{ font-family:"Orbitron"; text-align:center; color:var(--danger); text-shadow:0 0 18px rgba(255,71,87,.8); font-size:clamp(26px,6vw,40px); margin:0; letter-spacing:2px; }
-      #victory h2{ font-family:"Orbitron"; text-align:center; color:var(--gold); text-shadow:0 0 18px rgba(255,210,62,.8); font-size:clamp(26px,6vw,40px); margin:0; letter-spacing:2px; }
-      #pause h2{ font-family:"Orbitron"; text-align:center; margin:0 0 14px; letter-spacing:3px; }
+      #gameover h2{ font-family:"Orbitron","Trebuchet MS",system-ui,sans-serif; text-align:center; color:var(--danger); text-shadow:0 0 18px rgba(255,71,87,.8); font-size:clamp(26px,6vw,40px); margin:0; letter-spacing:2px; }
+      #victory h2{ font-family:"Orbitron","Trebuchet MS",system-ui,sans-serif; text-align:center; color:var(--gold); text-shadow:0 0 18px rgba(255,210,62,.8); font-size:clamp(26px,6vw,40px); margin:0; letter-spacing:2px; }
+      #pause h2{ font-family:"Orbitron","Trebuchet MS",system-ui,sans-serif; text-align:center; margin:0 0 14px; letter-spacing:3px; }
     </style>
   </head>
   <body>
@@ -286,12 +284,13 @@
     /* ---------------- Audio (synth nhẹ) ---------------- */
     let audioCtx = null, muted = false;
     function ac(){
+      if (hostPaused || document.hidden) return null;
       if (!audioCtx){ try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} }
-      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
       return audioCtx;
     }
     function beep(freq, dur, type, vol, slide){
-      if (muted) return;
+      if (muted || hostPaused || document.hidden) return;
       const a = ac(); if (!a) return;
       const o = a.createOscillator(), g = a.createGain();
       o.type = type || 'square'; o.frequency.value = freq;
@@ -362,6 +361,11 @@
 
     /* ---------------- Trạng thái ---------------- */
     let state = 'menu'; // menu | playing | levelup | paused | over | win | endless-note
+    let hostPaused = false, pendingPulses = [];
+    const embedded = window.parent !== window;
+    function postToLibrary(type, details = {}){
+      if (embedded) window.parent.postMessage({ type, ...details }, location.protocol === 'file:' ? '*' : location.origin);
+    }
     let meta = { gold: 0, shop: { might:0, vital:0, swift:0, greed:0, magnet:0 } };
     let selChar = 0;
     let P = null;                 // player
@@ -391,9 +395,16 @@
     /* ---------------- Input ---------------- */
     const keys = {};
     window.addEventListener('keydown', e => {
-      keys[e.key.toLowerCase()] = true;
+      const key = e.key.toLowerCase();
+      if (embedded && !e.altKey && !e.ctrlKey && !e.metaKey && ['p','r','escape'].includes(key)){
+        e.preventDefault();
+        if (!e.repeat) postToLibrary('tramchoi:shortcut', { action: { p:'pause', r:'restart', escape:'close' }[key] });
+        return;
+      }
+      if (hostPaused || e.altKey || e.ctrlKey || e.metaKey) return;
+      keys[key] = true;
       if (['arrowup','arrowdown','arrowleft','arrowright',' '].includes(e.key.toLowerCase())) e.preventDefault();
-      if ((e.key === 'p' || e.key === 'Escape')){
+      if (!e.repeat && (key === 'p' || key === 'escape')){
         if (state === 'playing') pauseGame();
         else if (state === 'paused') resumeGame();
       }
@@ -408,6 +419,7 @@
     const joyEl = document.getElementById('joy'), knobEl = document.getElementById('joy-knob');
     let joyId = null, joyOX = 0, joyOY = 0, joyDX = 0, joyDY = 0;
     canvas.addEventListener('touchstart', e => {
+      if (hostPaused || state !== 'playing') return;
       ac();
       for (const t of e.changedTouches){
         if (joyId === null){
@@ -437,7 +449,27 @@
     }
     canvas.addEventListener('touchend', joyEnd);
     canvas.addEventListener('touchcancel', joyEnd);
-    document.addEventListener('visibilitychange', () => { if (document.hidden && state === 'playing') pauseGame(); });
+    function clearInput(){
+      for (const key of Object.keys(keys)) delete keys[key];
+      joyId = null; joyDX = 0; joyDY = 0;
+      joyEl.style.display = 'none'; knobEl.style.transform = 'translate(-50%,-50%)';
+    }
+    window.addEventListener('blur', clearInput);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) return;
+      clearInput();
+      if (embedded) postToLibrary('tramchoi:pause-request');
+      else if (state === 'playing') pauseGame();
+    });
+    window.addEventListener('message', event => {
+      const sameOrigin = event.origin === location.origin || (location.protocol === 'file:' && event.origin === 'null');
+      if (!embedded || event.source !== window.parent || !sameOrigin || event.data?.type !== 'tramchoi:control') return;
+      if (event.data.action === 'pause'){
+        hostPaused = Boolean(event.data.value); clearInput();
+        if (hostPaused) audioCtx?.suspend().catch(() => {});
+        else if (!document.hidden && audioCtx?.state === 'suspended') audioCtx.resume().catch(() => {});
+      } else if (event.data.action === 'restart') startRun();
+    });
 
     /* ---------------- Sinh quái ---------------- */
     const ETYPES = {
@@ -558,7 +590,7 @@
           if (w.cd <= 0){
             w.cd = cdMax;
             novaPulse(w, evo, 0);
-            if (evo) setTimeout(() => { if (state === 'playing' || state === 'endless') novaPulse(w, evo, 1); }, 220);
+            if (evo) pendingPulses.push({ left:0.22, weapon:w });
             sfx.nova();
           }
         }
@@ -694,6 +726,14 @@
 
     /* ---------------- Cập nhật chính ---------------- */
     function update(dt){
+      const due = pendingPulses;
+      pendingPulses = [];
+      for (const pulse of due){
+        pulse.left -= dt;
+        if (pulse.left <= 0) novaPulse(pulse.weapon, true, 1);
+        else pendingPulses.push(pulse);
+      }
+      if (state !== 'playing') return;
       runTime += dt;
       if (feverT > 0) feverT -= dt;
       document.getElementById('fever-tag').classList.toggle('on', feverT > 0);
@@ -1092,6 +1132,7 @@
       requestAnimationFrame(loop);
       const dt = Math.min(0.033, (ts - lastTs) / 1000 || 0.016);
       lastTs = ts;
+      if (hostPaused || document.hidden) return;
       if (state === 'playing'){
         update(dt);
         draw();
@@ -1142,6 +1183,7 @@
       return out;
     }
     function pickLevelUp(i){
+      if (hostPaused || state !== 'levelup') return;
       const c = lvChoices[i]; if (!c) return;
       if (c.kind === 'weapon'){
         if (P.weapons[c.id]) P.weapons[c.id].lvl++;
@@ -1169,6 +1211,8 @@
 
     /* ---------------- Luồng game ---------------- */
     function startRun(){
+      clearInput(); pendingPulses = [];
+      el('pause').classList.remove('on'); el('levelup').classList.remove('on');
       P = newPlayer();
       addWeapon(CHARACTERS[selChar].weapon);
       enemies = []; projs = []; ebullets = []; gems = []; coins = []; parts = []; rings = []; bolts = []; floats = [];
@@ -1187,14 +1231,19 @@
     }
     function pauseGame(){
       if (state !== 'playing') return;
+      clearInput();
       state = 'paused';
       el('pause').classList.add('on');
     }
     function resumeGame(){
+      if (hostPaused || state !== 'paused') return;
+      clearInput();
       state = 'playing';
       el('pause').classList.remove('on');
     }
     function quitToMenu(){
+      clearInput(); pendingPulses = [];
+      el('levelup').classList.remove('on');
       state = 'menu';
       ctx.fillStyle = '#04040d'; ctx.fillRect(0, 0, VW, VH);
       el('pause').classList.remove('on');
@@ -1206,6 +1255,8 @@
       el('menu').classList.add('on');
     }
     function showEnd(won){
+      clearInput();
+      postToLibrary('tramchoi:score', { score:kills });
       el('hud').classList.remove('on');
       const html = `
         <div><div class="v">${fmtTime(runTime)}</div><div class="k">THỜI GIAN</div></div>

@@ -14,6 +14,14 @@
   };
   const games = [
     {
+      id: 'neon', title: 'Neon Survivors', category: 'arcade', players: '1 người', badge: 'MỚI', supports3d: false,
+      frameSrc: 'Neon Survivors.html',
+      description: 'Né bầy quái, tiến hóa vũ khí, sống sót giữa ánh neon.', keywords: 'neon survivors sinh tồn bắn súng quái boss',
+      intro: 'Chọn một trong ba chiến binh, thu thập ngọc kinh nghiệm và phối hợp vũ khí để đối đầu Neon Overlord.',
+      instructions: ['Dùng WASD hoặc phím mũi tên để di chuyển. Trên điện thoại, kéo trên sân chơi để dùng cần điều khiển.', 'Nhân vật tự tấn công. Nhặt ngọc XP để lên cấp rồi chọn một trong ba nâng cấp; có thể dùng phím 1–3.', 'Nhặt vàng để mua nâng cấp trong menu giữa các ván. Vàng và nâng cấp được giữ trong lần mở game hiện tại.', 'Sống sót tới phút thứ 10 và đánh bại boss để thắng, sau đó có thể chơi tiếp vô hạn. P tạm dừng, R chơi lại, Esc về thư viện.'],
+      variant: 'Game 2D từ file Neon Survivors của bạn. Kỷ lục thư viện tính theo số hạ gục; vàng và cửa hàng chỉ tồn tại trong phiên mở game.',
+    },
+    {
       id: 'battleship', title: 'Hải chiến', category: 'board', players: 'Bạn đấu máy', badge: 'MỚI', supports3d: false,
       description: 'Giấu đội tàu, dò mục tiêu và làm chủ mặt biển.', keywords: 'hai chien battleship tàu chiến bắn tọa độ',
       intro: 'Hai hạm đội, một vùng biển bí mật. Xếp tàu của bạn rồi tìm đội tàu đối phương qua từng phát bắn.',
@@ -64,6 +72,7 @@
     },
     {
       id: 'delivery',
+      frameSrc: 'delivery.html',
       title: 'Delivery Dash',
       category: 'arcade',
       players: '1 người',
@@ -800,9 +809,10 @@
         instance?.destroy({ preserveOnline: game.id === 'caro' }); instance = null;
         show3DError(error.message || 'Không thể khởi tạo đồ họa 3D. Bạn có thể chơi bản 2D.');
       }
-    } else if (game.id === 'delivery') {
+    } else if (game.frameSrc) {
       const frame = document.createElement('iframe');
-      frame.title = 'Delivery Dash — game giao báo nguyên bản'; frame.src = 'delivery.html'; frame.allow = 'fullscreen'; stage.append(frame);
+      frame.title = game.id === 'delivery' ? 'Delivery Dash — game giao báo nguyên bản' : game.title;
+      frame.src = game.frameSrc; frame.allow = 'fullscreen'; stage.append(frame);
       frame.addEventListener('load', () => { if (token === mountGeneration) iframeControl(frame, 'pause', paused); }, { once: true });
       instance = { frame, onScore, restart: () => iframeControl(frame, 'restart'), setPaused: value => iframeControl(frame, 'pause', value), destroy: () => frame.remove() };
       frame.focus({ preventScroll: true });
@@ -1050,8 +1060,9 @@
       !event.data
     )
       return;
-    if (event.data.type === 'tramchoi:score' && active?.id === 'delivery')
+    if (event.data.type === 'tramchoi:score' && active?.frameSrc)
       instance.onScore(event.data.score);
+    if (event.data.type === 'tramchoi:pause-request') setPaused(true);
     if (event.data.type === 'tramchoi:shortcut') {
       if (event.data.action === 'pause') setPaused(!paused);
       if (event.data.action === 'restart') restartGame();

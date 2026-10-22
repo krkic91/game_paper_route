@@ -92,6 +92,9 @@
     return html;
   }
   function cover(id) {
+    if (id === 'neon') {
+      return `<svg viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><radialGradient id="neon-bg"><stop stop-color="#203454"/><stop offset="1" stop-color="#090d21"/></radialGradient></defs><rect width="400" height="240" fill="url(#neon-bg)"/><g stroke="#28425a" stroke-width="1" opacity=".65">${Array.from({length:11},(_,i)=>`<path d="M${i*40} 0v240"/>`).join('')}${Array.from({length:7},(_,i)=>`<path d="M0 ${i*40}h400"/>`).join('')}</g><circle cx="200" cy="120" r="76" fill="none" stroke="#22d3ee" stroke-width="2" opacity=".35"/><circle cx="200" cy="120" r="46" fill="none" stroke="#a78bfa" stroke-width="3"/><path d="m200 91 23 29-23 29-23-29Z" fill="#22d3ee" stroke="#c5f9ff" stroke-width="3"/><g fill="#ff2d95" stroke="#ffa8d4" stroke-width="2"><path d="m80 43 17 30H63Z"/><path d="m315 139 17 30h-34Z"/><path d="m93 177 17 30H76Z"/></g><g fill="#a78bfa"><circle cx="308" cy="57" r="12"/><circle cx="49" cy="127" r="9"/></g><g stroke="#ffd23e" stroke-width="5" stroke-linecap="round"><path d="m220 108 52-28"/><path d="m179 133-40 24"/></g><g fill="#a3e635"><path d="m255 178 6 9-6 9-6-9Z"/><path d="m143 47 6 9-6 9-6-9Z"/></g></svg>`;
+    }
     if (id === 'battleship') {
       const grid = Array.from({ length: 9 }, (_, i) => `<path d="M${80 + i * 28} 25v196M80 ${25 + i * 24.5}h224"/>`).join('');
       return scene(`<g stroke="#c2e0dd" opacity=".35">${grid}</g><g transform="translate(142 54) rotate(23 45 65)"><path d="M8 20h74l-4 105-33 28-33-28Z" fill="#e7e4c9"/><path d="M27 30h36v74H27z" fill="#647f80"/><path d="M36 50h18v28H36zm0 42h18v19H36z" fill="#a6b5a4"/></g><circle cx="284" cy="75" r="24" fill="none" stroke="#efbd77" stroke-width="3"/><path d="M284 43v64m-32-32h64" stroke="#efbd77" stroke-width="3"/><path d="m42 203 20-6 20 6 20-6m175 0 20 6 20-6 20 6" fill="none" stroke="#b7d8cc" stroke-width="4"/>`, '#527d89');

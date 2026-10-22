@@ -16,16 +16,16 @@ async function check(page, source, engine, width) {
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   page.on('dialog', d => d.accept());
   await page.goto(source);
-  await page.waitForFunction(() => document.querySelectorAll('.game-card').length === 27);
+  await page.waitForFunction(() => document.querySelectorAll('.game-card').length === 28);
   const ids = await page.locator('.game-card').evaluateAll(cards => cards.map(card => card.dataset.game));
-  assert.equal(new Set(ids).size, 27);
+  assert.equal(new Set(ids).size, 28);
   for (const id of games) {
     assert.ok(ids.includes(id));
     assert.equal(await page.locator(`[data-game="${id}"] .cover-play > svg`).count(), 1);
     assert.equal(await page.locator(`[data-game="${id}"] [data-edition="3d"]`).count(), 0);
     assert.equal(await page.evaluate(id => typeof window.ArcadeGames[id], id), 'function');
   }
-  for (const [category, count] of [['board', 10], ['card', 3], ['puzzle', 6], ['strategy', 1], ['social', 1], ['arcade', 4], ['sport', 2]]) {
+  for (const [category, count] of [['board', 10], ['card', 3], ['puzzle', 6], ['strategy', 1], ['social', 1], ['arcade', 5], ['sport', 2]]) {
     await page.locator(`[data-filter="${category}"]`).click();
     assert.equal(await page.locator('.game-card').count(), count, category);
   }
@@ -44,7 +44,7 @@ async function check(page, source, engine, width) {
   }
   assert.deepEqual(errors, []);
   await page.screenshot({ path: join(folder, `${engine}-${source.startsWith('file:') ? 'offline' : 'http'}-${width}.png`) });
-  report.runs.push({ engine, source: source.startsWith('file:') ? 'file' : 'http', width, count: 27 }); save();
+  report.runs.push({ engine, source: source.startsWith('file:') ? 'file' : 'http', width, count: 28 }); save();
 }
 (async () => {
   for (const engine of (process.env.EXPANSION_BROWSERS || 'chromium,webkit').split(',')) {

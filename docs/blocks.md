@@ -16,6 +16,8 @@ Game một người với giếng 10 cột × 20 hàng. Xếp kín một hàng n
 
 Chỉ được giữ/đổi một lần trước khi khóa khối hiện tại. Khối lấy từ ô giữ quay về hướng và vị trí sinh ban đầu. Bóng viền mờ biểu thị đúng vị trí khối sẽ đến khi thả ngay.
 
+Bàn tự điều chỉnh kích thước theo chiều cao vùng chơi, giữ tỷ lệ 10×20. Trên điện thoại dọc, bảy nút chia thành hai hàng; trên màn hình rộng dùng một hàng. Bộ kiểm thử kiểm tra toàn bàn và cả bảy nút cùng nằm trong vùng nhìn thấy ở các kích thước đã nêu bên dưới, với nút tối thiểu 44×44 px.
+
 ## Luật và điểm
 
 - Xóa 1 / 2 / 3 / 4 hàng cùng lúc: 100 / 300 / 500 / 800 điểm × cấp hiện tại.

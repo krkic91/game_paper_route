@@ -278,7 +278,7 @@ async function run(browser, engine, id, profile, full) {
   const label = `${engine}-${id}-${profile.width}x${profile.height}`;
   try {
     await install(page, id);
-    assert.equal(await page.locator('.game-card').count(), 27);
+    assert.equal(await page.locator('.game-card').count(), 28);
     assert.ok(await page.locator(`[data-game="${id}"] .game-cover svg`).count());
     await open(page, id);
     await noOverflow(page, label);
@@ -313,7 +313,7 @@ async function offline(browser, engine) {
   const page = await browser.newPage(), errors = watch(page);
   try {
     await page.goto(pathToFileURL(join(__dirname, '../index.html')).href);
-    await page.waitForFunction(() => document.querySelectorAll('.game-card').length === 27);
+    await page.waitForFunction(() => document.querySelectorAll('.game-card').length === 28);
     for (const id of games) {
       await open(page, id);
       await page.locator('#close-game').click();

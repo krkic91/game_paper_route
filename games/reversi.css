@@ -1,6 +1,7 @@
 /* version v1.0 */
-.reversi-workspace{--rv-green:#255b4c;--rv-gold:#f2cc76;color:#203b35}
-.reversi-workspace .game-toolbar{align-items:center;flex-wrap:wrap;gap:18px}
+.reversi-workspace{--rv-green:#255b4c;--rv-gold:#f2cc76;color:#203b35;background:#e8eee7;flex:0 0 auto}
+.reversi-workspace .game-toolbar{align-items:center;flex-wrap:wrap;gap:18px;border-color:#b9c7bf}
+.reversi-workspace .game-status{color:#456052}
 .reversi-heading{display:grid;gap:3px;margin-right:auto}.reversi-heading small{font-size:10px;letter-spacing:.18em}.reversi-heading strong{font-size:28px}.reversi-heading strong span{color:#c59140}
 .reversi-settings{display:flex;flex-wrap:wrap;gap:10px}.reversi-settings label{display:grid;gap:5px;font-size:11px;font-weight:700}.reversi-settings select{max-width:100%;min-height:40px;border:1px solid #b9c7bf;border-radius:9px;padding:5px 9px;background:#fff;color:#203b35;font:inherit;font-size:12px}
 .reversi-workspace .game-board-area{background:#e8eee7;padding:20px;min-height:auto;min-width:0;flex:0 0 auto}
