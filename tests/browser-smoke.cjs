@@ -27,7 +27,7 @@ async function open(page, id) {
   await page.waitForFunction(
     (id) =>
       location.hash === `#play/${id}` &&
-      (id === 'delivery'
+      (['delivery', 'neon'].includes(id)
         ? document.querySelector('#game-stage iframe')
         : document.querySelector('#game-stage .game-workspace')),
     id,
@@ -311,6 +311,7 @@ async function noOverflow(page) {
       'xidach',
       'werewolf',
       'battleship',
+      'neon',
       'minesweeper',
       'tower',
       'onet',

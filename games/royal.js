@@ -4,32 +4,7 @@
   const S = window.ArcadeShared;
   const chessNames = { K: 'Vua', Q: 'Hậu', R: 'Xe', B: 'Tượng', N: 'Mã', P: 'Tốt' };
   const xiangqiNames = { K: 'Tướng', A: 'Sĩ', B: 'Tượng', N: 'Mã', R: 'Xe', C: 'Pháo', P: 'Tốt' };
-  const glyphs = { rK: '帥', rA: '仕', rB: '相', rN: '傌', rR: '俥', rC: '炮', rP: '兵', bK: '將', bA: '士', bB: '象', bN: '馬', bR: '車', bC: '砲', bP: '卒' };
-
-  // Original vector pieces stay sharp and consistent across browser/font systems.
-  function chessPiece(piece, side) {
-    const role = piece.length === 2 ? piece[1] : piece;
-    const color = side || (piece.length === 2 ? piece[0] : 'w');
-    const fill = color === 'w' ? '#fff9e8' : '#31483d';
-    const line = color === 'w' ? '#526650' : '#e6dfc4';
-    const shapes = {
-      P: '<circle cx="32" cy="19" r="8"/><path d="M27 27h10l-1 8 7 12H21l7-12z"/>',
-      N: '<path d="M19 46l3-13 12-7-12 1-5-5 8-14 4 5 10-1 9 13-1 21z"/><path d="M27 18l5-4M24 28l7 4" fill="none"/><circle cx="36" cy="21" r="1.3" fill="' + line + '" stroke="none"/>',
-      B: '<path d="M32 7c-4 8-12 12-12 19 0 6 6 8 9 10l-7 11h20l-7-11c3-2 9-4 9-10 0-7-8-11-12-19z"/><path d="M35 17l-7 10" fill="none"/>',
-      R: '<path d="M19 10h7v7h5v-7h6v7h5v-7h5v15l-6 4 2 18H21l2-18-4-4z"/><path d="M23 26h18" fill="none"/>',
-      Q: '<path d="M19 18l6 8 7-14 7 14 6-8-5 20 4 9H20l4-9z"/><circle cx="17" cy="15" r="3"/><circle cx="32" cy="9" r="3"/><circle cx="47" cy="15" r="3"/><path d="M25 37h14" fill="none"/>',
-      K: '<path d="M32 6v12M26 12h12" fill="none" stroke-width="3.5"/><path d="M25 19c-10-3-14 8-8 14l9 7-5 7h22l-5-7 9-7c6-6 2-17-8-14l-7 5z"/><path d="M26 39h12" fill="none"/>',
-    };
-    return '<svg class="royal-piece-art" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true"><g fill="' + fill + '" stroke="' + line + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + (shapes[role] || shapes.P) + '<path d="M20 47h24l3 7H17z"/><path d="M17 55h30" stroke-width="3"/></g></svg>';
-  }
-  function xiangqiPiece(piece, vector = false) {
-    if (vector) {
-      const ink = piece[0] === 'r' ? '#b44835' : '#3b443b';
-      return '<svg viewBox="0 0 64 64" width="64" height="64" aria-hidden="true"><circle cx="32" cy="33" r="29" fill="#aa8755"/><circle cx="32" cy="30" r="28" fill="#fff0ce" stroke="' + ink + '" stroke-width="2"/><circle cx="32" cy="30" r="23" fill="none" stroke="' + ink + '"/><text x="32" y="42" text-anchor="middle" font-family="SimSun,Songti SC,serif" font-size="35" font-weight="700" fill="' + ink + '">' + glyphs[piece] + '</text></svg>';
-    }
-    return '<span class="royal-disc ' + (piece[0] === 'r' ? 'is-red' : 'is-black') + '" aria-hidden="true"><span lang="zh">' + (glyphs[piece] || '') + '</span></span>';
-  }
-  window.ArcadeRoyalArt = { chessPiece, xiangqiPiece };
+  const { chessPiece, xiangqiPiece } = window.ArcadeRoyalArt;
 
   function riverBoard() {
     let lines = '';

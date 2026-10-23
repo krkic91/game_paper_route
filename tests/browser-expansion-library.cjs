@@ -23,7 +23,7 @@ async function check(page, source, engine, width) {
     assert.ok(ids.includes(id));
     assert.equal(await page.locator(`[data-game="${id}"] .cover-play > svg`).count(), 1);
     assert.equal(await page.locator(`[data-game="${id}"] [data-edition="3d"]`).count(), 0);
-    assert.equal(await page.evaluate(id => typeof window.ArcadeGames[id], id), 'function');
+    assert.equal(await page.evaluate(id => typeof window.ArcadeGames?.[id], id), 'undefined');
   }
   for (const [category, count] of [['board', 10], ['card', 3], ['puzzle', 6], ['strategy', 1], ['social', 1], ['arcade', 5], ['sport', 2]]) {
     await page.locator(`[data-filter="${category}"]`).click();
@@ -38,6 +38,7 @@ async function check(page, source, engine, width) {
   for (const id of games) {
     await page.locator(`[data-game="${id}"] .cover-play`).click();
     await page.locator(`.${id}-workspace`).waitFor();
+    assert.equal(await page.evaluate(id => typeof window.ArcadeGames[id], id), 'function');
     if (await page.locator('[data-start]').count()) await page.locator('[data-start]').click();
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
     await page.locator('#close-game').click();

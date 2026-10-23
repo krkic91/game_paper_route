@@ -4,10 +4,13 @@
 const http = require('node:http');
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const { createHash } = require('node:crypto');
 const { attachCaroOnline } = require('../server/caro-online.cjs');
 const root = path.resolve(__dirname, '..');
-const port = Number(process.env.PORT || process.argv[2] || 4173);
+const args = process.argv.slice(2);
+const port = Number(process.env.PORT || args.find((arg) => !arg.startsWith('--')) || 4173);
 const host = process.env.HOST || '127.0.0.1';
+const production = process.env.NODE_ENV === 'production' || args.includes('--production');
 const types = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
@@ -18,10 +21,28 @@ const types = {
   '.ico': 'image/x-icon',
   '.md': 'text/plain; charset=utf-8',
 };
+
+function sendError(req, res, status, message, extraHeaders = {}) {
+  res.writeHead(status, {
+    'Content-Type': 'text/plain; charset=utf-8',
+    'Content-Length': Buffer.byteLength(message),
+    'Cache-Control': 'no-store',
+    'X-Content-Type-Options': 'nosniff',
+    ...extraHeaders,
+  });
+  res.end(req.method === 'HEAD' ? undefined : message);
+}
+
+// GET/HEAD use weak comparison: a browser may return W/"tag" even when our
+// content hash was sent as a strong validator. Match complete quoted tags only.
+function matchesETag(header, etag) {
+  return typeof header === 'string' && (header.trim() === '*' ||
+    (header.match(/(?:W\/)?"[^"\r\n]*"/g) || []).some((tag) => tag.replace(/^W\//, '') === etag));
+}
+
 const server = http.createServer(async (req, res) => {
   if (!['GET', 'HEAD'].includes(req.method)) {
-    res.writeHead(405, { Allow: 'GET, HEAD' });
-    res.end();
+    sendError(req, res, 405, 'Method not allowed.', { Allow: 'GET, HEAD' });
     return;
   }
   try {
@@ -31,24 +52,34 @@ const server = http.createServer(async (req, res) => {
         ['server', 'scripts', 'tests', 'node_modules', 'test-results', 'docs'].includes((parts[0] || '').toLowerCase()) ||
         ['package.json', 'package-lock.json'].includes(pathname.slice(1).toLowerCase()) ||
         pathname.includes(':')) {
-      res.writeHead(403);
-      res.end('Forbidden');
+      sendError(req, res, 403, 'Forbidden');
       return;
     }
     let filename = path.resolve(root, `.${pathname}`);
     if (filename !== root && !filename.startsWith(root + path.sep)) {
-      res.writeHead(403);
-      res.end('Forbidden');
+      sendError(req, res, 403, 'Forbidden');
       return;
     }
     if ((await fs.stat(filename)).isDirectory()) filename = path.join(filename, 'index.html');
     const data = await fs.readFile(filename);
-    res.writeHead(200, {
-      'Content-Type': types[path.extname(filename)] || 'application/octet-stream',
+    const headers = {
+      'Content-Type': types[path.extname(filename).toLowerCase()] || 'application/octet-stream',
       'Content-Length': data.length,
-      'Cache-Control': 'no-store',
+      // File names are not content-versioned. Revalidate every use so deploys
+      // cannot leave browsers running an old game against new library code.
+      'Cache-Control': production ? 'no-cache' : 'no-store',
       'X-Content-Type-Options': 'nosniff',
-    });
+    };
+    if (production) {
+      headers.ETag = `"${createHash('sha256').update(data).digest('hex')}"`;
+      if (matchesETag(req.headers['if-none-match'], headers.ETag)) {
+        delete headers['Content-Length'];
+        res.writeHead(304, headers);
+        res.end();
+        return;
+      }
+    }
+    res.writeHead(200, headers);
     res.end(req.method === 'HEAD' ? undefined : data);
   } catch (error) {
     const status =
@@ -57,8 +88,7 @@ const server = http.createServer(async (req, res) => {
         : error instanceof URIError
           ? 400
           : 500;
-    res.writeHead(status, { 'Content-Type': 'text/plain; charset=utf-8' });
-    res.end(status === 404 ? 'Không tìm thấy trang.' : 'Không thể xử lý yêu cầu.');
+    sendError(req, res, status, status === 404 ? 'Không tìm thấy trang.' : 'Không thể xử lý yêu cầu.');
   }
 });
 const online = attachCaroOnline(server);
@@ -67,7 +97,8 @@ server.on('error', (error) => {
   process.exitCode = 1;
 });
 server.listen(port, host, () => {
-  console.log(`Trạm Chơi đang chạy tại http://${host}:${port}`);
+  console.log(`Trạm Chơi đang chạy tại http://${host}:${server.address().port}`);
+  console.log(production ? 'Cache: production (ETag, revalidate).' : 'Cache: development (no-store).');
   console.log('Nhấn Ctrl+C để dừng.');
 });
 async function shutdown() {

@@ -38,6 +38,10 @@ function watch(page) {
 
 async function installFactoryCapture(page) {
   await page.goto(base);
+  await page.waitForFunction(() => window.ArcadeLoader);
+  // Load the selected production module before wrapping its factory. Mounting
+  // still goes through the real library route below.
+  await page.evaluate(() => window.ArcadeLoader.load({ id: 'uno' }, '2d'));
   await page.waitForFunction(() => window.ArcadeUno && window.ArcadeGames.uno);
   await page.evaluate(() => {
     const original = window.ArcadeUno.createGame;

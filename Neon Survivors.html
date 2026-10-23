@@ -26,9 +26,9 @@
       body{
         margin:0; background:var(--bg); color:var(--text);
         font-family:"Rajdhani",system-ui,sans-serif;
-        overflow:hidden; touch-action:none; user-select:none; -webkit-user-select:none;
+        overflow:hidden; touch-action:auto; user-select:none; -webkit-user-select:none;
       }
-      #game{ position:fixed; inset:0; display:block; }
+      #game{ position:fixed; inset:0; display:block; touch-action:none; }
 
       /* ---------- HUD ---------- */
       #hud{ position:fixed; inset:0; pointer-events:none; display:none; z-index:5; }
@@ -82,7 +82,7 @@
         color:#fff; opacity:0; pointer-events:none; transition:opacity .3s, transform .3s; white-space:nowrap;
       }
       #banner.show{ opacity:1; transform:translate(-50%,-50%) scale(1); }
-      #banner small{ display:block; font-size:clamp(12px,2.6vw,17px); letter-spacing:1px; color:var(--cyan); font-family:"Rajdhani"; font-weight:700; margin-top:6px; }
+      #banner small{ display:block; font-size:clamp(12px,2.6vw,17px); letter-spacing:1px; color:var(--cyan); font-family:"Rajdhani",system-ui,sans-serif; font-weight:700; margin-top:6px; }
 
       /* ---------- Joystick ---------- */
       #joy{ position:fixed; width:120px; height:120px; border-radius:50%; border:2px solid rgba(34,211,238,.4); background:rgba(34,211,238,.06); display:none; z-index:6; pointer-events:none; }
@@ -91,13 +91,13 @@
       /* ---------- Overlays / menus ---------- */
       .overlay{
         position:fixed; inset:0; z-index:10; display:none; align-items:center; justify-content:center;
-        background:rgba(2,2,12,.78); backdrop-filter:blur(3px); padding:14px; overflow-y:auto;
+        background:rgba(2,2,12,.78); backdrop-filter:blur(3px); padding:14px; overflow-y:auto; touch-action:pan-y;
       }
       .overlay.on{ display:flex; }
       .panel{
         background:var(--panel); border:1px solid var(--panel-line); border-radius:14px;
         box-shadow:0 0 40px rgba(34,211,238,.15), inset 0 0 60px rgba(34,211,238,.04);
-        padding:clamp(16px,3.5vw,30px); width:min(880px,100%); max-height:100%; overflow-y:auto;
+        padding:clamp(16px,3.5vw,30px); width:min(880px,100%); max-height:100%; overflow-y:auto; touch-action:pan-y;
       }
       h1.title{
         font-family:"Orbitron","Trebuchet MS",system-ui,sans-serif; font-weight:900; text-align:center; margin:0 0 2px;
@@ -138,6 +138,10 @@
       .gold-line{ text-align:center; font-weight:700; font-size:17px; color:var(--gold); text-shadow:0 0 10px rgba(255,210,62,.6); }
       .help{ color:var(--dim); font-size:13.5px; font-weight:600; line-height:1.6; text-align:center; margin-top:14px; }
       .help b{ color:var(--text); }
+      .settings{ display:flex; gap:12px; align-items:center; justify-content:center; flex-wrap:wrap; margin-top:14px; }
+      .settings select{ font:inherit; color:var(--text); background:#10142a; border:1px solid var(--panel-line); border-radius:6px; padding:8px; }
+      .save-status{ color:var(--dim); text-align:center; font-size:13px; margin:10px 0; }
+      #reset-confirm{ border:1px solid var(--danger); border-radius:8px; padding:12px; text-align:center; margin-top:12px; }
 
       /* Level up */
       #levelup .panel{ width:min(760px,100%); }
@@ -204,6 +208,17 @@
         <div class="sec-title">Nâng cấp vĩnh viễn (áp dụng mọi ván sau)</div>
         <div class="shop-grid" id="shop-grid"></div>
 
+        <div class="settings">
+          <label>Đồ họa <select class="quality-select" aria-label="Chất lượng đồ họa"><option value="auto">Tự động</option><option value="low">Thấp</option><option value="high">Cao</option></select></label>
+          <button class="ghost-btn" id="menu-mute">Âm thanh: Bật</button>
+          <button class="ghost-btn" id="btn-reset-progress">Xóa tiến trình</button>
+        </div>
+        <p class="save-status" role="status"></p>
+        <div id="reset-confirm" hidden>
+          <p>Xóa toàn bộ vàng, nâng cấp và tùy chọn Neon trên trình duyệt này? Kỷ lục trong thư viện vẫn được giữ.</p>
+          <div class="btn-row"><button class="ghost-btn" id="btn-confirm-reset">XÓA TIẾN TRÌNH</button><button class="ghost-btn" id="btn-cancel-reset">Hủy</button></div>
+        </div>
+
         <button class="big-btn" id="btn-start">▶ VÀO TRẬN</button>
         <p class="help">
           <b>WASD / phím mũi tên</b> hoặc <b>kéo joystick</b> để di chuyển — vũ khí tự động tấn công.<br/>
@@ -226,6 +241,8 @@
     <div class="overlay" id="pause">
       <div class="panel" style="width:min(420px,100%)">
         <h2>TẠM DỪNG</h2>
+        <div class="settings"><label>Đồ họa <select class="quality-select" aria-label="Chất lượng đồ họa khi tạm dừng"><option value="auto">Tự động</option><option value="low">Thấp</option><option value="high">Cao</option></select></label></div>
+        <p class="save-status" role="status"></p>
         <div class="btn-row" style="flex-direction:column;align-items:stretch">
           <button class="big-btn" id="btn-resume" style="margin:0">▶ TIẾP TỤC</button>
           <button class="ghost-btn" id="btn-quit">✖ BỎ VÁN — VỀ MENU</button>
@@ -266,12 +283,16 @@
     const canvas = document.getElementById('game');
     const ctx = canvas.getContext('2d');
     let VW = 0, VH = 0, DPR = 1;
+    let quality = 'auto', autoQuality = 'high', renderDirty = true;
+    const spriteCache = new Map();
+    const effectiveQuality = () => quality === 'auto' ? autoQuality : quality;
     function resize(){
-      DPR = Math.min(window.devicePixelRatio || 1, 2);
+      DPR = Math.min(window.devicePixelRatio || 1, effectiveQuality() === 'low' ? 1 : 2);
       VW = window.innerWidth; VH = window.innerHeight;
       canvas.width = VW * DPR; canvas.height = VH * DPR;
       canvas.style.width = VW + 'px'; canvas.style.height = VH + 'px';
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      spriteCache.clear(); renderDirty = true;
     }
     window.addEventListener('resize', resize); resize();
 
@@ -374,6 +395,82 @@
     let runTime = 0, kills = 0, goldRun = 0, spawnT = 0, eventT = 55, bossSpawned = false, bossRef = null;
     let feverT = 0, pendingLevels = 0, endless = false, lastEvent = '';
 
+    /* Lưu chỉ dữ liệu lâu dài, không lưu một ván đang chạy. */
+    const SAVE_KEY = 'tramchoi.neon.v1';
+    let saveStatus = 'ready';
+    function saveMessage(){
+      const message = saveStatus === 'unavailable'
+        ? 'Không thể lưu trên trình duyệt này. Thay đổi hiện tại chỉ giữ khi game còn mở; bản lưu cũ (nếu có) chưa được cập nhật.'
+        : saveStatus === 'invalid' ? 'Bản lưu không hợp lệ hoặc khác phiên bản. Đang dùng tiến trình mới.'
+        : 'Tự động lưu vàng, nâng cấp và tùy chọn trên trình duyệt này. Ván đang chơi không được lưu.';
+      document.querySelectorAll('.save-status').forEach(node => { if (node.textContent !== message) node.textContent = message; });
+    }
+    function loadProgress(){
+      try {
+        const raw = localStorage.getItem(SAVE_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        if (!data || data.version !== 1 || !Number.isSafeInteger(data.gold) || data.gold < 0 || data.gold > 1000000000
+          || !data.shop || !SHOP.every(s => Number.isInteger(data.shop[s.id]) && data.shop[s.id] >= 0 && data.shop[s.id] <= s.max)
+          || !Number.isInteger(data.character) || data.character < 0 || data.character >= CHARACTERS.length
+          || typeof data.muted !== 'boolean' || !['auto','low','high'].includes(data.quality)){
+          saveStatus = 'invalid'; return;
+        }
+        meta = { gold:data.gold, shop:Object.fromEntries(SHOP.map(s => [s.id, data.shop[s.id]])) };
+        selChar = data.character; muted = data.muted; quality = data.quality;
+      } catch (error){ saveStatus = error instanceof SyntaxError ? 'invalid' : 'unavailable'; }
+    }
+    function saveProgress(){
+      try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify({ version:1, gold:meta.gold, shop:meta.shop, character:selChar, muted, quality }));
+        saveStatus = 'ready';
+      } catch (error){ saveStatus = 'unavailable'; }
+      saveMessage();
+    }
+    window.addEventListener('pagehide', saveProgress);
+    function syncSettings(){
+      document.querySelectorAll('.quality-select').forEach(node => { node.value = quality; });
+      document.getElementById('btn-mute').textContent = muted ? '🔇' : '🔊';
+      document.getElementById('menu-mute').textContent = 'Âm thanh: ' + (muted ? 'Tắt' : 'Bật');
+      saveMessage();
+    }
+    function setQuality(value){
+      if (!['auto','low','high'].includes(value)) return;
+      quality = value; qualitySlow = 0; qualityFast = 0; resize(); syncSettings(); saveProgress();
+    }
+
+    /* Chỉ tìm ứng viên gần đó; kiểm tra hình tròn chính xác vẫn giữ nguyên.
+       _gridOrder giữ thứ tự mảng gốc khi nhiều mục tiêu chồng nhau/cách đều. */
+    const enemyGrid = new Map(), GRID_SIZE = 128;
+    let gridDirty = true, gridRadius = 0;
+    function rebuildEnemyGrid(){
+      enemyGrid.clear(); gridRadius = 0;
+      enemies.forEach((enemy, index) => {
+        enemy._gridOrder = index;
+        gridRadius = Math.max(gridRadius, enemy.r);
+        const key = Math.floor(enemy.x / GRID_SIZE) + ',' + Math.floor(enemy.y / GRID_SIZE);
+        let bucket = enemyGrid.get(key);
+        if (!bucket) enemyGrid.set(key, bucket = []);
+        bucket.push(enemy);
+      });
+      gridDirty = false;
+    }
+    function nearbyEnemies(x, y, radius, body = true, ordered = true){
+      if (gridDirty) rebuildEnemyGrid();
+      const r = radius + (body ? gridRadius : 0);
+      const x0 = Math.floor((x-r)/GRID_SIZE), x1 = Math.floor((x+r)/GRID_SIZE);
+      const y0 = Math.floor((y-r)/GRID_SIZE), y1 = Math.floor((y+r)/GRID_SIZE);
+      // Large-area queries are cheaper as the original ordered scan.
+      if ((x1-x0+1)*(y1-y0+1) > enemies.length) return enemies;
+      const found = [];
+      for (let gx = x0; gx <= x1; gx++) for (let gy = y0; gy <= y1; gy++){
+        const bucket = enemyGrid.get(gx + ',' + gy);
+        if (bucket) for (const enemy of bucket) found.push(enemy);
+      }
+      if (ordered) found.sort((a,b) => a._gridOrder - b._gridOrder);
+      return found;
+    }
+
     function newPlayer(){
       const c = CHARACTERS[selChar];
       const maxHp = c.hp + meta.shop.vital * 12;
@@ -456,7 +553,9 @@
     }
     window.addEventListener('blur', clearInput);
     document.addEventListener('visibilitychange', () => {
+      resetClock();
       if (!document.hidden) return;
+      saveProgress();
       clearInput();
       if (embedded) postToLibrary('tramchoi:pause-request');
       else if (state === 'playing') pauseGame();
@@ -465,7 +564,8 @@
       const sameOrigin = event.origin === location.origin || (location.protocol === 'file:' && event.origin === 'null');
       if (!embedded || event.source !== window.parent || !sameOrigin || event.data?.type !== 'tramchoi:control') return;
       if (event.data.action === 'pause'){
-        hostPaused = Boolean(event.data.value); clearInput();
+        hostPaused = Boolean(event.data.value); clearInput(); resetClock(); renderDirty = true;
+        if (hostPaused) saveProgress();
         if (hostPaused) audioCtx?.suspend().catch(() => {});
         else if (!document.hidden && audioCtx?.state === 'suspended') audioCtx.resume().catch(() => {});
       } else if (event.data.action === 'restart') startRun();
@@ -496,6 +596,7 @@
         kbx:0, kby:0, life: type === 'goblin' ? 22 : Infinity, phase: 1, phaseT: 3, summonT: 4
       };
       enemies.push(e);
+      gridDirty = true;
       return e;
     }
     function director(dt){
@@ -559,7 +660,10 @@
     /* ---------------- Vũ khí ---------------- */
     function nearestEnemy(x, y, maxD){
       let best = null, bd = maxD * maxD;
-      for (const e of enemies){ const d = dist2(x, y, e.x, e.y); if (d < bd){ bd = d; best = e; } }
+      for (const e of nearbyEnemies(x, y, maxD, false, false)){
+        const d = dist2(x, y, e.x, e.y);
+        if (d < bd || (best && d === bd && e._gridOrder < best._gridOrder)){ bd = d; best = e; }
+      }
       return best;
     }
     function fireWeapons(dt){
@@ -608,7 +712,7 @@
                 damageEnemy(t, dmg, from.x, from.y, 60);
                 hitSet.add(t); from = t;
                 let nt = null, nd = 150 * 150;
-                for (const e of enemies){ if (hitSet.has(e)) continue; const d = dist2(from.x, from.y, e.x, e.y); if (d < nd){ nd = d; nt = e; } }
+                for (const e of nearbyEnemies(from.x, from.y, 150, false)){ if (hitSet.has(e)) continue; const d = dist2(from.x, from.y, e.x, e.y); if (d < nd){ nd = d; nt = e; } }
                 t = nt;
               }
               sfx.tesla();
@@ -618,7 +722,7 @@
         else if (id === 'missiles'){
           const cdMax = (1.7 - w.lvl * 0.14) * P.cdMul;
           if (w.cd <= 0){
-            const inRange = enemies.filter(e => dist2(P.x, P.y, e.x, e.y) < 560 * 560);
+            const inRange = nearbyEnemies(P.x, P.y, 560, false).filter(e => dist2(P.x, P.y, e.x, e.y) < 560 * 560);
             if (inRange.length){
               w.cd = cdMax;
               const n = (evo ? 4 : 1 + Math.floor(w.lvl / 2)) + (w.lvl >= 2 ? 1 : 0);
@@ -636,8 +740,9 @@
       const R = (120 + w.lvl * 22) * (evo ? 1.25 : 1);
       const dmg = (14 + w.lvl * 7) * (evo ? 1.5 : 1) * P.dmgMul;
       rings.push({ x: P.x, y: P.y, r: 10, maxR: R, ttl: 0.3, color: evo ? '#ffd23e' : '#ff2d95' });
-      for (let i = enemies.length - 1; i >= 0; i--){
-        const e = enemies[i];
+      const candidates = nearbyEnemies(P.x, P.y, R);
+      for (let i = candidates.length - 1; i >= 0; i--){
+        const e = candidates[i];
         if (dist2(P.x, P.y, e.x, e.y) < (R + e.r) * (R + e.r)) damageEnemy(e, dmg, P.x, P.y, 260);
       }
       shake = Math.max(shake, 3);
@@ -654,7 +759,7 @@
         const a = rot + (i / count) * TAU;
         const bx = P.x + Math.cos(a) * R, by = P.y + Math.sin(a) * R;
         w.blades.push({ x: bx, y: by });
-        for (const e of enemies){
+        for (const e of nearbyEnemies(bx, by, 16)){
           if (runTime - e.orbitHit < 0.38) continue;
           if (dist2(bx, by, e.x, e.y) < (16 + e.r) * (16 + e.r)){
             e.orbitHit = runTime;
@@ -666,7 +771,7 @@
 
     /* ---------------- Sát thương & chết ---------------- */
     function damageEnemy(e, dmg, fromX, fromY, kb){
-      if (e.hp <= 0) return;
+      if (state !== 'playing' || e.hp <= 0) return;
       e.hp -= dmg;
       e.flash = 0.08;
       if (kb){
@@ -726,6 +831,8 @@
 
     /* ---------------- Cập nhật chính ---------------- */
     function update(dt){
+      if (state !== 'playing' || hostPaused || document.hidden) return;
+      gridDirty = true;
       const due = pendingPulses;
       pendingPulses = [];
       for (const pulse of due){
@@ -736,7 +843,6 @@
       if (state !== 'playing') return;
       runTime += dt;
       if (feverT > 0) feverT -= dt;
-      document.getElementById('fever-tag').classList.toggle('on', feverT > 0);
       P.invuln = Math.max(0, P.invuln - dt);
       if (P.comboT > 0){ P.comboT -= dt; if (P.comboT <= 0) P.combo = 0; }
       if (P.regen) P.hp = Math.min(P.maxHp, P.hp + P.regen * dt);
@@ -759,7 +865,9 @@
 
       director(dt);
       fireWeapons(dt);
+      if (state !== 'playing') return;
       updateOrbit(dt);
+      if (state !== 'playing') return;
 
       // Đạn của người chơi
       for (let i = projs.length - 1; i >= 0; i--){
@@ -774,12 +882,12 @@
         }
         p.x += p.vx * dt; p.y += p.vy * dt;
         let kill = p.life <= 0;
-        for (const e of enemies){
+        for (const e of nearbyEnemies(p.x, p.y, p.r)){
           if (e.dead) continue;
           if (dist2(p.x, p.y, e.x, e.y) < (p.r + e.r) * (p.r + e.r)){
             if (p.splash){
               rings.push({ x: p.x, y: p.y, r: 8, maxR: p.splash, ttl: 0.25, color: p.color });
-              for (const e2 of enemies) if (dist2(p.x, p.y, e2.x, e2.y) < (p.splash + e2.r) * (p.splash + e2.r)) damageEnemy(e2, p.dmg, p.x, p.y, 140);
+              for (const e2 of nearbyEnemies(p.x, p.y, p.splash)) if (dist2(p.x, p.y, e2.x, e2.y) < (p.splash + e2.r) * (p.splash + e2.r)) damageEnemy(e2, p.dmg, p.x, p.y, 140);
               burst(p.x, p.y, p.color, 10);
             } else {
               damageEnemy(e, p.dmg, p.x - p.vx * 0.01, p.y - p.vy * 0.01, 90);
@@ -789,6 +897,7 @@
           }
         }
         if (kill) projs.splice(i, 1);
+        if (state !== 'playing') return;
       }
 
       // Quái
@@ -826,7 +935,6 @@
               sfx.nova();
             }
           }
-          document.getElementById('bossfill').style.width = Math.max(0, frac * 100) + '%';
         }
         const sp = e.speed * (e.type === 'boss' ? (e.phase === 3 ? 1.45 : e.phase === 2 ? 1.2 : 1) : 1);
         e.x += (mvx * sp + e.kbx) * dt; e.y += (mvy * sp + e.kby) * dt;
@@ -844,16 +952,20 @@
         if (d < e.r + P.r && e.dmg > 0 && e.atkCd <= 0 && P.invuln <= 0){
           e.atkCd = 0.6;
           hurtPlayer(e.dmg);
+          if (state !== 'playing') return;
         }
       }
 
       // Đạn địch
+      gridDirty = true;
       for (let i = ebullets.length - 1; i >= 0; i--){
         const b = ebullets[i];
         b.x += b.vx * dt; b.y += b.vy * dt;
         if (dist2(b.x, b.y, P.x, P.y) < (b.r + P.r) * (b.r + P.r)){
           if (P.invuln <= 0) hurtPlayer(b.dmg);
-          ebullets.splice(i, 1); continue;
+          ebullets.splice(i, 1);
+          if (state !== 'playing') return;
+          continue;
         }
         if (dist2(b.x, b.y, P.x, P.y) > 1400 * 1400) ebullets.splice(i, 1);
       }
@@ -876,6 +988,7 @@
         }
       }
       // Vàng
+      let collectedGold = false;
       for (let i = coins.length - 1; i >= 0; i--){
         const c = coins[i];
         c.age += dt;
@@ -888,10 +1001,12 @@
         if (d2 < 26 * 26){
           coins.splice(i, 1);
           const v = Math.round(1 * (1 + meta.shop.greed * 0.2));
-          goldRun += v; meta.gold += v;
+          goldRun += v; meta.gold = Math.min(1000000000, meta.gold + v); collectedGold = true;
           sfx.gold();
         }
       }
+      // Save once per pickup batch, before an iframe can be closed or a page reloaded.
+      if (collectedGold) saveProgress();
 
       // Hiệu ứng
       for (let i = parts.length - 1; i >= 0; i--){ const p = parts[i]; p.ttl -= dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 0.92; p.vy *= 0.92; if (p.ttl <= 0) parts.splice(i, 1); }
@@ -904,6 +1019,7 @@
     }
 
     function hurtPlayer(dmg){
+      if (state !== 'playing') return;
       const real = Math.max(1, dmg - P.armor);
       P.hp -= real; P.invuln = 0.4;
       P.combo = 0; P.comboT = 0;
@@ -929,29 +1045,73 @@
 
     /* ---------------- HUD ---------------- */
     const el = id => document.getElementById(id);
+    const hudNodes = Object.fromEntries(['hpbar','hptext','xpbar','lvl-badge','timer','gold-count','kill-count','combo','combo-fill','fever-tag','bossfill'].map(id => [id, el(id)]));
+    hudNodes.mult = el('combo').querySelector('.mult');
+    const hudValues = new Map();
+    function hudSet(id, property, value){
+      const key = id + ':' + property;
+      if (hudValues.get(key) === value) return;
+      hudValues.set(key, value);
+      const node = hudNodes[id];
+      if (property === 'on') node.classList.toggle('on', value);
+      else if (property === 'text') node.textContent = value;
+      else node.style[property] = value;
+    }
+    const percent = value => Math.round(clamp(value, 0, 100) * 10) / 10 + '%';
     function updateHUD(){
-      el('hpbar').style.width = (P.hp / P.maxHp * 100) + '%';
-      el('hptext').textContent = Math.ceil(P.hp) + ' / ' + P.maxHp;
-      el('xpbar').style.width = (P.xp / P.xpNeed * 100) + '%';
-      el('lvl-badge').textContent = 'LV ' + P.level;
-      el('timer').textContent = fmtTime(runTime);
-      el('gold-count').textContent = goldRun;
-      el('kill-count').textContent = kills;
-      const c = el('combo');
+      hudSet('hpbar', 'width', percent(P.hp / P.maxHp * 100));
+      hudSet('hptext', 'text', Math.ceil(P.hp) + ' / ' + P.maxHp);
+      hudSet('xpbar', 'width', percent(P.xp / P.xpNeed * 100));
+      hudSet('lvl-badge', 'text', 'LV ' + P.level);
+      hudSet('timer', 'text', fmtTime(runTime));
+      hudSet('gold-count', 'text', String(goldRun));
+      hudSet('kill-count', 'text', String(kills));
+      hudSet('fever-tag', 'on', feverT > 0);
+      if (bossRef) hudSet('bossfill', 'width', percent(bossRef.hp / bossRef.maxHp * 100));
+      hudSet('combo', 'on', P.combo >= 5);
       if (P.combo >= 5){
-        c.classList.add('on');
-        c.querySelector('.mult').textContent = '×' + comboMult();
-        c.querySelector('.mult').style.color = comboMult() >= 8 ? '#ff2d95' : '#ffd23e';
-        el('combo-fill').style.width = (P.comboT / 4 * 100) + '%';
-      } else c.classList.remove('on');
+        hudSet('mult', 'text', '×' + comboMult());
+        hudSet('mult', 'color', comboMult() >= 8 ? '#ff2d95' : '#ffd23e');
+        hudSet('combo-fill', 'width', percent(P.comboT / 4 * 100));
+      }
     }
 
     /* ---------------- Render ---------------- */
+    function drawSprite(shape, x, y, radius, color, glow, angle = 0, flash = false){
+      const blur = effectiveQuality() === 'low' ? 0 : glow;
+      const key = [shape,radius,color,blur,flash].join(':');
+      let sprite = spriteCache.get(key);
+      if (!sprite){
+        const size = Math.ceil(radius * 2.8 + blur * 4 + 4), bitmap = document.createElement('canvas');
+        bitmap.width = bitmap.height = Math.ceil(size * DPR);
+        const pen = bitmap.getContext('2d');
+        pen.scale(DPR, DPR); pen.translate(size / 2, size / 2);
+        pen.fillStyle = flash ? '#fff' : color; pen.shadowColor = color; pen.shadowBlur = blur * DPR;
+        pen.beginPath();
+        if (shape === 'diamond'){
+          pen.moveTo(0,-radius); pen.lineTo(radius,0); pen.lineTo(0,radius); pen.lineTo(-radius,0);
+        } else if (shape === 'drone'){
+          pen.moveTo(0,-radius); pen.lineTo(radius,radius*.8); pen.lineTo(-radius,radius*.8);
+        } else if (shape === 'speeder'){
+          pen.moveTo(radius*1.3,0); pen.lineTo(Math.cos(2.5)*radius,Math.sin(2.5)*radius); pen.lineTo(Math.cos(-2.5)*radius,Math.sin(-2.5)*radius);
+        } else if (shape === 'brute'){
+          for (let i=0; i<6; i++){ const a=i/6*TAU; i ? pen.lineTo(Math.cos(a)*radius,Math.sin(a)*radius) : pen.moveTo(radius,0); }
+        } else pen.arc(0,0,radius,0,TAU);
+        pen.closePath(); pen.fill();
+        sprite = { bitmap, size };
+        if (spriteCache.size >= 128) spriteCache.clear();
+        spriteCache.set(key, sprite);
+      }
+      if (angle){ ctx.save(); ctx.translate(x,y); ctx.rotate(angle); ctx.drawImage(sprite.bitmap,-sprite.size/2,-sprite.size/2,sprite.size,sprite.size); ctx.restore(); }
+      else ctx.drawImage(sprite.bitmap,x-sprite.size/2,y-sprite.size/2,sprite.size,sprite.size);
+    }
     function draw(){
       ctx.fillStyle = '#04040d';
       ctx.fillRect(0, 0, VW, VH);
       const sx = shake ? rand(-shake, shake) : 0, sy = shake ? rand(-shake, shake) : 0;
       const ox = VW / 2 - cam.x + sx, oy = VH / 2 - cam.y + sy;
+      const visible = (x,y,r) => x+r+ox >= 0 && y+r+oy >= 0 && x-r+ox <= VW && y-r+oy <= VH;
+      const low = effectiveQuality() === 'low';
 
       // Lưới nền
       const grid = 72;
@@ -980,37 +1140,35 @@
 
       // Ngọc XP
       for (const g of gems){
+        if (!visible(g.x,g.y,g.r+20)) continue;
         const blink = g.age > 9 ? (Math.sin(runTime * 16) > 0 ? 1 : 0.25) : 1;
         ctx.globalAlpha = blink;
-        ctx.fillStyle = g.v >= 20 ? '#ff2d95' : g.v >= 5 ? '#a78bfa' : '#22d3ee';
-        ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 8;
-        ctx.beginPath();
-        ctx.moveTo(g.x, g.y - g.r); ctx.lineTo(g.x + g.r, g.y); ctx.lineTo(g.x, g.y + g.r); ctx.lineTo(g.x - g.r, g.y);
-        ctx.closePath(); ctx.fill();
+        drawSprite('diamond',g.x,g.y,g.r,g.v >= 20 ? '#ff2d95' : g.v >= 5 ? '#a78bfa' : '#22d3ee',8);
       }
       ctx.globalAlpha = 1; ctx.shadowBlur = 0;
 
       // Vàng
       for (const c of coins){
-        ctx.fillStyle = '#ffd23e'; ctx.shadowColor = '#ffd23e'; ctx.shadowBlur = 8;
-        ctx.beginPath(); ctx.arc(c.x, c.y, 5.5, 0, TAU); ctx.fill();
-        ctx.shadowBlur = 0;
+        if (!visible(c.x,c.y,24)) continue;
+        drawSprite('circle',c.x,c.y,5.5,'#ffd23e',8);
         ctx.fillStyle = '#b8860b';
         ctx.beginPath(); ctx.arc(c.x, c.y, 2.4, 0, TAU); ctx.fill();
       }
 
       // Vòng nova
       for (const r of rings){
+        if (!visible(r.x,r.y,r.r+32)) continue;
         ctx.globalAlpha = Math.max(0, r.ttl / 0.3);
-        ctx.strokeStyle = r.color; ctx.lineWidth = 4; ctx.shadowColor = r.color; ctx.shadowBlur = 14;
+        ctx.strokeStyle = r.color; ctx.lineWidth = 4; ctx.shadowColor = r.color; ctx.shadowBlur = low ? 0 : 14;
         ctx.beginPath(); ctx.arc(r.x, r.y, r.r, 0, TAU); ctx.stroke();
       }
       ctx.globalAlpha = 1; ctx.shadowBlur = 0;
 
       // Sét tesla
       for (const b of bolts){
+        if (!visible((b.x1+b.x2)/2,(b.y1+b.y2)/2,Math.hypot(b.x2-b.x1,b.y2-b.y1)/2+24)) continue;
         ctx.globalAlpha = Math.max(0, b.ttl / 0.14);
-        ctx.strokeStyle = b.color; ctx.lineWidth = 2.5; ctx.shadowColor = b.color; ctx.shadowBlur = 10;
+        ctx.strokeStyle = b.color; ctx.lineWidth = 2.5; ctx.shadowColor = b.color; ctx.shadowBlur = low ? 0 : 10;
         ctx.beginPath();
         ctx.moveTo(b.x1, b.y1);
         const mxp = (b.x1 + b.x2) / 2 + rand(-9, 9), myp = (b.y1 + b.y2) / 2 + rand(-9, 9);
@@ -1021,40 +1179,18 @@
 
       // Đạn địch
       for (const b of ebullets){
-        ctx.fillStyle = '#ff5e78'; ctx.shadowColor = '#ff4757'; ctx.shadowBlur = 10;
-        ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, TAU); ctx.fill();
+        if (!visible(b.x,b.y,b.r+24)) continue;
+        drawSprite('circle',b.x,b.y,b.r,'#ff5e78',10);
       }
       ctx.shadowBlur = 0;
 
       // Quái
       for (const e of enemies){
+        if (!visible(e.x,e.y,e.r*1.3+60)) continue;
         const wob = Math.sin(e.t * 6) * 1.5;
-        ctx.fillStyle = e.flash > 0 ? '#ffffff' : e.color;
-        ctx.shadowColor = e.color; ctx.shadowBlur = e.type === 'boss' ? 26 : 12;
-        ctx.beginPath();
-        if (e.type === 'drone'){
-          ctx.moveTo(e.x, e.y - e.r);
-          ctx.lineTo(e.x + e.r, e.y + e.r * 0.8);
-          ctx.lineTo(e.x - e.r, e.y + e.r * 0.8);
-          ctx.closePath();
-        } else if (e.type === 'speeder'){
-          const a = Math.atan2(P.y - e.y, P.x - e.x);
-          ctx.moveTo(e.x + Math.cos(a) * e.r * 1.3, e.y + Math.sin(a) * e.r * 1.3);
-          ctx.lineTo(e.x + Math.cos(a + 2.5) * e.r, e.y + Math.sin(a + 2.5) * e.r);
-          ctx.lineTo(e.x + Math.cos(a - 2.5) * e.r, e.y + Math.sin(a - 2.5) * e.r);
-          ctx.closePath();
-        } else if (e.type === 'brute'){
-          for (let s = 0; s < 6; s++){
-            const a = (s / 6) * TAU + e.t * 0.8;
-            const px = e.x + Math.cos(a) * e.r, py = e.y + Math.sin(a) * e.r;
-            s === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
-          }
-          ctx.closePath();
-        } else {
-          ctx.arc(e.x, e.y + wob * 0.3, e.r, 0, TAU);
-        }
-        ctx.fill();
-        ctx.shadowBlur = 0;
+        const shape = ['drone','speeder','brute'].includes(e.type) ? e.type : 'circle';
+        drawSprite(shape,e.x,e.y+(shape === 'circle' ? wob*.3 : 0),e.r,e.color,e.type === 'boss' ? 26 : 12,
+          e.type === 'speeder' ? Math.atan2(P.y-e.y,P.x-e.x) : e.type === 'brute' ? e.t*.8 : 0,e.flash > 0);
         // mắt
         ctx.fillStyle = '#0a0a18';
         ctx.beginPath(); ctx.arc(e.x, e.y, e.r * 0.32, 0, TAU); ctx.fill();
@@ -1075,8 +1211,8 @@
 
       // Đạn người chơi
       for (const p of projs){
-        ctx.fillStyle = p.color; ctx.shadowColor = p.color; ctx.shadowBlur = 12;
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, TAU); ctx.fill();
+        if (!visible(p.x,p.y,p.r+28)) continue;
+        drawSprite('circle',p.x,p.y,p.r,p.color,12);
       }
       ctx.shadowBlur = 0;
 
@@ -1086,7 +1222,7 @@
         const evo = ow.lvl >= 5;
         for (const b of ow.blades){
           ctx.fillStyle = evo ? '#ffd23e' : '#22d3ee';
-          ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 14;
+          ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = low ? 0 : 14;
           ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(runTime * 9);
           ctx.beginPath(); ctx.moveTo(0, -11); ctx.lineTo(4, 0); ctx.lineTo(0, 11); ctx.lineTo(-4, 0); ctx.closePath(); ctx.fill();
           ctx.restore();
@@ -1097,9 +1233,7 @@
       // Người chơi
       const blinkP = P.invuln > 0 && Math.sin(runTime * 30) > 0;
       ctx.globalAlpha = blinkP ? 0.45 : 1;
-      ctx.fillStyle = P.color; ctx.shadowColor = P.color; ctx.shadowBlur = 20;
-      ctx.beginPath(); ctx.arc(P.x, P.y, P.r, 0, TAU); ctx.fill();
-      ctx.shadowBlur = 0;
+      drawSprite('circle',P.x,P.y,P.r,P.color,20);
       ctx.fillStyle = '#04040d';
       ctx.beginPath(); ctx.arc(P.x + P.face * 4, P.y - 2, 3, 0, TAU); ctx.fill();
       ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
@@ -1107,7 +1241,9 @@
       ctx.globalAlpha = 1;
 
       // Hạt
-      for (const p of parts){
+      for (let index = 0; index < parts.length; index += low ? 2 : 1){
+        const p = parts[index];
+        if (!visible(p.x,p.y,p.r)) continue;
         ctx.globalAlpha = Math.max(0, p.ttl / p.max);
         ctx.fillStyle = p.color;
         ctx.fillRect(p.x - p.r / 2, p.y - p.r / 2, p.r, p.r);
@@ -1117,6 +1253,7 @@
       // Số sát thương
       ctx.font = '700 13px Rajdhani, sans-serif'; ctx.textAlign = 'center';
       for (const f of floats){
+        if (!visible(f.x,f.y,50)) continue;
         ctx.globalAlpha = Math.max(0, f.ttl / 0.65);
         ctx.fillStyle = f.color;
         ctx.fillText(f.txt, f.x, f.y);
@@ -1127,17 +1264,43 @@
     }
 
     /* ---------------- Vòng lặp ---------------- */
-    let lastTs = 0;
+    const STEP = 1 / 60, MAX_CATCHUP = 0.25;
+    let lastTs = null, accumulator = 0, drawnState = '', qualitySlow = 0, qualityFast = 0;
+    function resetClock(){ lastTs = null; accumulator = 0; }
+    function advanceSimulation(elapsed){
+      if (hostPaused || document.hidden || state !== 'playing'){ accumulator = 0; return; }
+      accumulator += Math.min(MAX_CATCHUP, Math.max(0, elapsed));
+      let steps = 0;
+      while (accumulator + 1e-9 >= STEP && steps < 15 && state === 'playing'){
+        accumulator = Math.max(0, accumulator - STEP);
+        update(STEP); steps++;
+      }
+      if (state !== 'playing' || steps === 15) accumulator = 0;
+    }
+    function sampleQuality(elapsed, cost){
+      if (quality !== 'auto' || elapsed <= 0) return;
+      // A single stalled frame should not trigger a downgrade, but sustained
+      // very low FPS must still accumulate evidence instead of being ignored.
+      const evidence = Math.min(elapsed, 0.1);
+      const slow = cost > 15 || elapsed > 0.028;
+      qualitySlow = slow ? qualitySlow + evidence : Math.max(0, qualitySlow - evidence * 0.5);
+      qualityFast = !slow && cost < 7 && elapsed < 0.020 ? qualityFast + evidence : 0;
+      if (autoQuality === 'high' && qualitySlow >= 3){ autoQuality = 'low'; qualitySlow = qualityFast = 0; resize(); }
+      else if (autoQuality === 'low' && qualityFast >= 12){ autoQuality = 'high'; qualitySlow = qualityFast = 0; resize(); }
+    }
     function loop(ts){
       requestAnimationFrame(loop);
-      const dt = Math.min(0.033, (ts - lastTs) / 1000 || 0.016);
+      const dt = lastTs === null ? 0 : Math.max(0, (ts - lastTs) / 1000);
       lastTs = ts;
-      if (hostPaused || document.hidden) return;
+      if (hostPaused || document.hidden){ accumulator = 0; return; }
       if (state === 'playing'){
-        update(dt);
+        const began = performance.now();
+        advanceSimulation(dt);
         draw();
-      } else if (state === 'levelup' || state === 'paused' || state === 'win' || state === 'over'){
-        if (P) draw();
+        renderDirty = false; drawnState = state;
+        sampleQuality(dt, performance.now() - began);
+      } else if (P && state !== 'menu' && (renderDirty || drawnState !== state)){
+        draw(); renderDirty = false; drawnState = state;
       }
     }
     requestAnimationFrame(loop);
@@ -1146,6 +1309,7 @@
     let lvChoices = [];
     function openLevelUp(){
       state = 'levelup';
+      resetClock(); renderDirty = true;
       sfx.levelup();
       lvChoices = rollChoices();
       const grid = el('lv-grid');
@@ -1200,18 +1364,19 @@
       } else if (c.kind === 'heal'){
         P.hp = Math.min(P.maxHp, P.hp + P.maxHp * 0.4);
       } else if (c.kind === 'goldbag'){
-        goldRun += 25; meta.gold += 25; sfx.gold();
+        goldRun += 25; meta.gold = Math.min(1000000000, meta.gold + 25); saveProgress(); sfx.gold();
       }
       pendingLevels--;
       el('levelup').classList.remove('on');
       if (pendingLevels > 0){ openLevelUp(); }
       else state = 'playing';
+      resetClock(); renderDirty = true;
       updateHUD();
     }
 
     /* ---------------- Luồng game ---------------- */
     function startRun(){
-      clearInput(); pendingPulses = [];
+      clearInput(); pendingPulses = []; resetClock(); renderDirty = true; gridDirty = true;
       el('pause').classList.remove('on'); el('levelup').classList.remove('on');
       P = newPlayer();
       addWeapon(CHARACTERS[selChar].weapon);
@@ -1233,16 +1398,18 @@
       if (state !== 'playing') return;
       clearInput();
       state = 'paused';
+      resetClock(); renderDirty = true; saveProgress();
       el('pause').classList.add('on');
     }
     function resumeGame(){
       if (hostPaused || state !== 'paused') return;
       clearInput();
       state = 'playing';
+      resetClock(); renderDirty = true;
       el('pause').classList.remove('on');
     }
     function quitToMenu(){
-      clearInput(); pendingPulses = [];
+      clearInput(); pendingPulses = []; resetClock(); saveProgress();
       el('levelup').classList.remove('on');
       state = 'menu';
       ctx.fillStyle = '#04040d'; ctx.fillRect(0, 0, VW, VH);
@@ -1256,6 +1423,7 @@
     }
     function showEnd(won){
       clearInput();
+      resetClock(); renderDirty = true; saveProgress();
       postToLibrary('tramchoi:score', { score:kills });
       el('hud').classList.remove('on');
       const html = `
@@ -1277,7 +1445,7 @@
         const b = document.createElement('button');
         b.className = 'char-card' + (i === selChar ? ' sel' : '');
         b.innerHTML = `<div class="glyph">${c.glyph}</div><h3 style="color:${c.color}">${c.name}</h3><p>${c.desc}</p><div class="statline">${c.stat}</div>`;
-        b.addEventListener('click', () => { selChar = i; renderMenu(); });
+        b.addEventListener('click', () => { selChar = i; saveProgress(); renderMenu(); });
         cg.appendChild(b);
       });
       const sg = el('shop-grid');
@@ -1296,7 +1464,7 @@
         btn.addEventListener('click', () => {
           if (meta.gold >= cost && meta.shop[s.id] < s.max){
             meta.gold -= cost; meta.shop[s.id]++;
-            sfx.gold(); renderMenu();
+            saveProgress(); sfx.gold(); renderMenu();
           }
         });
         d.appendChild(btn);
@@ -1316,16 +1484,25 @@
       el('victory').classList.remove('on');
       el('hud').classList.add('on');
       state = 'playing';
+      resetClock(); renderDirty = true;
       banner('∞ CHẾ ĐỘ VÔ HẠN ∞', 'Độ khó vẫn tăng — trụ được bao lâu?');
     });
     el('btn-pause').addEventListener('click', () => { if (state === 'playing') pauseGame(); });
-    el('btn-mute').addEventListener('click', function(){
-      muted = !muted;
-      this.textContent = muted ? '🔇' : '🔊';
+    function toggleMute(){ muted = !muted; syncSettings(); saveProgress(); }
+    el('btn-mute').addEventListener('click', toggleMute);
+    el('menu-mute').addEventListener('click', toggleMute);
+    document.querySelectorAll('.quality-select').forEach(node => node.addEventListener('change', () => setQuality(node.value)));
+    el('btn-reset-progress').addEventListener('click', () => { el('reset-confirm').hidden = false; el('btn-cancel-reset').focus(); });
+    el('btn-cancel-reset').addEventListener('click', () => { el('reset-confirm').hidden = true; el('btn-reset-progress').focus(); });
+    el('btn-confirm-reset').addEventListener('click', () => {
+      meta = { gold:0, shop:Object.fromEntries(SHOP.map(s => [s.id,0])) };
+      selChar = 0; muted = false; quality = 'auto'; autoQuality = 'high'; qualitySlow = qualityFast = 0;
+      saveProgress(); resize(); syncSettings(); renderMenu();
+      el('reset-confirm').hidden = true; el('btn-reset-progress').focus();
     });
     canvas.addEventListener('mousedown', () => ac());
 
-    renderMenu();
+    loadProgress(); resize(); syncSettings(); renderMenu();
     </script>
   </body>
 </html>

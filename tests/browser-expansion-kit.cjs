@@ -93,6 +93,8 @@ async function run(spec) {
           const label = `${engine}-${spec.id}-${width}x${height}-${full ? 'functional' : 'responsive'}`;
           try {
             await page.goto(base);
+            await page.waitForFunction(() => window.ArcadeLoader);
+            await page.evaluate(id => window.ArcadeLoader.load({ id }, '2d'), spec.id);
             await page.waitForFunction(({ api, id }) => window[api] && window.ArcadeGames[id], { api: spec.api, id: spec.id });
             if (spec.setup) await spec.setup(page);
             else await capture(page, spec.api);

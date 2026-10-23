@@ -113,6 +113,14 @@ test('AI levels and hint are legal, deterministic and do not mutate input', () =
   assert.equal(L.chooseMove(corner, 'hard').index, 0); assert.match(L.explainMove(corner, L.chooseMove(corner)), /Chiếm góc/);
   L.play(corner, 0); assert.equal(L.chooseMove(corner), null);
 });
+test('hard AI keeps seeded decisions stable with board-only move ordering', () => {
+  const s = L.createGame(), rand = random(72), choices = [];
+  for (let turn = 0; turn < 21; turn++) {
+    if (turn % 7 === 0) choices.push(L.chooseMove(s, 'hard').index);
+    const moves = L.legalMoves(s); L.play(s, moves[Math.floor(rand() * moves.length)].index);
+  }
+  assert.deepEqual(choices, [19, 21, 43]);
+});
 test('200 seeded full games agree with independent oracle, conserve discs and terminate', () => {
   let skipped = 0, early = 0;
   for (let seed = 1; seed <= 200; seed++) {

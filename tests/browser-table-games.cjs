@@ -40,6 +40,8 @@ async function reachable(locator, label) {
 }
 async function install(page, id) {
   await page.goto(base);
+  await page.waitForFunction(() => window.ArcadeLoader);
+  await page.evaluate(id => window.ArcadeLoader.load({ id }, '2d'), id);
   await page.waitForFunction(({ api, id }) => window[api] && window.ArcadeGames[id], { api: apis[id], id });
   await page.evaluate(({ api, id }) => {
     const original = window[api];

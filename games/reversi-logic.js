@@ -102,8 +102,16 @@
     return positional(state.board, player) + mobility * 8 + (own - other) * (c.empty < 14 ? 5 : 0.2);
   }
   function ordered(state, moves) {
-    return moves.map(move => ({ ...move, order: positional(next(state, move).board, state.current) }))
-      .sort((a, b) => b.order - a.order || a.index - b.index);
+    const board = state.board.slice(), player = state.current;
+    const choices = moves.map(move => {
+      board[move.index] = player;
+      for (const cell of move.flips) board[cell] = player;
+      const order = positional(board, player);
+      board[move.index] = 0;
+      for (const cell of move.flips) board[cell] = -player;
+      return { ...move, order };
+    });
+    return choices.sort((a, b) => b.order - a.order || a.index - b.index);
   }
   function chooseMove(state, level = state.level) {
     const moves = legalMoves(state);

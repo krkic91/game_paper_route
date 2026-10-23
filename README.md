@@ -26,10 +26,21 @@ python -m http.server 4173
 
 Để chơi Caro trên hai thiết bị, xem [hướng dẫn Caro online, LAN và triển khai](docs/caro-online.md). [Kế hoạch triển khai](docs/caro-online-plan.md) lưu kiến trúc và phạm vi đã thống nhất.
 
+Chế độ triển khai: `npm run start:production` (hoặc
+`node scripts/serve.js --production 4173`) bật cache có ETag. Trình duyệt kiểm tra
+lại nội dung và nhận `304` nếu file chưa đổi; không giữ cứng bản game cũ.
+`npm start`/`npm run dev` vẫn tắt cache để thấy thay đổi ngay. Lệnh này chỉ chạy
+server; cấu hình HTTPS/domain/hosting thực hiện theo hướng dẫn Caro online.
+
+Trang chủ tải 3 file JavaScript; mã và CSS của từng game được tải khi mở game,
+dùng lại khi mở tiếp trong cùng trang. HTTP và mở trực tiếp `file://` đều được
+hỗ trợ. Xem [kế hoạch, phép đo và kiểm thử tối ưu](docs/optimization.md).
+
 ## Danh sách game
 
 | Game                | Chế độ                                        | Cách chơi chính                                                   |
 | ------------------- | --------------------------------------------- | ----------------------------------------------------------------- |
+| **Neon Survivors** | 1 người · 2D | Chọn nhân vật, né quái, nâng cấp vũ khí và đánh boss ở phút thứ 10. |
 | **Hải chiến** | Bạn đấu máy · 2D | Xếp đội tàu, dò tọa độ và đánh chìm đối thủ. |
 | **Dò mìn** | 1 người · 3 mức · thử thách ngày | Mở các ô an toàn bằng suy luận và cắm cờ. |
 | **Thủ thành** | 1 người · 3 bản đồ | Xây, nâng cấp tháp và chặn 12 đợt quái. |
@@ -62,6 +73,14 @@ Bảy game mới dùng bản 2D. Xem [phân công triển khai](docs/seven-games
 và luật từng game: [Hải chiến](docs/battleship.md), [Dò mìn](docs/minesweeper.md),
 [Thủ thành](docs/tower.md), [Nối thú](docs/onet.md), [Xếp gạch rơi](docs/blocks.md),
 [Cờ lật](docs/reversi.md), [Cờ Thú](docs/jungle.md).
+
+**Neon Survivors** dùng trực tiếp file `Neon Survivors.html`, mở từ nhóm Arcade
+hoặc `/#play/neon`. Có tạm dừng/chơi lại/phím tắt của thư viện; kỷ lục tính theo
+số hạ gục. Xem [hướng dẫn tích hợp Neon Survivors](docs/neon.md).
+
+Vàng, nâng cấp và tùy chọn Neon được tự động lưu trên trình duyệt khi lưu trữ
+khả dụng. Có chọn đồ họa Tự động/Thấp/Cao và xóa tiến trình trong menu game.
+Ván đang chơi chưa có chức năng lưu để tiếp tục sau khi tải lại trang.
 
 ### Các biến thể luật được sử dụng
 

@@ -25,6 +25,13 @@ async function run(browser, engine) {
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
   try {
     await page.goto(base);
+    await page.waitForFunction(() => window.ArcadeLoader);
+    await page.evaluate(async () => {
+      // Both real renderers are inspected by this regression test. Preload
+      // them before capturing factories; UI mounting still uses the route.
+      await window.ArcadeLoader.load({ id: 'race' }, '2d');
+      await window.ArcadeLoader.load({ id: 'race' }, '3d');
+    });
     await page.waitForFunction(() => window.Arcade3D && window.RaceLogic);
     const canvasLean = await page.evaluate(() => {
       const results = [];

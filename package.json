@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "start": "node scripts/serve.js",
+    "start:production": "node scripts/serve.js --production",
     "dev": "node scripts/serve.js",
     "test": "node --test tests/core.test.js tests/arcade.test.js tests/race.test.cjs tests/lifecycle.test.js tests/online-server.test.cjs tests/online-client.test.cjs tests/sudoku.test.cjs tests/puppies.test.cjs tests/chess.test.cjs tests/xiangqi.test.cjs tests/uno.test.cjs tests/domino.test.cjs tests/monopoly.test.cjs tests/tienlen.test.cjs tests/xidach.test.cjs tests/werewolf.test.cjs tests/battleship.test.cjs tests/minesweeper.test.cjs tests/tower.test.cjs tests/onet.test.cjs tests/blocks.test.cjs tests/reversi.test.cjs tests/jungle.test.cjs",
     "test:online": "node tests/browser-online.cjs",
@@ -22,7 +23,12 @@
     "test:table": "node --test tests/domino.test.cjs tests/monopoly.test.cjs tests/tienlen.test.cjs tests/xidach.test.cjs tests/werewolf.test.cjs",
     "test:table:browser": "node tests/browser-table-games.cjs",
     "test:expansion": "node --test tests/battleship.test.cjs tests/minesweeper.test.cjs tests/tower.test.cjs tests/onet.test.cjs tests/blocks.test.cjs tests/reversi.test.cjs tests/jungle.test.cjs",
-    "test:expansion:browser": "node tests/browser-expansion.cjs"
+    "test:expansion:browser": "node tests/browser-expansion.cjs",
+    "test:neon": "node tests/browser-neon.cjs",
+    "test:neon-optimization": "node tests/browser-neon-optimization.cjs",
+    "test:loader": "node tests/browser-loader.cjs",
+    "test:cache": "node --test tests/http-cache.test.cjs",
+    "benchmark:optimization": "node tests/benchmark-optimization.cjs"
   },
   "engines": {
     "node": ">=18"
