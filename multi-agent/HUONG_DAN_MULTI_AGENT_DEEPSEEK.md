@@ -4,10 +4,10 @@
 
 Harness (công cụ điều phối và thực thi) vẫn là Codex. Model được chọn thông qua provider Command Code.
 
-File `C:\Users\ciKrk\.codex\cmdcode_provider.config.toml` cần có:
+File `C:\Users\ciKrk\.codex\cmd_ds.config.toml` cần có:
 
 ```toml
-model_provider = "cmdcode"
+model_provider = "cmd_ds"
 model = "deepseek/deepseek-v4.1-flash"
 model_reasoning_effort = "high"
 service_tier = "default"
@@ -19,7 +19,7 @@ File `C:\Users\ciKrk\.codex\config.toml` cần có các block sau. Nếu đã c�
 [features]
 multi_agent = true
 
-[model_providers.cmdcode]
+[model_providers.cmd_ds]
 name = "Command Code using Deepseek model"
 base_url = "https://api.commandcode.ai/provider/v1"
 env_key = "CMD_API_KEY"
@@ -35,7 +35,7 @@ Các block trên không yêu cầu đổi model/provider mặc định của phi
 Trong VS Code, mở nhiều terminal bằng **Ctrl+Shift+`**. Trong mỗi terminal chạy:
 
 ```powershell
-codex --profile cmdcode_provider
+codex --profile cmd_ds
 ```
 
 Ví dụ phân chia công việc:
@@ -49,7 +49,7 @@ Các phiên này độc lập, không tự chia sẻ lịch sử trò chuyện h
 Để kiểm tra chỉ đọc:
 
 ```powershell
-codex --profile cmdcode_provider --sandbox read-only
+codex --profile cmd_ds --sandbox read-only
 ```
 
 ## 3. Cách B: nhiều subagent trong một phiên DeepSeek
@@ -57,7 +57,7 @@ codex --profile cmdcode_provider --sandbox read-only
 Khởi chạy phiên cha dùng DeepSeek:
 
 ```powershell
-codex --profile cmdcode_provider --enable multi_agent --sandbox read-only
+codex --profile cmd_ds --enable multi_agent --sandbox read-only
 ```
 
 Nếu `multi_agent = true` đã có trong cấu hình, có thể bỏ `--enable multi_agent`.
@@ -73,7 +73,7 @@ Hãy tạo 3 subagent chạy song song:
 Chỉ đọc, không sửa file. Chờ cả ba hoàn thành rồi tổng hợp kết quả.
 ```
 
-Trong thử nghiệm đã thực hiện, agent con mặc định kế thừa provider `cmdcode` và model `deepseek/deepseek-v4.1-flash` từ phiên cha DeepSeek.
+Trong thử nghiệm đã thực hiện, agent con mặc định kế thừa provider `cmd_ds` và model `deepseek/deepseek-v4.1-flash` từ phiên cha DeepSeek.
 
 Bật multi-agent chỉ cho phép tạo agent con; không có nghĩa mọi tin nhắn đều tự động tạo subagent. Số lượng agent thực tế có thể chịu giới hạn của Codex và provider.
 
@@ -82,7 +82,7 @@ Bật multi-agent chỉ cho phép tạo agent con; không có nghĩa mọi tin n
 Ví dụ chạy một nhiệm vụ từ terminal:
 
 ```powershell
-codex exec --profile cmdcode_provider --sandbox read-only "Kiem tra cau truc du an, khong sua file, va tom tat ket qua."
+codex exec --profile cmd_ds --sandbox read-only "Kiem tra cau truc du an, khong sua file, va tom tat ket qua."
 ```
 
 Có thể chạy lệnh này trong nhiều terminal với các nhiệm vụ khác nhau.
@@ -94,7 +94,7 @@ Trong Codex CLI, dùng `/status` để xem thông tin phiên nếu phiên bản 
 Để xác minh sâu hơn, kiểm tra dữ liệu phiên và log trong `C:\Users\ciKrk\.codex`. Những lần thử trước đã kiểm tra cơ sở dữ liệu phiên `state_5.sqlite` ở chế độ chỉ đọc và xác nhận:
 
 ```text
-model_provider: cmdcode
+model_provider: cmd_ds
 model: deepseek/deepseek-v4.1-flash
 reasoning_effort: high
 ```
@@ -106,7 +106,7 @@ Không dùng câu trả lời tự giới thiệu của model làm bằng chứn
 ## 6. Giới hạn đã xác minh
 
 - Đã chạy thành công một subagent DeepSeek từ phiên cha DeepSeek.
-- Đã chạy thành công một phiên `codex exec --profile cmdcode_provider` dùng DeepSeek.
+- Đã chạy thành công một phiên `codex exec --profile cmd_ds` dùng DeepSeek.
 - Chưa kiểm thử ba subagent DeepSeek chạy đồng thời.
 - Với Codex 0.164.0 đã kiểm tra, role subagent không áp dụng đổi provider riêng. Tạo subagent mặc định từ phiên cha OpenAI vẫn cho ra agent con OpenAI, không tự chuyển sang profile DeepSeek.
 - Có thể gọi một phiên CLI DeepSeek riêng từ quy trình điều phối khác, nhưng đó không phải subagent native qua `spawn_agent` của phiên OpenAI.

@@ -49,8 +49,8 @@ của tài liệu con.
   đóng iframe. Dữ liệu nạp vào được kiểm tra phiên bản, kiểu và giới hạn.
 - Lưới không gian lọc ứng viên va chạm, sau đó vẫn dùng kiểm tra khoảng cách
   và thứ tự mục tiêu như trước.
-- Vật thể ngoài khung nhìn được bỏ qua khi vẽ. Hình phát sáng lặp lại dùng
-  bitmap đệm; HUD chỉ ghi lại giá trị thay đổi.
+- Vật thể ngoài khung nhìn được bỏ qua khi vẽ. Hiệu ứng dùng đường vector
+  trực tiếp sau khi đối chiếu hiệu năng bitmap; HUD chỉ ghi lại giá trị thay đổi.
 - Vòng mô phỏng dùng bước 1/60 giây, bù tối đa 250 ms mỗi khung để không
   tích lũy vô hạn khi máy treo. Không bù thời gian đã tạm dừng/ẩn tab.
 - Màn tạm dừng, nâng cấp và kết thúc chỉ vẽ lại khi trạng thái/khung hình đổi.

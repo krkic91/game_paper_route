@@ -205,19 +205,20 @@ async function mechanics(page, source) {
     setQuality('high'); for(let i=0;i<100;i++) sampleQuality(.2,180);
     check(effectiveQuality()==='high','Explicit high quality was overridden');
 
-    // Cached sprites are bounded and only visible entities incur drawImage work.
+    // Only visible entities incur Canvas fill work; quality never removes actors.
     startRun(); P.weapons={}; enemies=[]; gems=[]; projs=[]; coins=[]; parts=[]; rings=[]; bolts=[]; floats=[]; ebullets=[]; shake=0;
-    setQuality('high'); spriteCache.clear(); draw(); const playerCache=spriteCache.size;
-    const originalImage=ctx.drawImage.bind(ctx); let images=0;
-    ctx.drawImage=(...args)=>{ images++; originalImage(...args); };
+    setQuality('high'); draw();
+    const originalFill=ctx.fill.bind(ctx); let images=0;
+    ctx.fill=(...args)=>{ images++; originalFill(...args); };
     draw(); const playerImages=images;
     for(let i=0;i<100;i++) { spawnEnemy('drone',100000+i,100000); gems.push({x:100000+i,y:100000,r:5,v:1,age:0}); }
     images=0; draw(); check(images===playerImages,'Offscreen actors still drawn');
-    check(spriteCache.size===playerCache,'Offscreen actors still generated sprites');
     enemies=[]; gems=[]; spawnEnemy('brute',100,0);
     images=0; draw(); check(images>playerImages,'Visible enemy missing');
-    const cached=spriteCache.size; draw(); check(spriteCache.size===cached,'Sprite cache grows on unchanged frames');
-    ctx.drawImage=originalImage;
+    const actorCounts=[enemies.length,gems.length,projs.length];
+    setQuality('low'); draw();
+    check(JSON.stringify(actorCounts)===JSON.stringify([enemies.length,gems.length,projs.length]),'Low quality changed game actors');
+    ctx.fill=originalFill;
     const observer=new MutationObserver(()=>{});
     observer.observe(el('hud'),{subtree:true,attributes:true,childList:true,characterData:true});
     updateHUD(); observer.takeRecords(); for(let i=0;i<100;i++) updateHUD();

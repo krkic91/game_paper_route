@@ -65,7 +65,9 @@ async function run(browser, engine) {
     });
     await page.evaluate(async () => {
       const A = window.Arcade3D;
+      const raceView = A.views.race;
       await A.load();
+      if (A.views.race !== raceView) throw new Error('Loading other 3D games replaced the current race renderer');
       const originalScene = A.createScene, originalView = A.createView;
       A.createScene = function (ui, scope, config) {
         const e = originalScene.apply(this, arguments);

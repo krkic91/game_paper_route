@@ -70,7 +70,8 @@
     return {draw,engine:e,canvas:e.canvas,point:event=>e.point(event),reset(){stateRef=null;}};
   }
   A.drivingScene=driving;
-  A.views.race=(ui,scope)=>driving(ui,scope,false);
+  // Loading another action game after race must preserve the newer race renderer.
+  if (!A.views.race) A.views.race=(ui,scope)=>driving(ui,scope,false);
 
   A.views.snake=function(ui,scope){
     const e=A.createScene(ui,scope,{id:'snake',width:22.6,depth:22.6,height:1.6,label:'Rắn săn mồi 3D. Vuốt hoặc dùng phím mũi tên.',yaw:0,orbit:false,elevation:.9,background:'#294a3e'});

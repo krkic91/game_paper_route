@@ -18,7 +18,7 @@ const report = {
   method: 'Three fresh contexts for library startup. Fixed seeded synthetic scene; CPU update timing and Canvas draw plus forced 1px readback. Readback costs are included; these are not gameplay FPS.',
   runs: [],
 };
-const save = () => fs.writeFileSync(path.join(folder, `benchmark-${phase}.json`), JSON.stringify(report, null, 2));
+const save = () => fs.writeFileSync(path.join(folder, `benchmark-${phase}${process.env.BENCHMARK_SUFFIX || ''}.json`), JSON.stringify(report, null, 2));
 const source = name => phase === 'before' && snapshots[name] ? path.join(folder, snapshots[name]) : path.join(root, name);
 const initialHtml = fs.readFileSync(source('index.html'), 'utf8');
 const assets = [...initialHtml.matchAll(/<(?:script\b[^>]*\bsrc|link\b[^>]*\bhref)="([^"]+\.(?:js|css))"/g)].map(m => m[1]);
@@ -97,11 +97,12 @@ async function scene(browser, base) {
       for (let i = 0; i < 100; i++) dropCoin(130 + i * 8, -400 + i * 9);
       const initialCounts = { enemies: enemies.length, projectiles: projs.length, gems: gems.length, coins: coins.length };
       for (let i = 0; i < 12; i++) update(1 / 60);
-      const updateTimes = [], drawTimes = [];
+      const updateTimes = [], drawTimes = [], submissionTimes = [];
       for (let i = 0; i < 80; i++) { const at = performance.now(); update(1 / 60); updateTimes.push(performance.now() - at); }
       draw(); ctx.getImageData(0, 0, 1, 1);
       for (let i = 0; i < 40; i++) {
-        const at = performance.now(); draw(); ctx.getImageData(0, 0, 1, 1); drawTimes.push(performance.now() - at);
+        const at = performance.now(); draw(); submissionTimes.push(performance.now() - at);
+        ctx.getImageData(0, 0, 1, 1); drawTimes.push(performance.now() - at);
       }
       updateHUD();
       const observer = new MutationObserver(() => {});
@@ -120,7 +121,7 @@ async function scene(browser, base) {
         values.sort((a, b) => a - b);
         return { medianMs: values[Math.floor(values.length / 2)], p95Ms: values[Math.floor(values.length * .95)], samples: values.length };
       };
-      return { initialCounts, viewport: [VW, VH], dpr: DPR, quality: typeof effectiveQuality === 'function' ? effectiveQuality() : 'original', update: summarize(updateTimes), renderAndReadback: summarize(drawTimes), unchangedHudMutations, staticPauseDrawCalls: pausedDraws };
+      return { initialCounts, viewport: [VW, VH], dpr: DPR, quality: typeof effectiveQuality === 'function' ? effectiveQuality() : 'original', update: summarize(updateTimes), drawSubmission: summarize(submissionTimes), renderAndReadback: summarize(drawTimes), unchangedHudMutations, staticPauseDrawCalls: pausedDraws };
     });
   } finally { await context.close(); }
 }
@@ -132,7 +133,7 @@ async function scene(browser, base) {
       const edge = 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe';
       const browser = await { chromium, webkit }[engine].launch({ headless: true, ...(engine === 'chromium' ? { executablePath: process.env.BROWSER_PATH || (fs.existsSync(edge) ? edge : undefined) } : {}) });
       try {
-        const run = { engine, version: browser.version(), startup: await startup(browser, base) };
+        const run = { engine, version: browser.version(), ...(process.env.BENCHMARK_SCENE_ONLY === '1' ? {} : { startup: await startup(browser, base) }) };
         report.runs.push(run); save(); console.log(`${phase} ${engine}: startup recorded`);
         run.scene = await scene(browser, base); save(); console.log(`${phase} ${engine}: scene recorded`);
       } finally { await browser.close(); }

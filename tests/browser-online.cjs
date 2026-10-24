@@ -4,7 +4,7 @@
 const assert = require('node:assert/strict');
 const { existsSync, mkdirSync } = require('node:fs');
 const { join } = require('node:path');
-const { chromium, webkit } = require('playwright');
+const { chromium, webkit } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 
 const base = (process.env.TEST_URL || 'http://127.0.0.1:4173').replace(/\/$/, '');
 const engine = process.env.ONLINE_BROWSER || 'chromium';

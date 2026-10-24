@@ -9,7 +9,6 @@ Mở http://127.0.0.1:4173.
  - Đề xuất:
      - Thêm 5–10 màn nhập môn cỡ 5×5 và 6×6.
      - Đặt lại nhãn cho đúng mức khó thật: Dễ → Vừa → Khó…
-     - Có thể thêm một màn hướng dẫn tương tác dạy 3 luật.
 
  2. Gợi ý hiện chỉ lộ đáp án, không dạy cách suy luận
  - L.hint() đặt luôn con cún ở dòng trên cùng còn thiếu của đáp án, nên gợi ý luôn đi từ trên xuống và người chơi không học được gì.
@@ -85,8 +84,7 @@ Mở http://127.0.0.1:4173.
     dung vô hạn bằng sinh bàn. Effort M. Dùng icon trái cây/đá quý có sẵn trong art.js.
  3. Phỏm — card vs 3 máy. Rất Việt Nam, đặc biệt miền Bắc; chiến thuật, gần gũi; tái dùng UI bài của Tiến lên/UNO; AI cần viết luật +
     heuristic. Effort M–L. Nếu muốn rẻ hơn: Sâm lốc (luật đơn giản hơn), Mậu binh (so bài, ít AI).
- 4. Sút bóng luân lưu (Penalty) — sport 1–2 người. Ai cũng biết, hợp World Cup/SEA Games, 1 chạm, rất hợp mobile; đối trọng vui với Đua
-    xe/Bida. Effort S–M.
+ 4. Sút bóng luân lưu (Penalty) — sport 1–2 người. Ai cũng biết, hợp World Cup/SEA Games, 1 chạm, rất hợp mobile; đối trọng vui với Đua xe/Bida. Effort S–M.
 
  Nhóm B — đáng làm nếu muốn bản sắc/depth (chọn 1–2):
  5. Đuổi hình bắt chữ / Nối chữ tiếng Việt — rất Việt, gia đình, giáo dục; nhưng cần kho 150–300 câu (content-heavy). Effort M+L.
