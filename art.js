@@ -120,7 +120,37 @@
       '<path d="M79 79h26v26H79Z" fill="#b0bd84"/><path d="m79 79 26 26m0-26-26 26" stroke="#f2ead5" stroke-width="2"/>';
     return html;
   }
+  function gem(kind, fragment = false) {
+    const colors = ['#d97983', '#6fa5c6', '#70a88b', '#ad8bc2', '#dfb65c', '#c6bca5'];
+    const shapes = ['M32 5 55 24 46 51 18 51 9 24Z', 'M32 4 57 32 32 59 7 32Z', 'M17 9h30l9 23-9 23H17L8 32Z', 'M32 4 59 53H5Z', 'M32 3 40 23 61 24 44 38 50 60 32 47 14 60 20 38 3 24 24 23Z', 'M32 6a26 26 0 1 1 0 52 26 26 0 1 1 0-52'];
+    const body = `<path d="${shapes[kind]}" fill="${colors[kind]}" stroke="#ffffffb0" stroke-width="2"/><path d="m20 19 12-7 10 9-16 3Z" fill="#fff" opacity=".43"/><path d="m19 41 12 12 14-9-16 3Z" fill="#203a54" opacity=".14"/>`;
+    return fragment ? body : `<svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true">${body}</svg>`;
+  }
   function cover(id) {
+    if (id === 'draughts') {
+      let grid = '';
+      for (let i = 0; i < 64; i++) grid += `<rect x="${103 + i % 8 * 24}" y="${24 + Math.floor(i / 8) * 24}" width="24" height="24" fill="${(Math.floor(i / 8) + i % 8) % 2 ? '#7a8e73' : '#f1e1bb'}"/>`;
+      const pieces = [[1,0,0],[3,0,0],[2,1,0],[6,1,0],[3,2,0],[4,3,1],[1,4,1],[0,5,1],[4,5,1],[3,6,1],[6,7,1]].map(([x,y,c],i) => `<circle cx="${115+x*24}" cy="${36+y*24}" r="9.5" fill="${c?'#b9674d':'#304f42'}" stroke="#f1d9ab" stroke-width="1.5"/>${i===5?'<path d="m207 104 4 7 5-7 4 7 4-7-2 13h-13Z" fill="#f5db87"/>':''}`).join('');
+      return scene(`<rect x="96" y="17" width="206" height="206" rx="8" fill="#ae9570"/>${grid}${pieces}`, '#d7c6a5');
+    }
+    if (id === 'match3') {
+      const cells = Array.from({length:12},(_,i)=>`<g transform="translate(${95+i%4*55} ${37+Math.floor(i/4)*56})"><rect width="49" height="49" rx="10" fill="#fff5fc"/><g transform="translate(5 5) scale(.61)">${gem([0,1,3,2,4,4,4,5,2,0,1,3][i], true)}</g></g>`).join('');
+      return scene(`${cells}<path d="M105 117h189" stroke="#fff7c8" stroke-width="3" stroke-dasharray="4 5"/>`, '#bfa8ca');
+    }
+    if (id === 'phom') {
+      const cards = ['♠','♣','♥'].map((s,i)=>`<g transform="translate(${91+i*73} ${53-i%2*16}) rotate(${(i-1)*12} 39 65)"><rect y="5" width="78" height="130" rx="10" fill="#183f323d"/><rect width="78" height="130" rx="10" fill="#fff2d7"/><text x="12" y="30" font-family="Georgia,serif" font-size="25" fill="${i===2?'#b76450':'#395448'}">7</text><text x="39" y="89" text-anchor="middle" font-size="49" fill="${i===2?'#b76450':'#395448'}">${s}</text></g>`).join('');
+      return scene(`<ellipse cx="200" cy="122" rx="175" ry="103" fill="#69977b" stroke="#c7a879" stroke-width="9"/>${cards}`, '#b5c6a4');
+    }
+    if (id === 'penalty') {
+      const net = Array.from({length:12},(_,i)=>`<path d="M${82+i*21} 46v114"/>`).join('')+Array.from({length:6},(_,i)=>`<path d="M82 ${46+i*23}h231"/>`).join('');
+      return scene(`<path d="M0 160h400v80H0Z" fill="#739970"/><rect x="81" y="43" width="235" height="121" fill="#476e59" stroke="#f3edcc" stroke-width="6"/><g stroke="#d4dfbb" opacity=".5">${net}</g><circle cx="201" cy="99" r="12" fill="#eac293"/><path d="M188 113h26v31h-26Z" fill="#f2cd77"/><path d="m174 118 27 7 28-7m-35 25-7 23m21-23 7 23" fill="none" stroke="#f2cd77" stroke-width="10" stroke-linecap="round"/><circle cx="256" cy="198" r="21" fill="#fff9e3"/><path d="m256 186 11 8-4 13h-14l-4-13Z" fill="#37554c"/><path d="m260 168 17-24 13-29" stroke="#e8deae" fill="none" stroke-width="3" stroke-dasharray="5 5"/>`, '#a4b899');
+    }
+    if (id === 'wordchain') {
+      return scene('<g transform="rotate(-6 200 120)"><rect x="72" y="35" width="255" height="171" rx="15" fill="#fff4da"/><path d="M96 88h207M96 131h207M96 174h207" stroke="#d7d4b9"/><text x="96" y="77" fill="#537453" font-family="Georgia,serif" font-size="24">học sinh</text><text x="130" y="120" fill="#b38153" font-family="Georgia,serif" font-size="24">sinh nhật</text><text x="165" y="163" fill="#537453" font-family="Georgia,serif" font-size="24">nhật ký</text><path d="m105 105 11 9-11 8m34 26 11 9-11 8" stroke="#9fac85" fill="none" stroke-width="3"/></g>', '#d7d3ae');
+    }
+    if (id === 'fishing') {
+      return scene('<circle cx="310" cy="53" r="27" fill="#f1d58e"/><path d="M0 135q70-115 172 0 110-96 228-9v114H0Z" fill="#8eaf8c"/><path d="M0 169q200-47 400-5v76H0Z" fill="#8bb8b3"/><path d="M0 195h113v12H0m90 0v33" fill="#a58057" stroke="#a58057" stroke-width="6"/><path d="m98 191 64-122" stroke="#6a7155" stroke-width="4"/><path d="M163 69q91 18 98 115" stroke="#faf1d0" fill="none"/><ellipse cx="260" cy="189" rx="17" ry="4" fill="none" stroke="#e9e8cb"/><path d="M260 178v13" stroke="#d78468" stroke-width="5"/><path d="M306 215q20-19 40 0-20 19-40 0l-13-9v18Z" fill="#dfbd7d"/><circle cx="336" cy="213" r="2" fill="#466459"/>', '#d2dfbd');
+    }
     if (id === 'neon') {
       return `<svg viewBox="0 0 400 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><radialGradient id="neon-bg"><stop stop-color="#203454"/><stop offset="1" stop-color="#090d21"/></radialGradient></defs><rect width="400" height="240" fill="url(#neon-bg)"/><g stroke="#28425a" stroke-width="1" opacity=".65">${Array.from({length:11},(_,i)=>`<path d="M${i*40} 0v240"/>`).join('')}${Array.from({length:7},(_,i)=>`<path d="M0 ${i*40}h400"/>`).join('')}</g><circle cx="200" cy="120" r="76" fill="none" stroke="#22d3ee" stroke-width="2" opacity=".35"/><circle cx="200" cy="120" r="46" fill="none" stroke="#a78bfa" stroke-width="3"/><path d="m200 91 23 29-23 29-23-29Z" fill="#22d3ee" stroke="#c5f9ff" stroke-width="3"/><g fill="#ff2d95" stroke="#ffa8d4" stroke-width="2"><path d="m80 43 17 30H63Z"/><path d="m315 139 17 30h-34Z"/><path d="m93 177 17 30H76Z"/></g><g fill="#a78bfa"><circle cx="308" cy="57" r="12"/><circle cx="49" cy="127" r="9"/></g><g stroke="#ffd23e" stroke-width="5" stroke-linecap="round"><path d="m220 108 52-28"/><path d="m179 133-40 24"/></g><g fill="#a3e635"><path d="m255 178 6 9-6 9-6-9Z"/><path d="m143 47 6 9-6 9-6-9Z"/></g></svg>`;
     }
@@ -395,5 +425,5 @@
     }
     return scene('', '#7a9475');
   }
-  window.ArcadeArt = { icon, cover, hero, ludoBoard, puppy };
+  window.ArcadeArt = { icon, cover, hero, ludoBoard, puppy, gem };
 })();

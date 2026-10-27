@@ -21,6 +21,9 @@
     'battleship', 'minesweeper', 'tower', 'onet', 'blocks', 'reversi', 'jungle']) {
     manifest[id] = { scripts: [`${id}-logic.js`, `${id}.js`], css: `${id}.css` };
   }
+  for (const id of ['draughts', 'match3', 'phom', 'penalty', 'wordchain', 'fishing']) {
+    manifest[id] = { scripts: [`${id}-logic.js`, `${id}.js`], css: 'family.css' };
+  }
   function resource(relative, kind) {
     const url = new URL(relative, base).href;
     if (resources.has(url)) return resources.get(url);

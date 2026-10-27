@@ -14,6 +14,48 @@
   };
   const games = [
     {
+      id: 'draughts', title: 'Cờ đam', category: 'board', players: '1–2 người', badge: 'MỚI', supports3d: false,
+      description: 'Đi chéo, ăn liên tiếp và tiến lên phong vua.', keywords: 'co dam draughts checkers quân tròn cờ gia đình',
+      intro: 'Bàn cờ 8 × 8, mười hai quân mỗi bên. Một nước bắt đúng lúc có thể mở đường tới hàng phong vua.',
+      instructions: ['Chọn quân rồi chọn ô sáng để đi chéo. Đỏ đi trước; khi đấu máy bạn cầm Đỏ.', 'Có nước bắt thì bắt buộc ăn. Nếu còn ăn được bằng quân vừa đi, phải tiếp tục chuỗi.', 'Quân thường chỉ đi và bắt tiến. Đến hàng cuối được phong vua và kết thúc lượt; vua đi một ô chéo cả hai hướng.', 'Hết quân hoặc hết nước đi là thua. Có gợi ý, hoàn tác, máy Dễ/Vừa và chế độ 2 người chung thiết bị.'],
+      variant: 'Luật Anh 8 × 8. Tự hòa khi lặp thế 3 lần hoặc 80 lượt chỉ đi vua không bắt quân. Không dùng vua bay.',
+    },
+    {
+      id: 'match3', title: 'Kim cương · Ghép 3', category: 'puzzle', players: '1 người', badge: 'MỚI', supports3d: false,
+      description: 'Ghép ba viên, nối chuỗi lấp lánh cả khu vườn.', keywords: 'kim cuong ghep 3 match-3 match3 đá quý puzzle',
+      intro: 'Ba mươi lượt, sáu loại đá quý. Đổi chỗ hai ô để tạo những chuỗi rơi nối tiếp và tìm kỷ lục mới.',
+      instructions: ['Chạm hai ô cạnh nhau theo chiều ngang hoặc dọc để đổi chỗ.', 'Ghép từ 3 viên cùng loại thành hàng để ghi điểm. Các viên phía trên rơi xuống và bổ sung viên mới.', 'Chuỗi liên tiếp nhân điểm. Mỗi viên 10 điểm nhân số chuỗi.', 'Đổi sai không mất lượt. Có gợi ý; hết nước tự tạo bàn mới giữ điểm. Kết thúc sau 30 lượt hợp lệ.'],
+      variant: 'Bàn 8 × 8 sinh ngẫu nhiên, có sẵn nước đi. Một ván khoảng 3–5 phút, không giới hạn số ván.',
+    },
+    {
+      id: 'phom', title: 'Phỏm', category: 'card', players: 'Bạn đấu 3 máy', badge: 'MỚI', supports3d: false,
+      description: 'Giữ cạ, ghép phỏm, tìm lá rác để về nhất.', keywords: 'phom tá lả ta la bài bắc bộ rummy',
+      intro: 'Bàn bài bốn người quen thuộc. Ăn hoặc bốc, ghép phỏm và giảm điểm bài rác trước lúc hạ.',
+      instructions: ['Bạn có 10 lá và đánh trước; mỗi máy có 9 lá. Chọn lá rác rồi bấm Đánh lá chọn.', 'Các lượt sau: ăn lá người trước để tạo phỏm, hoặc bốc nọc, rồi đánh 1 lá.', 'Phỏm là 3–4 lá cùng số hoặc từ 3 lá liên tiếp cùng chất. A thấp, không nối K–A. Lá ăn được bảo vệ trong phỏm.', 'Sau 4 lượt tự hạ phỏm và gửi vào phỏm đã hạ trước. Ít điểm rác nhất thắng, móm xếp sau người có phỏm; bằng điểm ưu tiên người hạ trước. Hết rác là ù.'],
+      variant: 'Bàn gia đình 4 vòng cố định, tự hạ/gửi, không tái hay đền. A=1, J=11, Q=12, K=13. Mỗi phỏm tối đa 1 lá ăn. Không cược tiền.',
+    },
+    {
+      id: 'penalty', title: 'Sút bóng luân lưu', category: 'sport', players: '1–2 người', badge: 'MỚI', supports3d: false,
+      description: 'Chọn góc sút, đoán hướng và giữ bình tĩnh.', keywords: 'sut bong luan luu penalty football bóng đá thủ môn',
+      intro: 'Năm quả mỗi đội, luân phiên sút bóng và bắt gôn. Một chạm quyết định góc sút của bạn.',
+      instructions: ['Chọn một trong sáu vùng khung thành để sút hoặc đổ người bắt bóng.', 'Thủ môn đoán đúng vùng thì cản phá, khác vùng thì ghi bàn. Máy chọn kín trước khi bạn bấm.', 'Hai đội đá luân phiên 5 quả. Kết thúc sớm nếu đội kia không thể gỡ; hòa thì đá từng cặp lượt quyết định.', 'Chế độ 2 người: thủ môn chọn kín rồi chuyển thiết bị cho người sút. Bấm Sẵn sàng để tiếp tục.'],
+      variant: 'Luân lưu theo vùng, điều khiển một chạm. Hai người chơi chung thiết bị, chuyền máy để giữ kín lựa chọn.',
+    },
+    {
+      id: 'wordchain', title: 'Nối chữ tiếng Việt', category: 'puzzle', players: '1 người', badge: 'MỚI', supports3d: false,
+      description: 'Học sinh, sinh nhật… nối mãi một câu chuyện.', keywords: 'noi chu tiếng việt từ vựng giáo dục gia đình',
+      intro: 'Nối tiếng cuối thành tiếng đầu, khám phá từ vựng quen thuộc cùng máy trong 90 giây.',
+      instructions: ['Nhập từ có dấu, bắt đầu bằng tiếng cuối của từ máy vừa đưa: học sinh → sinh nhật.', 'Không lặp lại từ đã dùng. Chỉ nhận từ thuộc kho từ được chọn sẵn của bàn.', 'Mỗi từ đúng +10 điểm. Máy hết từ +50 điểm. Hết giờ hoặc hết từ thì kết thúc.', 'Có 3 gợi ý, mỗi lần trừ 5 điểm. Nhấn Nối từ hoặc Enter để gửi. Tạm dừng dừng cả đồng hồ.'],
+      variant: 'Kho từ/cụm từ lưu sẵn, chơi offline. Từ điển có giới hạn, không nhận mọi từ tiếng Việt.',
+    },
+    {
+      id: 'fishing', title: 'Câu cá thư giãn', category: 'arcade', players: '1 người', badge: 'MỚI', supports3d: false,
+      description: 'Một chiều bên hồ, một bộ sưu tập nho nhỏ.', keywords: 'cau ca thu gian fishing chill hồ sưu tập',
+      intro: 'Canh lực thả câu, chờ phao rung và đưa cá vào bờ. Một buổi chơi chậm rãi, không giới hạn thời gian.',
+      instructions: ['Bấm Thả câu rồi bấm lần nữa khi kim ở vùng xanh để thả mồi.', 'Chờ phao rung rồi bấm Giật cần trong 2,5 giây.', 'Giữ nút kéo hoặc Space để tăng lực, thả để giảm. Giữ kim trong vùng xanh; chạm hai đầu thanh thì cá thoát.', 'Sưu tập sáu loài cá. Bộ sưu tập lưu trên trình duyệt; chơi lại đặt lại điểm buổi câu và giữ bộ sưu tập.'],
+      variant: 'Không giới hạn thời gian hay lượt. Cá có trọng số xuất hiện và độ khó kéo khác nhau. Lưu cục bộ khi trình duyệt cho phép.',
+    },
+    {
       id: 'neon', title: 'Neon Survivors', category: 'arcade', players: '1 người', badge: 'MỚI', supports3d: false,
       frameSrc: 'Neon Survivors.html',
       description: 'Né bầy quái, tiến hóa vũ khí, sống sót giữa ánh neon.', keywords: 'neon survivors sinh tồn bắn súng quái boss',

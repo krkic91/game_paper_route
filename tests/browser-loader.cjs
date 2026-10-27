@@ -42,7 +42,7 @@ async function library(page, source) {
   assert.equal(await page.locator('#search').evaluate(el => el === document.activeElement), true);
   await page.keyboard.press('Escape');
   const ids = await page.locator('.game-card').evaluateAll(cards => cards.map(card => card.dataset.game));
-  assert.equal(ids.length, 28);
+  assert.equal(ids.length, 34);
   for (const id of ids) {
     await route(page, id);
     assert.equal(await page.locator('#pause-game').isEnabled(), true);
