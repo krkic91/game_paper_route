@@ -46,7 +46,7 @@ async function startup(browser, base) {
       const page = await context.newPage();
       await page.addInitScript(() => {
         const observer = new MutationObserver(() => {
-          if (document.querySelectorAll('.game-card').length === 34) {
+          if (document.querySelectorAll('.game-card').length === 41) {
             window.libraryReadyMs = performance.now(); observer.disconnect();
           }
         });

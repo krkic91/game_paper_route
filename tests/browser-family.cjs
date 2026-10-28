@@ -154,7 +154,7 @@ async function play(page, id, touch, full) {
       const page = await context.newPage(), errors = [];
       page.on('pageerror', e => errors.push(e.message)); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); }); page.on('dialog', d => d.accept());
       try {
-        await page.goto(source); assert.equal(await page.locator('.game-card').count(), 34);
+        await page.goto(source); assert.equal(await page.locator('.game-card').count(), 41);
         for (const [query, id] of [['co dam','draughts'],['ghep 3','match3'],['phom','phom'],['luan luu','penalty'],['noi chu','wordchain'],['cau ca','fishing']]) {
           await page.locator('#search').fill(query); assert.ok(await page.locator(`[data-game="${id}"]`).count());
         }

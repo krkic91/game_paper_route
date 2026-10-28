@@ -27,6 +27,7 @@
   function mount(host, options, kind) {
     const chess = kind === 'chess';
     const L = chess ? window.ChessLogic : window.XiangqiLogic;
+    let variant = 'standard';
     const names = chess ? chessNames : xiangqiNames;
     const columns = chess ? 8 : 9, rows = chess ? 8 : 10;
     const starter = chess ? 'w' : 'r'; // White / Red always moves first
@@ -46,18 +47,18 @@
       checkmate: 'Chiếu hết.', stalemate: chess ? 'Hết nước đi hợp lệ, không bị chiếu.' : 'Không còn nước đi hợp lệ.',
       'insufficient-material': 'Không đủ quân để chiếu hết.', 'threefold-repetition': 'Thế cờ lặp lại ba lần.',
       repetition: 'Thế cờ lặp lại ba lần.', 'fifty-move': '50 lượt không bắt quân hoặc đi Tốt.',
-      'king-captured': 'Tướng đã bị bắt.',
+      'king-captured': 'Tướng đã bị bắt.', quiet: '120 lượt không bắt hoặc lật quân.',
     };
     const ui = S.buildUI(host, {
       className: 'royal-workspace royal-' + kind,
-      toolbar: '<div class="royal-heading"><span>BÀN CỜ CỦA BẠN</span><strong>' + (chess ? 'Cờ vua' : 'Cờ tướng') + '</strong></div>' +
-        '<div class="royal-settings"><label><span>Chế độ</span><select data-royal-mode aria-label="Chế độ chơi"><option value="bot">Chơi với máy</option><option value="local">2 người / 1 máy</option></select></label><label data-royal-first-wrap><span>Đi trước</span><select data-royal-first aria-label="Chọn ai đi trước"><option value="human">Bạn</option><option value="bot">Máy</option></select></label><label data-royal-difficulty-wrap><span>Độ khó</span><select data-royal-difficulty aria-label="Độ khó của máy"><option value="easy">Dễ</option><option value="normal" selected>Vừa</option></select></label></div>',
+      toolbar: '<div class="royal-heading"><span>BÀN CỜ CỦA BẠN</span><strong data-royal-heading>' + (chess ? 'Cờ vua' : 'Cờ tướng') + '</strong></div>' +
+        '<div class="royal-settings">' + (!chess ? '<label><span>Biến thể</span><select data-royal-variant aria-label="Biến thể cờ tướng"><option value="standard">Cờ tướng</option><option value="hidden">Cờ úp</option></select></label>' : '') + '<label><span>Chế độ</span><select data-royal-mode aria-label="Chế độ chơi"><option value="bot">Chơi với máy</option><option value="local">2 người / 1 máy</option></select></label><label data-royal-first-wrap><span>Đi trước</span><select data-royal-first aria-label="Chọn ai đi trước"><option value="human">Bạn</option><option value="bot">Máy</option></select></label><label data-royal-difficulty-wrap><span>Độ khó</span><select data-royal-difficulty aria-label="Độ khó của máy"><option value="easy">Dễ</option><option value="normal" selected>Vừa</option></select></label></div>',
       board: '<div class="royal-playfield"><div class="royal-player" data-royal-player="top"></div><div class="royal-frame"><div class="royal-board" role="grid"></div></div><div class="royal-player" data-royal-player="bottom"></div>' +
         '<div class="royal-promotion" data-royal-promotion-panel role="group" aria-label="Chọn quân phong cấp" hidden><div><strong>Phong cấp cho Tốt</strong><span>Chọn quân để hoàn tất nước đi.</span></div><div class="royal-promotion-options">' + ['Q', 'R', 'B', 'N'].map((role) => '<button type="button" data-royal-promotion="' + role + '" aria-label="Phong cấp thành ' + chessNames[role] + '">' + chessPiece(role, human) + '<span>' + chessNames[role] + '</span></button>').join('') + '</div><button type="button" class="royal-text-button" data-royal-action="cancel-promotion">Hủy chọn</button></div>' +
         '<div class="royal-result" data-royal-result hidden><strong data-royal-result-title></strong><p data-royal-result-detail></p><button type="button" data-royal-action="restart">Chơi ván mới</button></div></div>',
       controls: '<div class="royal-turn" role="status"><span data-royal-turn></span><small data-royal-ply>Nước 1</small></div><div class="royal-tools"><button type="button" data-royal-action="undo">↶ Hoàn tác</button><button type="button" data-royal-action="flip" aria-pressed="false">⇅ Xoay bàn</button></div>' +
         '<p class="royal-help">Chọn quân rồi chọn ô có chấm. Phím mũi tên để di chuyển, Enter để chọn.</p>' +
-        (!chess ? '<details class="royal-legend"><summary>Tên các quân cờ</summary><div>' + Object.keys(xiangqiNames).map((role) => '<span>' + xiangqiPiece('r' + role) + xiangqiNames[role] + '</span>').join('') + '</div></details>' : ''),
+        (!chess ? '<details class="royal-legend"><summary>Tên quân & luật Cờ úp</summary><div>' + Object.keys(xiangqiNames).map((role) => '<span>' + xiangqiPiece('r' + role) + xiangqiNames[role] + '</span>').join('') + '</div><p>Cờ úp: trừ Tướng, 15 quân mỗi bên được xáo và úp kín, cả máy lẫn người đều không biết. Nước đầu đi theo vị trí xuất phát rồi lật; sau đó đi theo quân thật. Sĩ đã lật được ra khỏi cung; Tượng đã lật được qua sông, vẫn bị cản mắt.</p><p>Quy ước bàn này: quân úp bị bắt được lật cho cả hai xem. Tự hòa khi lặp thế 3 lần hoặc 120 lượt không bắt/lật quân; không xử phạt chiếu đuổi dai. Hoàn tác giữ nguyên quân đã xáo, không bốc lại.</p></details>' : ''),
     });
     ui.workspace.dataset.game = kind;
     const board = ui.area.querySelector('.royal-board');
@@ -115,11 +116,14 @@
       ui.workspace.dataset.status = state.status;
       ui.workspace.dataset.thinking = String(thinking);
       ui.workspace.dataset.mode = mode;
+      ui.workspace.dataset.variant = variant;
+      host.querySelector('[data-royal-heading]').textContent = chess ? 'Cờ vua' : variant === 'hidden' ? 'Cờ úp' : 'Cờ tướng';
       for (let index = 0; index < cells.length; index++) {
         const cell = cells[index], piece = state.board[index];
-        if (cell.dataset.piece !== (piece || '')) {
-          cell.dataset.piece = piece || '';
-          cell.querySelector('.royal-cell-piece').innerHTML = piece ? pieceArt(piece) : '';
+        const covered = Boolean(state.covered?.[index]), visible = covered ? piece[0] + 'U' : piece || '';
+        if (cell.dataset.piece !== visible) {
+          cell.dataset.piece = visible;
+          cell.querySelector('.royal-cell-piece').innerHTML = covered ? '<span class="royal-disc royal-covered ' + (piece[0] === 'r' ? 'is-red' : 'is-black') + '" aria-hidden="true"><span>?</span></span>' : piece ? pieceArt(piece) : '';
         }
         cell.dataset.legal = String(destinations.has(index));
         cell.classList.toggle('is-selected', selected === index);
@@ -128,7 +132,7 @@
         cell.tabIndex = focused === index ? 0 : -1;
         cell.setAttribute('aria-selected', String(selected === index));
         cell.setAttribute('aria-disabled', String(state.status !== 'playing' || thinking || Boolean(promotion)));
-        cell.setAttribute('aria-label', squareName(index) + ', ' + (piece ? names[piece[1]] + ' ' + sideName(piece[0]).toLowerCase() : 'ô trống') + (destinations.has(index) ? ', có thể đi tới' : '') + (check && piece === state.turn + 'K' ? ', đang bị chiếu' : ''));
+        cell.setAttribute('aria-label', squareName(index) + ', ' + (piece ? (covered ? 'Quân úp, nước đầu như ' : '') + names[piece[1]] + ' ' + sideName(piece[0]).toLowerCase() : 'ô trống') + (destinations.has(index) ? ', có thể đi tới' : '') + (check && piece === state.turn + 'K' ? ', đang bị chiếu' : ''));
       }
       playerPanel('top', flipped ? starter : 'b');
       playerPanel('bottom', flipped ? 'b' : starter);
@@ -156,7 +160,7 @@
     }
     function restart() {
       scope.clearTimers();
-      state = L.create(); thinking = false; captures = []; history = []; scored = false; notice = '';
+      state = L.create(chess ? undefined : { variant }); thinking = false; captures = []; history = []; scored = false; notice = '';
       human = humanSide();
       const nextFlip = human === 'b';
       if (nextFlip !== flipped) { flipped = nextFlip; buildBoard(); }
@@ -170,11 +174,12 @@
       history.push(beforeCaptures);
       const mover = before[move.from]?.[0];
       const survivors = state.board.filter((piece) => piece && piece[0] !== mover);
-      for (const piece of before.filter((piece) => piece && piece[0] !== mover)) {
+      if (state.covered) { if (state.lastMove.capture) captures.push(state.lastMove.capture); }
+      else for (const piece of before.filter((piece) => piece && piece[0] !== mover)) {
         const index = survivors.indexOf(piece);
         if (index === -1) captures.push(piece); else survivors.splice(index, 1);
       }
-      clearSelection(); notice = ''; focused = move.to;
+      clearSelection(); notice = state.lastMove?.revealed ? 'Vừa lật: ' + names[state.lastMove.revealed[1]] + ' ' + sideName(mover) + '.' : ''; focused = move.to;
       if (!scored && state.status === 'won' && (mode === 'local' || state.winner === human)) {
         scored = true;
         options.onScore?.(1000);
@@ -268,6 +273,11 @@
     });
     scope.on(host.querySelector('[data-royal-difficulty]'), 'change', (event) => {
       difficulty = event.target.value; render();
+    });
+    if (!chess) scope.on(host.querySelector('[data-royal-variant]'), 'change', event => {
+      const next = event.target.value;
+      if (state.ply && state.status === 'playing' && !window.confirm('Đổi biến thể sẽ bắt đầu ván mới. Bạn muốn đổi chứ?')) { event.target.value = variant; return; }
+      variant = next === 'hidden' ? 'hidden' : 'standard'; restart();
     });
     scope.on(window, 'keydown', (event) => {
       if (!host.contains(event.target)) return;

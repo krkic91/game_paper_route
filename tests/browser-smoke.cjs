@@ -56,24 +56,24 @@ async function noOverflow(page) {
     watch(page);
     await page.goto(base);
     await page.locator('.game-card').first().waitFor();
-    assert.equal(await page.locator('.game-card').count(), 34);
+    assert.equal(await page.locator('.game-card').count(), 41);
     await noOverflow(page);
     await page.screenshot({ path: join(shots, 'desktop-home.png'), fullPage: true });
     await page.locator('[data-filter="card"]').click();
-    assert.equal(await page.locator('.game-card').count(), 4);
+    assert.equal(await page.locator('.game-card').count(), 6);
     await page.locator('#search').fill('uno');
     assert.equal(await page.locator('.game-card').count(), 1);
     assert.equal(await page.locator('.game-card').getAttribute('data-game'), 'uno');
     assert.equal(await page.locator('[data-game="uno"] [data-edition="3d"]').count(), 0);
     await page.locator('#search').fill('');
     await page.locator('[data-filter="board"]').click();
-    assert.equal(await page.locator('.game-card').count(), 11);
+    assert.equal(await page.locator('.game-card').count(), 12);
     await page.locator('#search').fill('o an quan');
     assert.equal(await page.locator('.game-card[data-game="quan"]').count(), 1);
     await page.locator('#search').fill('khong-co-tro-nay');
     assert.equal(await page.locator('#empty-state').isVisible(), true);
     await page.locator('#clear-filters').click();
-    assert.equal(await page.locator('.game-card').count(), 34);
+    assert.equal(await page.locator('.game-card').count(), 41);
     await page.locator('[data-favorite="pool"]').click();
     await page.locator('[data-view="favorites"]').click();
     assert.equal(await page.locator('.game-card').count(), 1);
@@ -88,7 +88,7 @@ async function noOverflow(page) {
     await close(page);
     await page.locator('[data-view="favorites"]').click();
     await page.locator('.brand').click();
-    assert.equal(await page.locator('.game-card').count(), 34);
+    assert.equal(await page.locator('.game-card').count(), 41);
 
     await open(page, 'caro');
     assert.equal(await page.locator('.caro-cell').count(), 225);
@@ -380,7 +380,7 @@ async function noOverflow(page) {
     watch(offline);
     await offline.goto(pathToFileURL(resolve(__dirname, '../index.html')).href);
     await offline.locator('.game-card').first().waitFor();
-    assert.equal(await offline.locator('.game-card').count(), 34);
+    assert.equal(await offline.locator('.game-card').count(), 41);
     await open(offline, 'uno');
     assert.equal(await offline.locator('#player-title').textContent(), 'UNO');
     await close(offline);
@@ -443,7 +443,7 @@ async function noOverflow(page) {
     await restricted.close();
     assert.deepEqual(errors, [], 'no browser errors');
     console.log(
-      'Browser checks passed: all 34 games, game rules, AI turns, pause/restart, favorites, search, persistence, mobile, and file://.',
+      'Browser checks passed: all 41 games, game rules, AI turns, pause/restart, favorites, search, persistence, mobile, and file://.',
     );
     console.log(`Screenshots: ${shots}`);
   } finally {

@@ -154,9 +154,9 @@ async function desktop(browser, engine) {
   const page = await context.newPage(), errors = watch(page), checks = [];
   try {
     await installFactoryCapture(page);
-    assert.equal(await page.locator('.game-card').count(), 34);
+    assert.equal(await page.locator('.game-card').count(), 41);
     await page.locator('[data-filter="card"]').click();
-    assert.equal(await page.locator('.game-card').count(), 4);
+    assert.equal(await page.locator('.game-card').count(), 6);
     assert.equal(await page.locator('[data-game="uno"] [data-edition="3d"]').count(), 0);
     await page.locator('#search').fill('uno');
     assert.equal(await page.locator('.game-card').count(), 1);

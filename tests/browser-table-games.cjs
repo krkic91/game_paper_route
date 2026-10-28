@@ -280,7 +280,7 @@ async function run(browser, engine, id, profile, full) {
   const label = `${engine}-${id}-${profile.width}x${profile.height}`;
   try {
     await install(page, id);
-    assert.equal(await page.locator('.game-card').count(), 34);
+    assert.equal(await page.locator('.game-card').count(), 41);
     assert.ok(await page.locator(`[data-game="${id}"] .game-cover svg`).count());
     await open(page, id);
     await noOverflow(page, label);
@@ -315,7 +315,7 @@ async function offline(browser, engine) {
   const page = await browser.newPage(), errors = watch(page);
   try {
     await page.goto(pathToFileURL(join(__dirname, '../index.html')).href);
-    await page.waitForFunction(() => document.querySelectorAll('.game-card').length === 34);
+    await page.waitForFunction(() => document.querySelectorAll('.game-card').length === 41);
     for (const id of games) {
       await open(page, id);
       await page.locator('#close-game').click();
@@ -324,7 +324,7 @@ async function offline(browser, engine) {
     assert.equal(await page.locator('.game-card').count(), 1);
     assert.equal(await page.locator('.game-card').getAttribute('data-game'), 'werewolf');
     await page.locator('[data-filter="card"]').click();
-    assert.equal(await page.locator('.game-card').count(), 4);
+    assert.equal(await page.locator('.game-card').count(), 6);
     await page.locator('#search').fill('tien len');
     assert.equal(await page.locator('.game-card').count(), 1);
     assert.equal(await page.locator('.game-card').getAttribute('data-game'), 'tienlen');

@@ -127,6 +127,31 @@
     return fragment ? body : `<svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true">${body}</svg>`;
   }
   function cover(id) {
+    if (id === 'riddles') {
+      return scene('<g transform="rotate(-5 200 120)"><rect x="66" y="35" width="268" height="176" rx="18" fill="#fff4d8"/><rect x="87" y="57" width="88" height="88" rx="15" fill="#e3d9b6"/><rect x="224" y="57" width="88" height="88" rx="15" fill="#e3d9b6"/><path d="M107 100q30-38 54 0-24 38-54 0l-16-18v36Z" fill="#7ca5a3"/><circle cx="149" cy="95" r="3" fill="#304b41"/><path d="m250 122 5-30-9-15 12-13 27 18 8 40h-17l-2-25-12 25Z" fill="#b58b5d"/><circle cx="270" cy="82" r="3" fill="#304b41"/><path d="M191 99h19m-9-9v19" stroke="#8b7857" stroke-width="4"/><path d="M97 177h35m11 0h35m11 0h35m11 0h35m11 0h24" stroke="#ad9870" stroke-width="3"/></g>', '#d6c5a3');
+    }
+    if (id === 'coloring') {
+      return scene('<g transform="rotate(-7 200 120)"><rect x="86" y="22" width="218" height="198" rx="12" fill="#fff6df"/><path d="M193 184v-65m0 43q-44 0-46-35 40-5 46 35m0 20q45-4 46-38-39-4-46 38" stroke="#5c8260" fill="#9fbb82" stroke-width="3"/><g stroke="#696d56" stroke-width="2"><ellipse cx="194" cy="87" rx="22" ry="38" fill="#d9837f"/><ellipse cx="194" cy="87" rx="22" ry="38" transform="rotate(60 194 112)" fill="#edb978"/><ellipse cx="194" cy="87" rx="22" ry="38" transform="rotate(120 194 112)" fill="#fff6df"/><ellipse cx="194" cy="87" rx="22" ry="38" transform="rotate(180 194 112)" fill="#fff6df"/><ellipse cx="194" cy="87" rx="22" ry="38" transform="rotate(240 194 112)" fill="#93b6bd"/><ellipse cx="194" cy="87" rx="22" ry="38" transform="rotate(300 194 112)" fill="#ad98bf"/><circle cx="194" cy="112" r="23" fill="#efce79"/></g></g><path d="m308 207 28-123 14 3-28 123-12 16Z" fill="#c16e62"/><path d="m308 207 14 3-12 16Z" fill="#efd9ad"/>', '#bccbb4');
+    }
+    if (id === 'samloc' || id === 'maubinh') {
+      const cards = (id === 'samloc' ? ['10','J','Q','K','A'] : ['A','A','8','8','8']).map((label,i)=>`<g transform="translate(${68+i*47} ${64+Math.abs(i-2)*9}) rotate(${(i-2)*7} 34 53)"><rect width="67" height="106" rx="9" fill="#fff2d7" stroke="#d9c9a4"/><text x="9" y="27" font-family="Georgia,serif" font-size="22" fill="${i%2?'#b66851':'#395448'}">${label}</text><text x="34" y="76" text-anchor="middle" font-size="35" fill="${i%2?'#b66851':'#395448'}">${['♠','♥','♣','♦','♠'][i]}</text></g>`).join('');
+      return scene(`<ellipse cx="200" cy="125" rx="174" ry="101" fill="${id==='samloc'?'#668c76':'#627e83'}" stroke="#c7a879" stroke-width="8"/>${cards}<text x="200" y="211" text-anchor="middle" font-family="Georgia,serif" font-size="15" letter-spacing="4" fill="#f6e8c6">${id==='samloc'?'SÂM LỐC':'MẬU BINH'}</text>`, id==='samloc'?'#b9c39c':'#b1c3be');
+    }
+    if (id === 'coganh') {
+      let lines = '', pieces = '';
+      for (let i=0;i<5;i++) lines += `<path d="M100 ${30+i*45}h180M${100+i*45} 30v180"/>`;
+      lines += '<path d="M100 30 280 210M100 210 280 30M100 120 190 30 280 120 190 210Z"/>';
+      for(const [x,y,c] of [[0,0,0],[1,0,0],[3,0,0],[4,0,0],[0,1,0],[4,1,0],[1,2,0],[3,2,0],[2,2,1],[0,3,1],[4,3,1],[0,4,1],[1,4,1],[2,4,1],[3,4,1],[4,4,1]]) pieces += `<circle cx="${100+x*45}" cy="${30+y*45}" r="13" fill="${c?'#bd7652':'#53858a'}" stroke="#f8e8bc" stroke-width="2"/>`;
+      return scene(`<rect x="79" y="9" width="222" height="222" rx="15" fill="#e9d3a3"/><g stroke="#9e875c" stroke-width="1.8" fill="none">${lines}</g>${pieces}`, '#b4bf91');
+    }
+    if (id === 'piano') {
+      const keys=Array.from({length:7},(_,i)=>`<rect x="${73+i*37}" y="66" width="34" height="144" rx="5" fill="#fbf0da"/>`).join('');
+      const black=[0,1,3,4,5].map(i=>`<rect x="${99+i*37}" y="64" width="22" height="86" rx="4" fill="#53536c"/>`).join('');
+      return scene(`<g transform="rotate(-7 200 130)"><rect x="63" y="52" width="279" height="167" rx="13" fill="#746c8d"/>${keys}${black}</g><g fill="#f4deb1"><path d="M135 28v33q-25 13-27-1 0-10 17-13V23l38-9v33q-25 13-27-1 0-10 17-13V26Z"/><path d="M297 17v34q-25 13-27-1 0-10 17-13V14Z"/></g>`, '#b5a0c5');
+    }
+    if (id === 'jigsaw') {
+      return scene('<g transform="rotate(-5 200 120)"><rect x="81" y="28" width="226" height="184" rx="12" fill="#f4ebcd"/><path d="M89 129q62-114 124-10 42-66 86-12v97H89Z" fill="#8eaf8b"/><path d="M89 164q122-31 210 2v38H89Z" fill="#86b9b3"/><circle cx="252" cy="75" r="23" fill="#edca7e"/><g fill="none" stroke="#f9f2dc" stroke-width="3"><path d="M161 34v52c-20-13-20 31 0 18v99M236 34v52c20-13 20 31 0 18v99M89 119h47c-13 20 31 20 18 0h60c-13-20 31-20 18 0h67"/></g></g><path d="M294 163h25c-10-19 28-19 18 0h25v25c19-10 19 28 0 18v25h-25c10-19-28-19-18 0h-25v-25c19 10 19-28 0-18Z" fill="#d8ad72" stroke="#fff3d0" stroke-width="3"/>', '#cad3b0');
+    }
     if (id === 'draughts') {
       let grid = '';
       for (let i = 0; i < 64; i++) grid += `<rect x="${103 + i % 8 * 24}" y="${24 + Math.floor(i / 8) * 24}" width="24" height="24" fill="${(Math.floor(i / 8) + i % 8) % 2 ? '#7a8e73' : '#f1e1bb'}"/>`;

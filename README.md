@@ -1,7 +1,7 @@
 <!-- version v1.0 -->
 # Trạm Chơi
 
-**Một trang, 34 game chơi được ngay.** Cổng mini game tiếng Việt, giữ nguyên **Delivery Dash** và bổ sung game thể thao, bàn cờ, bài, nhập vai, chiến thuật, arcade, trí tuệ. Caro có chế độ online hai người khác thiết bị qua máy chủ Node.js. Không có tài khoản, quảng cáo hay bước build.
+**Một trang, 41 game chơi được ngay.** Cổng mini game tiếng Việt, giữ nguyên **Delivery Dash** và bổ sung game thể thao, bàn cờ, bài, nhập vai, chiến thuật, arcade, trí tuệ. Caro có chế độ online hai người khác thiết bị qua máy chủ Node.js. Không có tài khoản, quảng cáo hay bước build.
 
 ## Chạy dự án
 
@@ -58,7 +58,14 @@ hỗ trợ. Xem [kế hoạch, phép đo và kiểm thử tối ưu](docs/optimi
 | **Đua xe đạp**      | Bạn đấu 3 đối thủ máy · 2D/3D                  | Đua 1 km qua cua/dốc; quán tính, phanh, thả trôi, núp gió và nước rút. |
 | **Caro**            | Đấu máy / 2 người cùng thiết bị / online       | Bàn 15 × 15, nối từ 5 quân theo hàng ngang, dọc hoặc chéo.        |
 | **Cờ vua**          | Đấu máy Dễ/Vừa / 2 người cùng thiết bị · 2D   | Chiếu hết vua; có nhập thành, bắt tốt qua đường, phong cấp.    |
-| **Cờ tướng**        | Đấu máy Dễ/Vừa / 2 người cùng thiết bị · 2D   | Phối hợp Xe, Pháo, Mã; chiếu bí hoặc khiến đối thủ hết nước đi. |
+| **Cờ gánh** | Đấu máy Dễ/Vừa / 2 người | Gánh, vây và tùy chọn luật mở trên bàn 5 × 5. |
+| **Đuổi hình bắt chữ** | 1 người · 150 câu | Ba chủ đề, 10 câu/lượt, gợi ý và lưu câu đã giải. |
+| **Tô màu thư giãn** | 1 người · 6 tranh | Tô vùng, chọn màu riêng, hoàn tác, tự lưu và tải PNG. |
+| **Sâm lốc** | Bạn đấu 3 máy | 10 lá mỗi người, báo sâm, ăn trắng, so số không so chất. |
+| **Mậu binh** | Bạn đấu 3 máy | Xếp 3/5/5 lá, kiểm tra binh lủng, gợi ý và so từng chi. |
+| **Piano tiles** | 1 người · 3 nhịp độ | Bấm D F J K hoặc chạm bốn cột theo ba giai điệu. |
+| **Xếp hình jigsaw** | 1 người · 9/16/25 mảnh | Ba tranh SVG nguyên bản, kéo thả hoặc chạm để ghép. |
+| **Cờ tướng / Cờ úp** | Đấu máy Dễ/Vừa / 2 người cùng thiết bị · 2D | Chiếu bí hoặc khiến đối thủ hết nước; chọn Cờ úp tại ô Biến thể. |
 | **Cờ cá ngựa**      | Bạn + 3 máy / 2 người / 4 người cùng thiết bị | Tung xúc xắc, xuất chuồng, đá ngựa và đưa đủ 4 ngựa về đích.      |
 | **Ô ăn quan**       | Đấu máy (Dễ/Thường/Khó) / 2 người cùng thiết bị | Chọn ô dân, bấm mũi tên trên ô để rải; có hiệu ứng rải và luật tùy chọn. |
 | **UNO**             | Bạn đấu 3 máy · 2D                            | Ghép màu/ký hiệu, dùng lá chức năng, hô UNO và đánh hết bài.       |
@@ -106,7 +113,7 @@ Luật và điều khiển chi tiết luôn có trong nút **ⓘ Hướng dẫn*
 
 Sáu game gia đình mới dùng bản 2D và tải khi mở. Xem [luật, phạm vi và kiểm thử](docs/family-games.md).
 
-- Thư viện 34 game với hình minh họa riêng, bố cục tương thích máy tính và điện thoại; 10 game có thêm bản 3D. Bảy game mới dùng bản 2D như mô tả trong bảng.
+- Thư viện 41 game với hình minh họa riêng, bố cục tương thích máy tính và điện thoại; 10 game có thêm bản 3D. Các game mới dùng bản 2D như mô tả trong bảng.
 - Tìm kiếm tiếng Việt có dấu hoặc không dấu; lọc theo Arcade, Thể thao, Bàn cờ, Bài, Nhập vai, Chiến thuật, Trí tuệ.
 - Sắp xếp theo đề xuất, tên hoặc game mới chơi.
 - Đánh dấu **yêu thích**, danh sách **chơi gần đây**, **kỷ lục riêng cho từng game**.
@@ -323,7 +330,7 @@ Bộ kiểm thử kiểm tra thắng/thua, luật di chuyển, AI, va chạm, b�
 
 Chạy riêng luật bảy game mới bằng `npm run test:expansion`. Xem [báo cáo kiểm thử bảy game](docs/seven-games-testing.md) để biết phạm vi, kết quả và môi trường thực tế.
 
-`npm run test:expansion:browser` mở thư viện 34 game qua HTTP và `file://`,
+`npm run test:expansion:browser` mở thư viện 41 game qua HTTP và `file://`,
 rồi kiểm tra riêng bảy game trên Chromium/WebKit ở 320×740, 390×844,
 820×1180 và 1366×900. Chọn game bằng `EXPANSION_GAMES` (danh sách id cách
 nhau bằng dấu phẩy), engine bằng `EXPANSION_BROWSERS`; dùng
@@ -360,7 +367,7 @@ npm run test:table:browser
 npm run test:expansion:browser
 ```
 
-Trên Windows, script tự dùng Edge nếu có. Có thể chỉ định `BROWSER_PATH` (đường dẫn executable) và `TEST_URL` nếu cần. Bộ smoke mở cả 34 game, chơi các lượt mẫu, kiểm tra AI, tìm kiếm không dấu, yêu thích, lưu kỷ lục, tạm dừng/chơi lại, màn hình điện thoại và mở trực tiếp `file://`. Ảnh chụp lưu trong thư mục tạm `tram-choi-screenshots`, hoặc đường dẫn do biến `SCREENSHOTS` chỉ định.
+Trên Windows, script tự dùng Edge nếu có. Có thể chỉ định `BROWSER_PATH` (đường dẫn executable) và `TEST_URL` nếu cần. Bộ smoke mở cả 41 game, chơi các lượt mẫu, kiểm tra AI, tìm kiếm không dấu, yêu thích, lưu kỷ lục, tạm dừng/chơi lại, màn hình điện thoại và mở trực tiếp `file://`. Ảnh chụp lưu trong thư mục tạm `tram-choi-screenshots`, hoặc đường dẫn do biến `SCREENSHOTS` chỉ định.
 
 `test:table:browser` kiểm tra riêng Domino, Cờ tỷ phú, Tiến lên miền Nam, Xì dách
 và Ma sói trên Chromium/WebKit: hành động hợp lệ, kết quả ván, thông tin bí mật,
@@ -419,3 +426,11 @@ node tests/browser-caro-borders.cjs
 ```
 
 Script lấy mẫu 2.100 vị trí trên đường kẻ trong mỗi ảnh, chạy WebKit và Chromium với DPR 2, cùng cấu hình trang di động và desktop. Ảnh và kết quả JSON được lưu tại `test-results/caro-borders` (hoặc `CARO_BORDER_OUTPUT`). Có thể chọn kích thước bằng `CARO_WIDTHS=744,834,1024`; `CARO_CSS_FILE` cho phép đối chiếu một bản CSS cũ. User-agent iPad/Safari trong test chỉ mô phỏng thông tin trình duyệt, không chạy iPadOS hay Safari trên thiết bị thật.
+
+### Cờ úp, Cờ gánh, Piano tiles và Ghép hình
+
+Mở Cờ tướng rồi chọn **Biến thể → Cờ úp**. Ba game còn lại có thẻ riêng trong thư viện. Luật, điều khiển, nhạc và tranh được mô tả tại [docs/culture-games.md](docs/culture-games.md). Chạy `npm run test:culture` để kiểm tra luật và `npm run test:culture:browser` để kiểm tra thao tác trên máy tính/điện thoại mô phỏng và `file://`.
+
+### Đuổi hình bắt chữ, Tô màu, Sâm lốc và Mậu binh
+
+Bốn game có thẻ riêng trong thư viện và chạy được khi mở `index.html` trực tiếp. Xem [luật bàn, nội dung và kiểm thử](docs/extra-games.md). Chạy `npm run test:extras` để kiểm tra luật; `npm run test:extras:browser` để kiểm tra thao tác qua `file://` mà không cần mở cổng server.

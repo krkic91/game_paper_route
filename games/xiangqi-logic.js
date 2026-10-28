@@ -15,9 +15,9 @@
   const inside = (row, column) => row >= 0 && row < 10 && column >= 0 && column < 9;
   const palace = (row, column, side) => column >= 3 && column <= 5 && (side === 'r' ? row >= 7 && row <= 9 : row >= 0 && row <= 2);
   const crossed = (row, side) => side === 'r' ? row <= 4 : row >= 5;
-  const positionKey = state => state.turn + ':' + state.board.map(piece => piece || '--').join('');
+  const positionKey = state => state.turn + ':' + state.board.map((piece, i) => (piece || '--') + (state.covered?.[i] ? '?' : '')).join('');
 
-  function create() {
+  function create(options = {}) {
     const board = Array(90).fill(null);
     'RNBAKABNR'.split('').forEach((piece, column) => {
       board[column] = 'b' + piece;
@@ -32,7 +32,20 @@
       board[54 + column] = 'rP';
     }
     const state = { board, turn: 'r', status: 'playing', winner: null, reason: null, ply: 0, lastMove: null };
-    records.set(state, { history: [], positions: [positionKey(state)] });
+    let identities = null;
+    if (options.variant === 'hidden') {
+      const random = options.random || Math.random;
+      identities = Array(90).fill(null);
+      state.variant = 'hidden'; state.covered = board.map(p => Boolean(p && p[1] !== 'K'));
+      state.revealed = []; state.quiet = 0;
+      for (const side of ['r', 'b']) {
+        const cells = board.flatMap((p, i) => p?.[0] === side && p[1] !== 'K' ? [i] : []);
+        const pieces = cells.map(i => board[i]);
+        for (let i = pieces.length - 1; i > 0; i--) { const j = Math.min(i, Math.floor(random() * (i + 1))); [pieces[i], pieces[j]] = [pieces[j], pieces[i]]; }
+        cells.forEach((cell, i) => { identities[cell] = pieces[i]; });
+      }
+    }
+    records.set(state, { history: [], positions: [positionKey(state)], identities });
     return state;
   }
 
@@ -48,7 +61,7 @@
   }
 
   // Attack geometry includes the opposing king, unlike playable move destinations.
-  function attacks(board, from, to) {
+  function attacks(board, from, to, covered) {
     const piece = board[from], side = piece[0], type = piece[1];
     const row = Math.floor(from / 9), column = from % 9;
     const targetRow = Math.floor(to / 9), targetColumn = to % 9;
@@ -60,8 +73,8 @@
       const leg = Math.abs(dr) === 2 ? from + Math.sign(dr) * 9 : from + Math.sign(dc);
       return !board[leg];
     }
-    if (type === 'B') return Math.abs(dr) === 2 && Math.abs(dc) === 2 && !crossed(targetRow, side) && !board[from + dr / 2 * 9 + dc / 2];
-    if (type === 'A') return Math.abs(dr) === 1 && Math.abs(dc) === 1 && palace(targetRow, targetColumn, side);
+    if (type === 'B') return Math.abs(dr) === 2 && Math.abs(dc) === 2 && ((covered && !covered[from]) || !crossed(targetRow, side)) && !board[from + dr / 2 * 9 + dc / 2];
+    if (type === 'A') return Math.abs(dr) === 1 && Math.abs(dc) === 1 && ((covered && !covered[from]) || palace(targetRow, targetColumn, side));
     if (type === 'K') {
       if (dc === 0 && board[to] === other(side) + 'K' && screens(board, from, to) === 0) return true;
       return Math.abs(dr) + Math.abs(dc) === 1 && palace(targetRow, targetColumn, side);
@@ -70,19 +83,19 @@
     return false;
   }
 
-  function checked(board, side) {
+  function checked(board, side, covered) {
     const king = board.indexOf(side + 'K');
     if (king < 0) return true;
     const enemy = other(side);
     for (let index = 0; index < 90; index++) {
-      if (board[index] && board[index][0] === enemy && attacks(board, index, king)) return true;
+      if (board[index] && board[index][0] === enemy && attacks(board, index, king, covered)) return true;
     }
     return false;
   }
 
-  function inCheck(state, side = state.turn) { return checked(state.board, side); }
+  function inCheck(state, side = state.turn) { return checked(state.board, side, state.covered); }
 
-  function destinations(board, from) {
+  function destinations(board, from, covered) {
     const piece = board[from], side = piece[0], type = piece[1];
     const row = Math.floor(from / 9), column = from % 9, result = [];
     const add = (r, c) => {
@@ -111,7 +124,7 @@
       const distance = type === 'B' ? 2 : 1;
       for (const dr of [-distance, distance]) for (const dc of [-distance, distance]) {
         const r = row + dr, c = column + dc;
-        if (type === 'B' ? !crossed(r, side) && !board[from + dr / 2 * 9 + dc / 2] : palace(r, c, side)) add(r, c);
+        if (type === 'B' ? ((covered && !covered[from]) || !crossed(r, side)) && !board[from + dr / 2 * 9 + dc / 2] : (covered && !covered[from]) || palace(r, c, side)) add(r, c);
       }
     } else if (type === 'K') {
       for (const [dr, dc] of directions) if (palace(row + dr, column + dc, side)) add(row + dr, column + dc);
@@ -122,16 +135,16 @@
     return result;
   }
 
-  function boardMoves(board, side, from, firstOnly = false) {
+  function boardMoves(board, side, from, firstOnly = false, covered) {
     const result = [];
     const start = from === undefined ? 0 : from, end = from === undefined ? 90 : from + 1;
     for (let index = start; index < end; index++) {
       const piece = board[index];
       if (!piece || piece[0] !== side) continue;
-      for (const to of destinations(board, index)) {
+      for (const to of destinations(board, index, covered)) {
         const captured = board[to];
         board[to] = piece; board[index] = null;
-        const safe = !checked(board, side);
+        const safe = !checked(board, side, covered);
         board[index] = piece; board[to] = captured;
         if (safe) {
           result.push({ from: index, to });
@@ -144,29 +157,41 @@
 
   function legalMoves(state, from) {
     if (state.status !== 'playing' || (from !== undefined && (!Number.isInteger(from) || from < 0 || from >= 90))) return [];
-    return boardMoves(state.board, state.turn, from);
+    return boardMoves(state.board, state.turn, from, false, state.covered);
   }
 
   function snapshot(state) {
-    return { board: state.board.slice(), turn: state.turn, status: state.status, winner: state.winner, reason: state.reason, ply: state.ply, lastMove: state.lastMove && { ...state.lastMove } };
+    return { board: state.board.slice(), turn: state.turn, status: state.status, winner: state.winner, reason: state.reason, ply: state.ply, lastMove: state.lastMove && { ...state.lastMove },
+      ...(state.covered ? { covered: state.covered.slice(), revealed: state.revealed.slice(), quiet: state.quiet } : {}) };
   }
 
   function move(state, requested) {
     if (!requested || !legalMoves(state, requested.from).some(candidate => candidate.from === requested.from && candidate.to === requested.to)) return false;
     let record = records.get(state);
     if (!record) { record = { history: [], positions: [positionKey(state)] }; records.set(state, record); }
-    record.history.push(snapshot(state));
-    const capture = state.board[requested.to];
+    record.history.push({ state: snapshot(state), identities: record.identities?.slice() });
+    let capture = state.board[requested.to];
+    const wasCovered = Boolean(state.covered?.[requested.from]);
+    const capturedCovered = Boolean(state.covered?.[requested.to]);
     state.board[requested.to] = state.board[requested.from]; state.board[requested.from] = null;
-    state.lastMove = { from: requested.from, to: requested.to, capture };
+    if (state.covered) {
+      if (capturedCovered) { capture = record.identities[requested.to]; state.revealed.push(capture); }
+      if (wasCovered) { state.board[requested.to] = record.identities[requested.from]; state.revealed.push(state.board[requested.to]); }
+      record.identities[requested.from] = record.identities[requested.to] = null;
+      state.covered[requested.from] = state.covered[requested.to] = false;
+      state.quiet = capture || wasCovered ? 0 : state.quiet + 1;
+    }
+    state.lastMove = { from: requested.from, to: requested.to, capture, ...(state.covered ? { revealed: wasCovered ? state.board[requested.to] : null, capturedCovered } : {}) };
     state.turn = other(state.turn); state.ply++;
     const key = positionKey(state);
     record.positions.push(key);
-    if (!boardMoves(state.board, state.turn, undefined, true).length) {
+    if (!boardMoves(state.board, state.turn, undefined, true, state.covered).length) {
       state.status = 'won'; state.winner = other(state.turn);
       state.reason = inCheck(state) ? 'checkmate' : 'stalemate';
     } else if (record.positions.filter(position => position === key).length >= 3) {
       state.status = 'draw'; state.winner = null; state.reason = 'repetition';
+    } else if (state.covered && state.quiet >= 120) {
+      state.status = 'draw'; state.winner = null; state.reason = 'quiet';
     }
     return true;
   }
@@ -176,7 +201,8 @@
   function undo(state) {
     const record = records.get(state);
     if (!record || !record.history.length) return false;
-    Object.assign(state, record.history.pop());
+    const previous = record.history.pop();
+    Object.assign(state, previous.state); record.identities = previous.identities;
     record.positions.pop();
     return true;
   }
@@ -199,6 +225,7 @@
 
   // The search works only on a copy. Two plies and a node cap keep a browser turn bounded.
   function chooseMove(state, difficulty = 'normal') {
+    if (state.covered) return chooseHiddenMove(state, difficulty);
     const candidates = legalMoves(state);
     if (!candidates.length) return null;
     const board = state.board.slice(), depth = difficulty === 'easy' ? 1 : 2;
@@ -227,6 +254,54 @@
       const score = -search(other(state.turn), depth - 1, -Infinity, -bestScore, 1);
       board[candidate.from] = piece; board[candidate.to] = capture;
       if (score > bestScore) { bestScore = score; best = candidate; }
+    }
+    return { ...best };
+  }
+
+  // Only public information enters this evaluator. Unknown identities stay in
+  // records; the bot averages possible reveals from the publicly remaining pool.
+  function chooseHiddenMove(state, difficulty) {
+    const candidates = legalMoves(state), side = state.turn;
+    if (!candidates.length) return null;
+    const pools = {};
+    for (const color of ['r', 'b']) {
+      const pool = 'RRNNBBAACCPPPPP'.split('').map(p => color + p);
+      for (const piece of state.revealed) { const i = pool.indexOf(piece); if (i >= 0) pool.splice(i, 1); }
+      pools[color] = pool.length ? pool : [color + 'P'];
+    }
+    const average = color => pools[color].reduce((sum, p) => sum + values[p[1]], 0) / pools[color].length;
+    const means = { r: average('r'), b: average('b') };
+    function material(board, covered) {
+      return board.reduce((sum, p, i) => sum + (p ? (p[0] === side ? 1 : -1) * (covered[i] ? means[p[0]] : values[p[1]]) : 0), 0);
+    }
+    let best = candidates[0], bestScore = -Infinity;
+    for (const candidate of candidates) {
+      const options = state.covered[candidate.from] ? pools[side] : [state.board[candidate.from]];
+      let total = 0;
+      for (const piece of options) {
+        const board = state.board.slice(), covered = state.covered.slice();
+        board[candidate.from] = null; board[candidate.to] = piece;
+        covered[candidate.from] = covered[candidate.to] = false;
+        const replies = boardMoves(board, other(side), undefined, false, covered);
+        let score = replies.length ? material(board, covered) : 1000000;
+        if (difficulty !== 'easy' && replies.length) {
+          // One opponent reply, with any unknown mover still valued as unknown.
+          let replyScore = Infinity;
+          for (const reply of replies) {
+            const after = board.slice(), masks = covered.slice();
+            after[reply.to] = after[reply.from]; after[reply.from] = null;
+            masks[reply.to] = masks[reply.from]; masks[reply.from] = false;
+            replyScore = Math.min(replyScore, material(after, masks));
+          }
+          score = replyScore;
+        }
+        score += state.covered[candidate.from] ? 16 : 0;
+        score += (4 - Math.abs(candidate.to % 9 - 4)) * 2;
+        if (checked(board, other(side), covered)) score += 12;
+        total += score;
+      }
+      const expected = total / options.length;
+      if (expected > bestScore) { bestScore = expected; best = candidate; }
     }
     return { ...best };
   }
