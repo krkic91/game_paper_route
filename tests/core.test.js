@@ -9,6 +9,25 @@ const {
   crashPlayer,
   constants,
 } = require('../core.js');
+const Guide = require('../games/delivery-guide.js');
+
+test('delivery guidance distinguishes each side, reserved targets, range and empty papers without mutation', () => {
+  const game = createGameState({ skipBuild: true });
+  game.mailboxes.push({ x: -6, z: 12, side: -1, hit: false }, { x: 6, z: 40, side: 1, hit: false });
+  const core = { getTargetMailbox }, before = JSON.stringify(game);
+  assert.equal(Guide.aimStatus(game, -1, core).kind, 'ready');
+  assert.equal(Guide.aimStatus(game, 1, core).kind, 'range');
+  assert.equal(JSON.stringify(game), before);
+  spawnThrow(game, -1);
+  assert.equal(Guide.aimStatus(game, -1, core).kind, 'cooldown');
+  game.player.throwCooldown = 0;
+  assert.equal(Guide.aimStatus(game, -1, core).kind, 'flying');
+  assert.equal(Guide.aimStatus(game, 1, core).kind, 'range');
+  game.player.papersLeft = 0;
+  assert.equal(Guide.aimStatus(game, 1, core).blocked, true);
+  game.state = 'failed';
+  assert.equal(Guide.aimStatus(game, -1, core).kind, 'finished');
+});
 
 function stepGame(game, seconds, input = {}) {
   const dt = 1 / 60;

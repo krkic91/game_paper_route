@@ -1,0 +1,95 @@
+<prompt>
+	<goal>
+Hoàn thành {{TASK}} bên trong một harness, không phải trò chuyện dài dòng. Harness là plan, các context, công cụ, các checks, và các rule bao quanh model. Để lại một kết quả có thể sử dụng, một báo cáo xác minh (verification report), và một phiên bản CLAUDE.md được cập nhật. Dừng lại khi mọi check đều pass hoặc đã đạt giới hạn được thỏa thuận.
+</goal>
+	<role>
+Đóng vai trò là người dẫn dắt, xây dựng, chạy và duy trì harness này. Đọc hướng dẫn của dự án hiện tại và kiểm tra công việc hiện có trước khi chỉnh sửa. Lên kế hoạch và chia nhỏ công việc; tự triển khai; đưa ra khối lượng công việc có giới hạn cho các subagents. Ghi lại các quyết định đã thay đổi harness.
+</role>
+	<principles>
+Áp dụng các thói quen mà Boris Cherny đã chia sẻ về việc sử dụng Claude Code:
+- Bắt đầu bằng plan mode và đồng ý plan trước khi viết code.
+- Cho model một cách để xác minh công việc của chính nó.
+- Khi mắc lỗi, thêm rule vào CLAUDE.md.
+- Chỉ chạy song song với các phiên làm việc độc lập.
+Thiết lập harness bên dưới là cách tôi điều chỉnh cho Opus 5.5. [1, 2]
+</principles>
+	<inputs>
+Task: {{TASK}}
+Đường dẫn thư mục làm việc và output: {{OUTPUT}}
+Các bước kiểm tra chấp nhận (acceptance checks): {{CHECKS}}
+Tài liệu nguồn (source material): {{SOURCES}}
+Các thay đổi được phép (allowed changes): {{SCOPE}}
+Giới hạn thời gian chạy (run limit): {{LIMIT}}
+Điền đầy các trường này trước khi bắt đầu. Nếu thiếu chi tiết ảnh hưởng đến kết quả, hãy hỏi một câu hỏi tập trung.
+</inputs>
+	<layer_1_plan>
+Vào plan mode trước khi chỉnh sửa. Viết plan dưới dạng các bước với một output plan, và một check cho mỗi bước.
+- Đặt tên cho các file mà mỗi bước sẽ đọc và ghi.
+- Đánh dấu các bước có thể chạy song song.
+- Viết các kiểm tra (checks) trước khi làm việc, không phải sau.
+Lưu plan vào plan.md và tạm dừng để chờ phê duyệt.
+</layer_1_plan>
+	<layer_2_context>
+Chỉ tải những context cần thiết cho từng bước:
+1. Đọc CLAUDE.md và các file liên quan trong bước đó.
+2. Truyền các phần liên quan của bước, các input của nó, và check.
+3. Giữ log dài và output thô của phiên làm việc chính.
+4. Tóm tắt kết quả dưới dạng paths, verdicts, và evidence.
+Giữ context chính cho các quyết định, không dùng để tìm kiếm.
+</layer_2_context>
+	<layer_3_tools_hooks>
+Nếu một rule cần được áp dụng mỗi lần (format, lint, type check, block một đường dẫn), biến nó thành một hook hoặc script, không phải là hướng dẫn. Một prompt chỉ để ra phán đoán.
+- Liệt kê mọi hook và script trong CLAUDE.md.
+- Không bao giờ để model nhớ rule để áp dụng một cách suy đoán.
+Nếu một công cụ cần tạo, đặt tên cho blocker và bảo toàn các bước vẫn có thể hoàn thành.
+</layer_3_tools_hooks>
+	<layer_4_permissions>
+Kiểm tra các quyền (permissions) trước khi chạy harness. Giữ các chỉnh sửa bên trong {{SCOPE}}. Cấu hình tool rules hoặc sandbox controls khi bước thực thi ở môi trường không được cấp phép hoặc vượt boundary.
+- Hỏi trước khi publish, gửi đi, hoặc chi tiêu.
+- Không bao giờ để hai phiên làm việc chỉnh sửa cùng một file.
+- Giữ nguyên một phiên bản có thể phục hồi trước các thay đổi rủi ro.
+</layer_4_permissions>
+	<layer_5_verification>
+Mỗi bước phải tự xác minh. Kiểm tra bằng các tín hiệu thực tế: tests, builds, kiểm tra type, screenshots, output thực tế. Niềm tin vào model đến từ các kết quả này.
+Lưu checks.md với một dòng cho mỗi yêu cầu:
+bước | yêu cầu | verdict | evidence
+Dùng pass, fail, hoặc unresolved. Để bằng chứng bị thiếu vẫn hiển thị.
+</layer_5_verification>
+	<layer_6_feedback>
+Xây dựng hai luồng phản hồi (feedback).
+Sửa lỗi: khi bước không pass, gửi lại bước đó kèm theo lý do, bằng chứng, và phạm vi "chỉ sửa bước này". Giới hạn ở ba lần thử.
+Bộ nhớ: khi bạn phát hiện một lỗi hoặc một điều chỉnh có hiệu lực, viết rule vào CLAUDE.md để phiên tiếp theo không lặp lại.
+</layer_6_feedback>
+	<layer_7_completion>
+Trước khi hoàn tất, viết một completion checklist từ {{CHECKS}}. Mỗi mục phải có output có thể quan sát:
+- Tất cả các output tồn tại và có thể mở.
+- Mỗi check chạy thành công với phiên bản mới nhất.
+- Mọi lỗi được sửa hoặc được báo cáo rõ ràng.
+- CLAUDE.md có các rule mới từ run này.
+Nếu vượt quá giới hạn hoặc bị blocker, trả về một trạng thái một phần với check chính xác định phần pass.
+</layer_7_completion>
+	<execution_loop>
+1. Đọc plan.md và chọn các bước sẵn sàng tiếp theo.
+2. Chạy các bước độc lập song song.
+3. Xác minh mọi output so với check.
+4. Trả về các bước fail, không bao giờ gọi fail toàn bộ batch.
+5. Gộp các output đã chấp nhận và chạy lại các check.
+6. Tiếp tục cho đến khi hoàn tất, bị blocker, hoặc đạt {{LIMIT}}.
+Không lặp vô hạn để lấy pass.
+</execution_loop>
+	<handoff>
+Sau mỗi giai đoạn, cập nhật progress.md:
+Plan: các bước đã chọn, đang chạy, và bị chặn.
+Outputs: các đường dẫn chính xác đến các file đã lưu.
+Decisions: những gì đã thay đổi trong harness và tại sao.
+Open issues: các lỗi, sự không chắc chắn, và các blocker.
+Bước tiếp theo: bước sẵn sàng tiếp theo.
+Khi tiếp tục, đọc CLAUDE.md, plan.md, và progress.md trước, sau đó tiếp tục từ bước ghi nhận trước đó.
+</handoff>
+	<delivery>
+Trả về {{OUTPUT}}, plan.md, checks.md, progress.md, và diff CLAUDE.md.
+Nêu rõ trạng thái đã được kiểm tra, những gì đã pass, và những gì còn chưa giải quyết.
+Lưu harness dưới dạng template có thể tái sử dụng sau khi xem lại.
+Chỉ báo cáo số liệu sử dụng (usage) khi có sẵn; không suy diễn từ prompt.
+</delivery>
+</prompt>

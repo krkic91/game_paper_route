@@ -64,7 +64,7 @@ async function noOverflow(page) {
     await page.locator('#search').fill('uno');
     assert.equal(await page.locator('.game-card').count(), 1);
     assert.equal(await page.locator('.game-card').getAttribute('data-game'), 'uno');
-    assert.equal(await page.locator('[data-game="uno"] [data-edition="3d"]').count(), 0);
+    assert.equal(await page.locator('[data-game="uno"] [data-edition="3d"]').count(), 1);
     await page.locator('#search').fill('');
     await page.locator('[data-filter="board"]').click();
     assert.equal(await page.locator('.game-card').count(), 12);

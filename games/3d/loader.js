@@ -24,8 +24,14 @@
       if (!id || ['caro', 'ludo', 'quan', '2048', 'memory'].includes(id)) assets.push('board-views.js');
       if (!id || ['snake', 'pool', 'breakout', 'delivery'].includes(id)) assets.push('action-views.js');
       if (!id || id === 'race') assets.push('race-view.js');
-      if (!id || id === 'delivery') assets.push('../../core.js', 'delivery.js');
+      if (!id || id === 'delivery') assets.push('../../core.js', '../delivery-guide.js', 'delivery.js');
+      const existing = ['caro','ludo','quan','2048','memory','snake','pool','breakout','delivery','race'];
+      if (id && !existing.includes(id)) assets.push('extended.js','extended-boards.js','extended-tables.js','extended-puzzles.js','extended-live.js');
       for (const asset of assets) await script(asset);
+      if (id && !existing.includes(id)) {
+        if (!this.editions?.[id]) throw new Error('Chưa có bộ dựng cảnh cho game này.');
+        this.installEdition(id);
+      }
     },
     createView(id, ui, scope) {
       try { return this.views[id](ui, scope); }

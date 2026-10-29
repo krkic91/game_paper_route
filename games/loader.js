@@ -62,6 +62,7 @@
       // Append base CSS before overrides; await both before mounting to avoid an unstyled board.
       const styles = [resource('games.css', 'css')];
       if (entry?.css) for (const path of Array.isArray(entry.css) ? entry.css : [entry.css]) styles.push(resource(path, 'css'));
+      if (edition === '3d') styles.push(resource('3d/extended.css', 'css'));
       const code = (async () => {
         await scripts(['shared.js', ...(entry?.scripts || [])]);
         if (edition === '3d') {

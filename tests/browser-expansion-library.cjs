@@ -22,7 +22,7 @@ async function check(page, source, engine, width) {
   for (const id of games) {
     assert.ok(ids.includes(id));
     assert.equal(await page.locator(`[data-game="${id}"] .cover-play > svg`).count(), 1);
-    assert.equal(await page.locator(`[data-game="${id}"] [data-edition="3d"]`).count(), 0);
+    assert.equal(await page.locator(`[data-game="${id}"] [data-edition="3d"]`).count(), 1);
     assert.equal(await page.evaluate(id => typeof window.ArcadeGames?.[id], id), 'undefined');
   }
   for (const [category, count] of [['board', 12], ['card', 6], ['puzzle', 11], ['strategy', 1], ['social', 1], ['arcade', 7], ['sport', 3]]) {

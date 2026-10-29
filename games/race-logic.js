@@ -274,5 +274,36 @@
     return state;
   }
 
-  return { createRace, stepRace, trackAt };
+  // Read-only guidance derived from the same road and riders as the simulation.
+  function raceGuidance(state) {
+    const distance = clamp(finite(state.distance), 0, state.length);
+    const ahead = state.rivals.filter(r => r.distance > distance)
+      .sort((a, b) => a.distance - b.distance || a.id - b.id)[0];
+    const behind = state.rivals.filter(r => r.distance < distance)
+      .sort((a, b) => b.distance - a.distance || a.id - b.id)[0];
+    const gap = rider => rider ? { id: rider.id, meters: Math.abs(rider.distance - distance), finished: rider.finishTime !== null } : null;
+    const warnings = [], seen = new Set();
+    if (state.status === 'playing') {
+      const remaining = Math.max(0, state.length - distance);
+      for (let offset = 0; offset <= Math.min(60, remaining); offset += 2) {
+        if (distance + offset >= state.length) break;
+        const road = trackAt(distance + offset, state.trackSeed);
+        const add = (family, kind, label) => {
+          if (seen.has(family)) return;
+          seen.add(family); warnings.push({ kind, label, meters: offset });
+        };
+        if (road.surface === 'wet') add('surface', 'wet', 'Đường trơn');
+        else if (road.surface === 'gravel') add('surface', 'gravel', 'Đường sỏi');
+        if (Math.abs(road.curvature) >= .0018)
+          add('curve', road.curvature < 0 ? 'left' : 'right', road.curvature < 0 ? 'Cua trái' : 'Cua phải');
+        if (Math.abs(road.grade) >= .03)
+          add('grade', road.grade > 0 ? 'uphill' : 'downhill', road.grade > 0 ? 'Lên dốc' : 'Xuống dốc');
+      }
+      if (remaining <= 60) warnings.push({ kind: 'finish', label: 'Về đích', meters: remaining });
+    }
+    return { ahead: gap(ahead), behind: gap(behind), drafting: state.status === 'playing' && state.drafting,
+      warnings: warnings.sort((a, b) => a.meters - b.meters).slice(0, 2) };
+  }
+
+  return { createRace, stepRace, trackAt, raceGuidance };
 });

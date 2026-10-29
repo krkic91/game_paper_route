@@ -248,6 +248,9 @@
       geometry,trackGeometry,material,mesh,box,ball,cylinder,torus,rod,group,label,putLabel,hit,hitPlane,point,
       trackTexture(texture){textures.add(texture);return texture;},
       trackMaterial(mat){materials.add(mat);return mat;},
+      releaseTexture(texture){textures.delete(texture);texture.dispose();},
+      releaseMaterial(mat){materials.delete(mat);mat.dispose();},
+      unhit(key){hits.delete(key);},
       get time(){return elapsed;},get disposed(){return disposed;},get interacting(){return Boolean(activeGesture?.orbit);},
       invalidate(){dirty=true;},render,resize,dispose,
       follow(x){followX=x;updateCamera();},
@@ -260,7 +263,7 @@
       diagnostics(){
         const rect=canvas.getBoundingClientRect();scene.updateMatrixWorld(true);
         return {id,uid,frames,geometries:renderer.info.memory.geometries,textures:renderer.info.memory.textures,calls:renderer.info.render.calls,triangles:renderer.info.render.triangles,
-          targets:[...hits.entries()].filter(([,value])=>value.enabled()).map(([key,value])=>{const v=value.object.getWorldPosition(new T.Vector3());const p=api.project(v.x,v.y,v.z);return {key,x:rect.left+p.x,y:rect.top+p.y};})};
+          targets:[...hits.entries()].filter(([,value])=>value.enabled()).map(([key,value])=>{const v=new T.Box3().setFromObject(value.object).getCenter(new T.Vector3());const p=api.project(v.x,v.y,v.z);return {key,x:rect.left+p.x,y:rect.top+p.y};})};
       },
     };
     live.add(api);scope.cleanup(dispose);applyQuality();

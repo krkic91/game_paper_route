@@ -38,6 +38,11 @@
 - Kéo trên mặt đường để lái.
 - Giữ nút **ĐẠP XE** để tăng tốc.
 - Chạm mặt đường để ném báo.
+- Có nút **Ném trái / Ném phải** để chọn phía, ở cả 2D và 3D; bản 3D còn có
+  nút **Ném tự động**. Có thể giữ lái/đạp rồi dùng ngón khác bấm ném.
+- Dòng nhỏ trên nút cho biết hộp thư đã vào tầm, báo đang bay, đang lấy báo,
+  hoặc đã hết báo. Hộp thư trong tầm được nhấn bằng màu vàng kèm chữ.
+- Hủy thao tác chạm hoặc mất pointer capture không được tính là chạm để ném.
 - Chạm màn hình sau khi thắng hoặc thua để chơi lại.
 
 ## Cơ chế giao báo
@@ -47,6 +52,9 @@
 - Mỗi lần giao thành công được `100 điểm`.
 - Ném khi không có mục tiêu hợp lệ hoặc để tờ báo va vào chướng ngại sẽ bị tính là ném trượt.
 - Một hộp thư đang có báo bay tới sẽ không bị khóa mục tiêu lần thứ hai.
+- Nút vẫn cho phép ném khi không có mục tiêu trong tầm, theo luật ném trượt hiện
+  có; dòng trạng thái giúp người chơi biết trước. Hết báo, đang lấy báo hoặc
+  kết thúc ván thì nút bị khóa. Phản hồi dùng chung `games/delivery-guide.js`.
 
 ## Chướng ngại vật
 

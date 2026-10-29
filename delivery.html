@@ -21,12 +21,17 @@
         </div>
       </aside>
       <div class="mobile-ui">
+        <div class="delivery-throws" role="group" aria-label="Chọn phía ném báo">
+          <button class="delivery-throw" data-throw="left"><strong>← NÉM TRÁI</strong><small data-aim-label>Chờ hộp thư vào tầm</small></button>
+          <button class="delivery-throw" data-throw="right"><strong>NÉM PHẢI →</strong><small data-aim-label>Chờ hộp thư vào tầm</small></button>
+        </div>
         <button id="pedalButton" class="pedal-button" aria-label="Giữ để đạp xe">
           <span>ĐẠP XE</span><small>GIỮ</small>
         </button>
       </div>
     </div>
     <script src="core.js"></script>
+    <script src="games/delivery-guide.js"></script>
     <script src="game.js"></script>
   </body>
 </html>

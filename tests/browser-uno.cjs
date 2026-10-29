@@ -157,10 +157,10 @@ async function desktop(browser, engine) {
     assert.equal(await page.locator('.game-card').count(), 41);
     await page.locator('[data-filter="card"]').click();
     assert.equal(await page.locator('.game-card').count(), 6);
-    assert.equal(await page.locator('[data-game="uno"] [data-edition="3d"]').count(), 0);
+    assert.equal(await page.locator('[data-game="uno"] [data-edition="3d"]').count(), 1);
     await page.locator('#search').fill('uno');
     assert.equal(await page.locator('.game-card').count(), 1);
-    checks.push('library count, card category, search and 2D-only edition');
+    checks.push('library count, card category, search and edition switch');
     await open(page, {});
     assert.equal(await page.locator('.uno-opponent').count(), 3);
     assert.equal(await hand(page).count(), 3);
@@ -278,12 +278,14 @@ async function desktop(browser, engine) {
       'closing destroys the old round and pending AI callbacks');
     checks.push('restart and destroy cancel queued bot actions');
 
-    await page.goto(`${base}/#play/uno/3d`);
-    await page.waitForFunction(() => location.hash === '#play/uno');
-    assert.equal(await page.locator('#game-stage').getAttribute('data-edition'), '2d');
-    assert.equal(await page.locator('.player-edition-switch').isVisible(), false);
+    if(engine==='chromium'){
+      await page.evaluate(()=>{location.hash='#play/uno/3d';});
+      await page.locator('.three-canvas[data-rendered="true"]').waitFor();
+      assert.equal(await page.locator('#game-stage').getAttribute('data-edition'),'3d');
+      assert.equal(await page.locator('.player-edition-switch').isVisible(),true);
+    }
     assert.deepEqual(errors, [], `${engine}: no browser exceptions`);
-    checks.push('unsupported 3D route normalizes to 2D');
+    checks.push('3D edition is discoverable and its route opens on Chromium');
     await page.goto(pathToFileURL(join(__dirname, '../index.html')).href + '#play/uno');
     await page.locator('[data-start]').click();
     assert.equal(await hand(page).count(), 7, 'UNO also opens without a server through file://');

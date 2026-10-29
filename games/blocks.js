@@ -44,6 +44,8 @@
       return `<div class="blocks-mini" role="img" aria-label="Khối ${kind}" style="--block-color:${COLORS[kind]}">${cells.map(c => `<i style="grid-column:${c.x - minX + 1};grid-row:${c.y - minY + 1}"></i>`).join('')}</div>`;
     }
     function render() {
+      options.onSceneState?.(state);
+      if (options.renderer !== '3d') {
       context.fillStyle = '#14212d'; context.fillRect(0, 0, 280, 560);
       context.strokeStyle = '#c9d6df09'; context.lineWidth = 1;
       for (let x = 0; x <= 10; x++) { context.beginPath(); context.moveTo(x * cell, 0); context.lineTo(x * cell, 560); context.stroke(); }
@@ -52,6 +54,7 @@
       if (state.phase === 'play') {
         L.cells({ ...state.active, y: L.ghostY(state) }).forEach(c => tile(c.x, c.y, state.active.kind, true));
         L.cells(state.active).forEach(c => tile(c.x, c.y, state.active.kind));
+      }
       }
       ui.setStat('score', state.score); ui.setStat('level', state.level); ui.setStat('lines', state.lines);
       const key = `${state.hold}|${state.queue.slice(0, 3).join('')}|${state.holdUsed}`;

@@ -53,6 +53,8 @@
     }
     function circle(x,y,r,fill,stroke) { ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fillStyle=fill; ctx.fill(); if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=2;ctx.stroke();} }
     function draw() {
+      options.onSceneState?.(state, { selected });
+      if(options.renderer === '3d') return;
       const map=L.MAPS[state.map]; ctx.clearRect(0,0,900,500); ctx.fillStyle=map.color; ctx.fillRect(0,0,900,500);
       // Stable, code-native scenery keeps the route readable at every viewport.
       for(let i=0;i<26;i++) { const x=(i*137+43)%900,y=(i*83+33)%500; circle(x,y,4+(i%3)*2,'#506c4219'); }

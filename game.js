@@ -2,6 +2,11 @@
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 const pedalButton = document.getElementById('pedalButton');
+const throwButtons = [...document.querySelectorAll('[data-throw]')];
+function updateThrowButtons() {
+  for (const button of throwButtons) window.DeliveryGuide.updateButton(button, game,
+    button.dataset.throw === 'left' ? -1 : 1, window.GameCore, arcadePaused);
+}
 const {
   constants,
   clamp,
@@ -82,6 +87,7 @@ window.addEventListener('message', (event) => {
     arcadePaused = Boolean(event.data.value);
     clearHeldControls();
     lastTime = 0;
+    updateThrowButtons();
   }
   if (event.data.action === 'restart') resetGame();
 });
@@ -120,6 +126,7 @@ function resetGame() {
   mobile.gestures.clear();
   mobile.pedalPointers.clear();
   mobile.pedal = false;
+  updateThrowButtons();
 }
 
 window.addEventListener('resize', resize);
@@ -133,6 +140,7 @@ window.addEventListener('keydown', (event) => {
     return;
   }
   if (arcadePaused) return;
+  if (event.target.closest?.('button') && [' ', 'enter'].includes(key)) return;
   keys.add(key);
   if (['a', 'd', 'w', 's', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'j', 'k', ' '].includes(key) || event.code === 'Space') {
     dismissOnboarding();
@@ -153,6 +161,7 @@ window.addEventListener('keyup', (event) => {
 });
 
 canvas.addEventListener('pointerdown', (event) => {
+  if (arcadePaused || event.button !== 0) return;
   if (event.target === pedalButton) return;
   dismissOnboarding();
   canvas.setPointerCapture?.(event.pointerId);
@@ -199,7 +208,7 @@ function finishCanvasPointer(event) {
     mobile.steerReleased = true;
   }
 
-  if (tapLike) {
+  if (tapLike && event.type === 'pointerup' && !arcadePaused) {
     if (game.state === 'playing') {
       mobile.pendingThrow = true;
     } else {
@@ -211,6 +220,7 @@ function finishCanvasPointer(event) {
 
 canvas.addEventListener('pointerup', finishCanvasPointer);
 canvas.addEventListener('pointercancel', finishCanvasPointer);
+canvas.addEventListener('lostpointercapture', finishCanvasPointer);
 canvas.addEventListener('pointerleave', (event) => {
   if (event.pointerType !== 'mouse') return;
   finishCanvasPointer(event);
@@ -223,6 +233,7 @@ function updatePedalState() {
 function pedalPointerDown(event) {
   event.preventDefault();
   event.stopPropagation();
+  if (arcadePaused) return;
   if (game.state !== 'playing') {
     resetGame();
     return;
@@ -244,6 +255,14 @@ pedalButton.addEventListener('pointerdown', pedalPointerDown);
 pedalButton.addEventListener('pointerup', pedalPointerUp);
 pedalButton.addEventListener('pointercancel', pedalPointerUp);
 pedalButton.addEventListener('lostpointercapture', pedalPointerUp);
+
+for (const button of throwButtons) button.addEventListener('click', () => {
+  if (arcadePaused || game.state !== 'playing' || button.disabled) return;
+  dismissOnboarding();
+  pendingKeyboardThrow.left = button.dataset.throw === 'left';
+  pendingKeyboardThrow.right = button.dataset.throw === 'right';
+  pendingKeyboardThrow.auto = false; mobile.pendingThrow = false;
+});
 
 function buildInput() {
   const keyboardSteering = (keys.has('a') || keys.has('arrowleft') ? -1 : 0) + (keys.has('d') || keys.has('arrowright') ? 1 : 0);
@@ -905,7 +924,7 @@ function drawUI() {
     if (compact) {
       const introW = Math.max(170, w - 132);
       const introX = 12;
-      const introY = h - 144;
+      const introY = h - 225;
       roundedRectPath(introX, introY, introW, 78, 13);
       ctx.fillStyle = 'rgba(7, 18, 29, 0.88)';
       ctx.fill();
@@ -917,11 +936,11 @@ function drawUI() {
       ctx.fillStyle = '#ffffff';
       ctx.font = '600 11px Inter, sans-serif';
       ctx.fillText('Kéo trên đường để lái', introX + 12, introY + 43);
-      ctx.fillText('Chạm để ném khi thấy MỤC TIÊU', introX + 12, introY + 62);
+      ctx.fillText('Nút trái / phải để chọn phía ném', introX + 12, introY + 62);
     } else {
       const introW = Math.min(610, w - 40);
       const introX = (w - introW) * 0.5;
-      const introY = h - 124;
+      const introY = h - 210;
       roundedRectPath(introX, introY, introW, 68, 14);
       ctx.fillStyle = 'rgba(7, 18, 29, 0.86)';
       ctx.fill();
@@ -1069,6 +1088,7 @@ function frame(timestamp) {
   }
 
   if (game.score !== previousScore) postToArcade('tramchoi:score', { score: game.score });
+  updateThrowButtons();
   render();
   requestAnimationFrame(frame);
 }

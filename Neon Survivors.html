@@ -275,22 +275,33 @@
       </div>
     </div>
 
+    <script src="games/3d/neon-view.js"></script>
     <script>
     "use strict";
     /* ============================================================
        NEON SURVIVORS — survivors-like thuần canvas, viết từ đầu.
        ============================================================ */
     const canvas = document.getElementById('game');
-    const ctx = canvas.getContext('2d');
+    const edition3D = new URLSearchParams(location.search).get('renderer') === '3d';
+    const ctx = edition3D ? null : canvas.getContext('2d');
+    let neonView = null;
+    function sceneError(message){
+      hostPaused = true;
+      if (embedded) postToLibrary('tramchoi:3d-error', { message });
+      else { const notice=document.createElement('p');notice.textContent=message;document.getElementById('menu').prepend(notice); }
+    }
+    window.addEventListener('neon:3d-error', event => sceneError(event.detail));
+    if (edition3D) window.ArcadeNeon3D.create(canvas).then(view => { neonView=view;resize();renderDirty=true; }).catch(error => sceneError(error.message));
     let VW = 0, VH = 0, DPR = 1;
     let quality = 'auto', autoQuality = 'high', renderDirty = true;
     const effectiveQuality = () => quality === 'auto' ? autoQuality : quality;
     function resize(){
       DPR = Math.min(window.devicePixelRatio || 1, effectiveQuality() === 'low' ? 1 : 2);
       VW = window.innerWidth; VH = window.innerHeight;
-      canvas.width = VW * DPR; canvas.height = VH * DPR;
+      if (!edition3D) { canvas.width = VW * DPR; canvas.height = VH * DPR; }
       canvas.style.width = VW + 'px'; canvas.style.height = VH + 'px';
-      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      ctx?.setTransform(DPR, 0, 0, DPR, 0, 0);
+      neonView?.resize(VW,VH,DPR);
       renderDirty = true;
     }
     window.addEventListener('resize', resize); resize();
@@ -1096,6 +1107,7 @@
       if (angle) ctx.restore();
     }
     function draw(){
+      if (edition3D) { neonView?.draw({ P, cam, enemies, projs, ebullets, gems, coins, rings, bolts, time:runTime }); return; }
       ctx.fillStyle = '#04040d';
       ctx.fillRect(0, 0, VW, VH);
       const sx = shake ? rand(-shake, shake) : 0, sy = shake ? rand(-shake, shake) : 0;
@@ -1402,7 +1414,8 @@
       clearInput(); pendingPulses = []; resetClock(); saveProgress();
       el('levelup').classList.remove('on');
       state = 'menu';
-      ctx.fillStyle = '#04040d'; ctx.fillRect(0, 0, VW, VH);
+      if (ctx) { ctx.fillStyle = '#04040d'; ctx.fillRect(0, 0, VW, VH); }
+      neonView?.draw(null);
       el('pause').classList.remove('on');
       el('gameover').classList.remove('on');
       el('victory').classList.remove('on');

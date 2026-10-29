@@ -46,8 +46,8 @@ hỗ trợ. Xem [kế hoạch, phép đo và kiểm thử tối ưu](docs/optimi
 | **Sút bóng luân lưu** | Đấu máy / 2 người cùng thiết bị | Chọn 6 vùng sút/bắt, 5 quả mỗi bên, kết thúc sớm và lượt quyết định. |
 | **Nối chữ tiếng Việt** | 1 người đấu máy | Kho từ chọn sẵn, nối tiếng cuối trong 90 giây, có 3 gợi ý. |
 | **Câu cá thư giãn** | 1 người | Canh lực thả, giật cần và giữ lực kéo, sưu tập 6 loài cá lưu trên trình duyệt. |
-| **Neon Survivors** | 1 người · 2D | Chọn nhân vật, né quái, nâng cấp vũ khí và đánh boss ở phút thứ 10. |
-| **Hải chiến** | Bạn đấu máy · 2D | Xếp đội tàu, dò tọa độ và đánh chìm đối thủ. |
+| **Neon Survivors** | 1 người · 2D/3D | Chọn nhân vật, né quái, nâng cấp vũ khí và đánh boss ở phút thứ 10. |
+| **Hải chiến** | Bạn đấu máy · 2D/3D | Xếp đội tàu, dò tọa độ và đánh chìm đối thủ. |
 | **Dò mìn** | 1 người · 3 mức · thử thách ngày | Mở các ô an toàn bằng suy luận và cắm cờ. |
 | **Thủ thành** | 1 người · 3 bản đồ | Xây, nâng cấp tháp và chặn 12 đợt quái. |
 | **Nối thú** | 1 người · theo màn | Ghép cặp qua đường có tối đa hai lần rẽ. |
@@ -57,7 +57,7 @@ hỗ trợ. Xem [kế hoạch, phép đo và kiểm thử tối ưu](docs/optimi
 | **Delivery Dash**   | 1 người                                       | Lái xe giao báo, né chướng ngại, hoàn thành tuyến đường gốc.      |
 | **Đua xe đạp**      | Bạn đấu 3 đối thủ máy · 2D/3D                  | Đua 1 km qua cua/dốc; quán tính, phanh, thả trôi, núp gió và nước rút. |
 | **Caro**            | Đấu máy / 2 người cùng thiết bị / online       | Bàn 15 × 15, nối từ 5 quân theo hàng ngang, dọc hoặc chéo.        |
-| **Cờ vua**          | Đấu máy Dễ/Vừa / 2 người cùng thiết bị · 2D   | Chiếu hết vua; có nhập thành, bắt tốt qua đường, phong cấp.    |
+| **Cờ vua**          | Đấu máy Dễ/Vừa / 2 người cùng thiết bị · 2D/3D   | Chiếu hết vua; có nhập thành, bắt tốt qua đường, phong cấp.    |
 | **Cờ gánh** | Đấu máy Dễ/Vừa / 2 người | Gánh, vây và tùy chọn luật mở trên bàn 5 × 5. |
 | **Đuổi hình bắt chữ** | 1 người · 150 câu | Ba chủ đề, 10 câu/lượt, gợi ý và lưu câu đã giải. |
 | **Tô màu thư giãn** | 1 người · 6 tranh | Tô vùng, chọn màu riêng, hoàn tác, tự lưu và tải PNG. |
@@ -65,24 +65,24 @@ hỗ trợ. Xem [kế hoạch, phép đo và kiểm thử tối ưu](docs/optimi
 | **Mậu binh** | Bạn đấu 3 máy | Xếp 3/5/5 lá, kiểm tra binh lủng, gợi ý và so từng chi. |
 | **Piano tiles** | 1 người · 3 nhịp độ | Bấm D F J K hoặc chạm bốn cột theo ba giai điệu. |
 | **Xếp hình jigsaw** | 1 người · 9/16/25 mảnh | Ba tranh SVG nguyên bản, kéo thả hoặc chạm để ghép. |
-| **Cờ tướng / Cờ úp** | Đấu máy Dễ/Vừa / 2 người cùng thiết bị · 2D | Chiếu bí hoặc khiến đối thủ hết nước; chọn Cờ úp tại ô Biến thể. |
+| **Cờ tướng / Cờ úp** | Đấu máy Dễ/Vừa / 2 người cùng thiết bị · 2D/3D | Chiếu bí hoặc khiến đối thủ hết nước; chọn Cờ úp tại ô Biến thể. |
 | **Cờ cá ngựa**      | Bạn + 3 máy / 2 người / 4 người cùng thiết bị | Tung xúc xắc, xuất chuồng, đá ngựa và đưa đủ 4 ngựa về đích.      |
 | **Ô ăn quan**       | Đấu máy (Dễ/Thường/Khó) / 2 người cùng thiết bị | Chọn ô dân, bấm mũi tên trên ô để rải; có hiệu ứng rải và luật tùy chọn. |
-| **UNO**             | Bạn đấu 3 máy · 2D                            | Ghép màu/ký hiệu, dùng lá chức năng, hô UNO và đánh hết bài.       |
-| **Domino**          | Bạn đấu 3 máy · 2D                            | Nối quân ở hai đầu; hết quân hoặc ít chấm nhất khi khóa bàn.     |
-| **Cờ tỷ phú**       | Bạn đấu 3 máy · 2D · tối đa 30 vòng           | Mua đất, thu thuê, nâng cấp và giữ ngân quỹ trên bàn 24 ô.        |
-| **Tiến lên miền Nam** | Bạn đấu 3 máy · 2D                          | Ghép bộ, chặn bài, chặt heo và đánh hết 13 lá trước.              |
-| **Xì dách**         | Bạn đấu nhà cái máy · 2D                      | Rút hoặc dằn, tìm xì bàn/xì dách/ngũ linh và tránh quắc.          |
-| **Ma sói**          | Bạn đấu 7 máy · 2D                            | Vai bí mật, năng lực ban đêm, thảo luận và bỏ phiếu ban ngày.     |
+| **UNO**             | Bạn đấu 3 máy · 2D/3D                            | Ghép màu/ký hiệu, dùng lá chức năng, hô UNO và đánh hết bài.       |
+| **Domino**          | Bạn đấu 3 máy · 2D/3D                            | Nối quân ở hai đầu; hết quân hoặc ít chấm nhất khi khóa bàn.     |
+| **Cờ tỷ phú**       | Bạn đấu 3 máy · 2D/3D · tối đa 30 vòng           | Mua đất, thu thuê, nâng cấp và giữ ngân quỹ trên bàn 24 ô.        |
+| **Tiến lên miền Nam** | Bạn đấu 3 máy · 2D/3D                          | Ghép bộ, chặn bài, chặt heo và đánh hết 13 lá trước.              |
+| **Xì dách**         | Bạn đấu nhà cái máy · 2D/3D                      | Rút hoặc dằn, tìm xì bàn/xì dách/ngũ linh và tránh quắc.          |
+| **Ma sói**          | Bạn đấu 7 máy · 2D/3D                            | Vai bí mật, năng lực ban đêm, thảo luận và bỏ phiếu ban ngày.     |
 | **Bida bỏ túi**     | Luyện tập 1 người                             | Ngắm từ bi trắng, chọn lực, đánh đủ 15 bi màu vào 6 lỗ.           |
 | **Rắn săn mồi**     | 1 người                                       | Ăn trái cây, tránh tường và thân mình trên bàn 20 × 20.           |
 | **2048**            | 1 người                                       | Trượt và gộp số; đạt 2048 có thể chơi tiếp.                       |
-| **Sudoku**          | 1 người · 2D · Dễ / Vừa / Khó                  | Điền số 1–9 vào bàn 9 × 9, không trùng hàng, cột và khối 3 × 3.    |
-| **Xếp cún**         | 1 người · 2D · 100 cấp / 500 đề               | Mỗi hàng, cột và vùng màu có một cún; các cún không chạm nhau.    |
+| **Sudoku**          | 1 người · 2D/3D · Dễ / Vừa / Khó                  | Điền số 1–9 vào bàn 9 × 9, không trùng hàng, cột và khối 3 × 3.    |
+| **Xếp cún**         | 1 người · 2D/3D · 100 cấp / 500 đề               | Mỗi hàng, cột và vùng màu có một cún; các cún không chạm nhau.    |
 | **Lật thẻ trí nhớ** | 1 người                                       | Tìm 8 cặp trái cây trên 16 thẻ với ít lần lật nhất.               |
 | **Phá gạch**        | 1 người                                       | Đỡ bóng, phá 50 viên gạch với 3 mạng.                             |
 
-Bảy game mới dùng bản 2D. Xem [phân công triển khai](docs/seven-games-plan.md)
+Bảy game này hiện có cả bản 2D và 3D. Xem [phân công triển khai ban đầu](docs/seven-games-plan.md)
 và luật từng game: [Hải chiến](docs/battleship.md), [Dò mìn](docs/minesweeper.md),
 [Thủ thành](docs/tower.md), [Nối thú](docs/onet.md), [Xếp gạch rơi](docs/blocks.md),
 [Cờ lật](docs/reversi.md), [Cờ Thú](docs/jungle.md).
@@ -111,9 +111,9 @@ Luật và điều khiển chi tiết luôn có trong nút **ⓘ Hướng dẫn*
 
 ## Tính năng trang
 
-Sáu game gia đình mới dùng bản 2D và tải khi mở. Xem [luật, phạm vi và kiểm thử](docs/family-games.md).
+Sáu game gia đình có cả bản 2D và 3D, tải khi mở. Xem [luật, phạm vi và kiểm thử](docs/family-games.md).
 
-- Thư viện 41 game với hình minh họa riêng, bố cục tương thích máy tính và điện thoại; 10 game có thêm bản 3D. Các game mới dùng bản 2D như mô tả trong bảng.
+- Thư viện 41 game với hình minh họa riêng, bố cục tương thích máy tính và điện thoại; cả 41 game đều có bản 2D và 3D. Xem [các phiên bản 3D](docs/extended-3d.md).
 - Tìm kiếm tiếng Việt có dấu hoặc không dấu; lọc theo Arcade, Thể thao, Bàn cờ, Bài, Nhập vai, Chiến thuật, Trí tuệ.
 - Sắp xếp theo đề xuất, tên hoặc game mới chơi.
 - Đánh dấu **yêu thích**, danh sách **chơi gần đây**, **kỷ lục riêng cho từng game**.

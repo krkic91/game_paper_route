@@ -8,13 +8,14 @@
     const ui=S.canvasUI(host,900,550,{
       className:'delivery-three-workspace',renderer:'3d',label:'Delivery Dash 3D — giao báo bằng xe đạp',
       toolbar:S.stat('ĐÃ GIAO','delivered','0 / 24')+S.stat('ĐIỂM','score',0)+S.stat('TỜ BÁO','papers',36)+S.stat('MẠNG','hearts','♥ ♥ ♥')+S.stat('TIẾN ĐỘ','progress','0%'),
-      controls:`<button class="control-button steering-button" data-hold="left" aria-label="Giữ để lái trái">${icon('arrow-left')}</button><button class="control-button" data-hold="pedal">${icon('bike')}Giữ đạp xe</button><button class="control-button throw-button" data-throw="auto">${icon('arrow-up-right')}Ném báo</button><button class="control-button steering-button" data-hold="right" aria-label="Giữ để lái phải">${icon('arrow-right')}</button>`,
+      controls:`<button class="control-button steering-button" data-hold="left" aria-label="Giữ để lái trái">${icon('arrow-left')}</button><button class="control-button" data-hold="pedal">${icon('bike')}Giữ đạp xe</button><button class="control-button steering-button" data-hold="right" aria-label="Giữ để lái phải">${icon('arrow-right')}</button><div class="delivery-throws"><button class="control-button delivery-throw" data-throw="left"><strong>← Ném trái</strong><small data-aim-label></small></button><button class="control-button delivery-throw" data-throw="auto"><strong>Ném tự động</strong><small data-aim-label></small></button><button class="control-button delivery-throw" data-throw="right"><strong>Ném phải →</strong><small data-aim-label></small></button></div>`,
     });
     let view;
     try{view=A.drivingScene(ui,scope,true);}catch(error){scope.destroy();throw error;}
     const input=S.heldInput(scope,ui,{left:['a','arrowleft'],right:['d','arrowright'],pedal:['w','arrowup'],brake:['s','arrowdown']});
     let state,started=false,ended=false,elapsed=0,pending='',gesture=null,steering=0,released=false;
-    scope.on(ui.controls,'click',event=>{if(event.target.closest('[data-throw]')&&started&&!ended)pending='auto';});
+    const throwButtons=[...ui.controls.querySelectorAll('[data-throw]')];
+    scope.on(ui.controls,'click',event=>{const button=event.target.closest('[data-throw]');if(button&&!button.disabled&&started&&!ended)pending=button.dataset.throw;});
     scope.on(window,'keydown',event=>{
       const key=S.gameKey(event);if(event.repeat||!started||ended||![' ','j','k'].includes(key))return;
       event.preventDefault();pending=key==='j'?'left':key==='k'?'right':'auto';
@@ -40,6 +41,7 @@
     function stats(){
       ui.setStat('delivered',`${state.delivered} / ${state.mailboxes.length}`);ui.setStat('score',state.score);ui.setStat('papers',state.player.papersLeft);
       ui.setStat('hearts','♥ '.repeat(Math.max(0,state.player.hearts)).trim()||'—');ui.setStat('progress',`${Math.min(100,Math.floor(state.player.z/C.constants.LEVEL_END*100))}%`);
+      for(const button of throwButtons)window.DeliveryGuide.updateButton(button,state,button.dataset.throw==='left'?-1:button.dataset.throw==='right'?1:0,C,!started||scope.paused);
     }
     function draw(dt=0){
       const side=pending==='left'?-1:pending==='right'?1:0;
@@ -47,7 +49,7 @@
     }
     function restart(){
       scope.clearTimers();S.clearOverlays(ui);input.clear();state=C.createGameState();view.reset();started=false;ended=false;elapsed=0;pending='';gesture=null;steering=0;released=true;
-      ui.message('A / D để lái, W để đạp; Space ném, J trái / K phải. Cảm ứng: kéo để lái, chạm để ném.');
+      ui.message('A / D để lái, W để đạp; Space ném, J trái / K phải. Giữ lái và bấm Ném trái / phải; nhìn dòng báo tầm ném trên nút.');
       S.intro(ui,scope,{title:'Chuyến giao báo, thêm một chiều',detail:'Cùng 24 hộp thư và luật chơi nguyên bản — nay trên con phố 3D. Nhìn vòng vàng, ném thật chuẩn và về đích an toàn.',symbol:'bike',onStart:()=>{started=true;}});
       draw();
     }

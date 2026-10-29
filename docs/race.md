@@ -23,6 +23,18 @@ Lên dốc, đường sỏi và lề cỏ làm xe chậm hơn; đường ướt 
 Chạm cọc làm mất một điểm chịu va chạm; vũng nước giảm tốc và làm trơn lốp tạm
 thời; chạm tay đua làm hai xe chao và mất tốc độ. Nhặt nước hồi năng lượng.
 
+Bảng hỗ trợ bên dưới điều khiển dùng chung cho 2D và 3D:
+
+- Biểu tượng gió sáng kèm chữ **Đang núp gió · tiết kiệm sức** khi mô phỏng xác
+  nhận hiệu ứng; tắt khi tạm dừng hoặc kết thúc.
+- Báo tối đa hai điều kiện gần nhất trong 60 m phía trước: cua, dốc, đường ướt/sỏi
+  hoặc vạch đích. Điều kiện ngay dưới xe ghi **hiện tại**, không dự báo quá đích.
+- Khoảng cách đến đối thủ gần nhất phía trước/sau, kèm số tay đua; thanh tiến trình
+  đánh dấu cả bốn xe. Kết thúc hiển thị thứ hạng thực tế.
+
+Các thông tin này chỉ đọc trạng thái bằng `RaceLogic.raceGuidance`, không thay
+vật lý, AI, thời gian về đích hay công thức điểm.
+
 Âm thanh gió, lốp, truyền động và va chạm được tạo cục bộ bằng Web Audio, chỉ
 khởi tạo sau thao tác người dùng. Âm thanh dừng khi tạm dừng, kết thúc hoặc đóng
 game. Nút Âm thanh và Giảm rung lưu tùy chọn trên thiết bị. Giảm rung mặc định

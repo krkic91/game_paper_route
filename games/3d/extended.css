@@ -1,0 +1,23 @@
+/* Layout around the new mesh adapters; original controls stay in their game. */
+.three-edition-mount{display:flex;flex-direction:column;gap:8px;width:100%;min-width:0;grid-column:1/-1}
+.three-workspace .three-edition-mount>.three-viewport{flex:none;height:430px;min-height:340px}
+.three-edition-mount>.three-accessible{max-height:none;color:#cee0bb;background:#253e31}
+.three-live-caption{font-size:12px;line-height:1.6;text-align:center;margin:3px 0;color:#526852}
+.three-hand-pages{display:flex;justify-content:center;align-items:center;gap:14px;font-size:12px;color:#46624e}
+.three-hand-pages[hidden]{display:none}.three-hand-pages button{min-width:44px;min-height:36px;border-radius:6px;background:#496e59;color:white}
+.three-workspace .royal-playfield,.three-workspace .family-board-wrap,.three-workspace .sudoku-frame,.three-workspace .puppies-playfield,.three-workspace .reversi-table,.three-workspace .jungle-field,.three-workspace .riddles-paper,.three-workspace .wordchain-paper,.three-workspace .coloring-layout,.three-workspace .jigsaw-layout{width:100%;max-width:none}
+.three-workspace .tower-layout,.three-workspace .monopoly-layout,.three-workspace .blocks-playfield{display:flex;flex-direction:column;width:100%;max-width:none}
+.three-workspace .tower-map-column,.three-workspace .monopoly-map-column{width:100%;min-width:0}
+.three-blocks .blocks-sidebar{display:flex;flex-direction:row;justify-content:center;gap:20px;width:100%}
+.three-blocks .blocks-preview-panel{max-width:160px}.three-blocks .blocks-combo{display:none}
+.three-blocks .three-edition-mount>.three-viewport{height:520px}
+.three-workspace .three-accessible[open]>.three-original-board{position:relative;max-width:720px}
+.three-workspace .three-accessible[open]>.binh-rows,.three-workspace .three-accessible[open]>.vn-hand{width:calc(100% - 20px)}
+.three-coloring .three-accessible[open]>.coloring-canvas{display:block;height:auto;aspect-ratio:1}
+.three-jigsaw .three-accessible[open]>.jigsaw-tray{display:grid}
+.three-workspace .three-original-board[hidden]{display:none!important}
+@media(max-width:600px){
+  .three-workspace .three-edition-mount>.three-viewport{height:360px;min-height:320px}
+  .three-blocks .three-edition-mount>.three-viewport,.three-piano .three-edition-mount>.three-viewport{height:430px}
+  .three-live-caption{font-size:11px}.three-workspace .three-edition-mount{min-width:0}
+}

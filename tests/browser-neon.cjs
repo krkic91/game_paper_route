@@ -73,9 +73,9 @@ async function close(page, frame) {
 async function library(page) {
   await page.waitForFunction(() => document.querySelectorAll('.game-card').length === 41);
   assert.equal(await page.locator('[data-game="neon"] .cover-play > svg').count(), 1);
-  assert.equal(await page.locator('[data-game="neon"] [data-edition="3d"]').count(), 0);
+  assert.equal(await page.locator('[data-game="neon"] [data-edition="3d"]').count(), 1);
   await page.locator('[data-filter="arcade"]').click();
-  assert.equal(await page.locator('.game-card').count(), 5);
+  assert.equal(await page.locator('.game-card').count(), 7);
   await page.locator('[data-filter="all"]').click();
   await page.locator('#search').fill('neon');
   assert.equal(await page.locator('.game-card').count(), 1);

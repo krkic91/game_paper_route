@@ -14,98 +14,98 @@
   };
   const games = [
     {
-      id: 'riddles', title: 'Đuổi hình bắt chữ', category: 'puzzle', players: '1 người', badge: 'MỚI', supports3d: false,
+      id: 'riddles', title: 'Đuổi hình bắt chữ', category: 'puzzle', players: '1 người', badge: 'MỚI', supports3d: true,
       description: 'Hình quen, chữ lạ, một kho tiếng Việt thú vị.', keywords: 'duoi hinh bat chu đố vui tiếng Việt câu đố rebus',
       intro: 'Ghép ý nghĩa, tên hoặc âm đọc của các hình để tìm từ ghép và thành ngữ. 150 câu chia thành thiên nhiên, đời sống và từ ngữ.',
       instructions: ['Mỗi lượt có 10 câu. Nhìn các hình, nhập đáp án rồi bấm Trả lời; có dấu hay không dấu đều được.', 'Đúng được 100 điểm; mỗi lần sai trừ 10, mỗi gợi ý trừ 20, tối thiểu 10 điểm một câu.', 'Hai gợi ý mỗi câu; Xem đáp án bỏ qua câu đó với 0 điểm. Đọc lời giải rồi bấm Câu tiếp theo.', 'Không giới hạn thời gian. Lưu câu đã giải trên máy, lượt mới ưu tiên câu chưa giải.'],
       variant: 'Kho 150 câu tự biên soạn, hình biểu tượng hiển thị bằng phông emoji của thiết bị. Không cần mạng hoặc tài khoản.',
     },
     {
-      id: 'coloring', title: 'Tô màu thư giãn', category: 'puzzle', players: '1 người', badge: 'MỚI', supports3d: false,
+      id: 'coloring', title: 'Tô màu thư giãn', category: 'puzzle', players: '1 người', badge: 'MỚI', supports3d: true,
       description: 'Sáu bức tranh, bao nhiêu cách phối màu?', keywords: 'to mau tô tranh vẽ coloring nghệ thuật thư giãn',
       intro: 'Vườn hoa, đại dương, căn nhà, cánh bướm, hoa tròn và chuyến bay tới sao. Chọn màu rồi tô từng vùng theo ý thích.',
       instructions: ['Chọn một trong 16 màu, hoặc dùng Màu riêng; chạm vùng tranh để tô.', 'Tẩy màu trả vùng về trắng. Hoàn tác và Làm lại giữ tối đa 100 bước.', 'Mỗi tranh được lưu riêng trên trình duyệt để mở lại tô tiếp. Tải PNG để giữ hoặc in tranh.', 'Không giới hạn thời gian, không chấm đúng sai. Tô đủ vùng được 100 điểm. Chơi lại xóa màu của tranh đang chọn.'],
       variant: 'Sáu tranh SVG nguyên bản, tô theo vùng và xuất PNG 1200 × 1200. Có điều khiển bằng Tab/Enter/Space.',
     },
     {
-      id: 'samloc', title: 'Sâm lốc', category: 'card', players: 'Bạn đấu 3 máy', badge: 'MỚI', supports3d: false,
+      id: 'samloc', title: 'Sâm lốc', category: 'card', players: 'Bạn đấu 3 máy', badge: 'MỚI', supports3d: true,
       description: 'Mười lá trên tay, một tiếng báo sâm.', keywords: 'sam loc xâm lốc bài miền Bắc xin làng',
       intro: 'Bàn Sâm bốn người: 10 lá mỗi người, so số không so chất. Chọn chơi thường hoặc báo sâm để giành quyền đi trước.',
       instructions: ['Chọn các lá rồi Đánh bài, hoặc dùng Gợi ý. Chặn bằng bộ cùng loại, cùng độ dài và số lớn hơn.', 'Tứ quý chặt một lá 2 hoặc tứ quý nhỏ hơn. Không có đôi thông. Sảnh A23 nhỏ nhất, không KA2.', 'Báo sâm phải đánh hết bài mà không ai chặn được, kể cả bộ cuối. Bị chặn một lần sẽ thua sâm.', 'Bỏ lượt thì chờ vòng mới. Còn 1 lá tự báo; người ngay trước khi đánh lẻ phải dùng lá lớn nhất.', 'Thắng thường 100 điểm, báo sâm thành công 200. Xem Luật Sâm của bàn này để biết ăn trắng và thối 2.'],
       variant: 'Bàn gia đình không cược, không phạt cóng/đền cửa. Về bằng bộ 2 riêng là thua; sảnh chứa 2 được về. Máy chỉ dùng bài mình và thông tin công khai.',
     },
     {
-      id: 'maubinh', title: 'Mậu binh', category: 'card', players: 'Bạn đấu 3 máy', badge: 'MỚI', supports3d: false,
+      id: 'maubinh', title: 'Mậu binh', category: 'card', players: 'Bạn đấu 3 máy', badge: 'MỚI', supports3d: true,
       description: 'Xếp ba chi, tìm thế đẹp cho mười ba lá.', keywords: 'mau binh binh xap xam xập xám chinese poker 13 lá',
       intro: 'Chia 13 lá thành chi trên 3, giữa 5 và dưới 5. Tự xếp hoặc tham khảo gợi ý trước khi so từng chi với ba máy.',
       instructions: ['Chọn lá ở khay rồi chạm ô trống trong chi. Chọn hai lá để đổi vị trí; có nút trả lá về khay.', 'Chi dưới phải mạnh bằng hoặc hơn chi giữa, chi giữa mạnh bằng hoặc hơn chi trên. Binh lủng được báo để sửa trước khi so.', 'Chi 3 lá chỉ xét mậu thầu, đôi, sám. Chi 5 lá xét đầy đủ bộ poker. Không so chất; A2345 là sảnh thấp nhất.', 'Mỗi chi thắng +1, thua −1, hòa 0. Thắng cả ba chi một người được +6, đối thủ −6.', 'Bấm So bài để xem bảng kết quả và bài của từng máy. Có gợi ý, hoàn tác và không giới hạn thời gian.'],
       variant: 'Bàn gia đình so từng chi, không xét tới trắng/thưởng bộ đặc biệt, không cược. Máy xếp bài từ chính 13 lá của mình. Dẫn đầu bảng nhận 100 điểm.',
     },
     {
-      id: 'coganh', title: 'Cờ gánh', category: 'board', players: '1–2 người', badge: 'MỚI', supports3d: false,
+      id: 'coganh', title: 'Cờ gánh', category: 'board', players: '1–2 người', badge: 'MỚI', supports3d: true,
       description: 'Gánh một đôi, vây một nhóm, đổi màu thế cờ.', keywords: 'co ganh co chem dân gian Việt Nam Quảng Nam mở vây',
       intro: 'Mười sáu quân hai màu trên bàn 5 × 5. Đọc thế gánh, đặt bẫy mở và chặn đường để biến quân đối thủ thành quân của mình.',
       instructions: ['Đỏ đi trước. Chọn quân rồi đi một bước theo đường kẻ tới giao điểm trống, không nhảy.', 'Gánh: đi vào giữa hai quân đối thủ trên một đường thẳng để đổi màu cả hai. Có thể gánh nhiều cặp cùng lúc.', 'Vây: cả nhóm quân đối thủ không còn giao điểm trống để đi sẽ đổi màu.', 'Luật mở: khi nước trước không đổi quân mà tạo thế gánh tại ô vừa rời, phải vào ô đó nếu đi tới được. Có thể tắt luật để học bản cơ bản.', 'Có máy Dễ/Vừa, hai người cùng thiết bị, gợi ý và hoàn tác. Chiếm hết quân hoặc khiến đối thủ hết nước là thắng.'],
       variant: 'Bàn 5 × 5, đường chéo nối tại các điểm chẵn. Tự hòa lặp thế 3 lần, 80 lượt không đổi màu hoặc 300 lượt tổng. Đổi luật bắt đầu ván mới.',
     },
     {
-      id: 'piano', title: 'Piano tiles · Phím đàn', category: 'arcade', players: '1 người', badge: 'MỚI', supports3d: false,
+      id: 'piano', title: 'Piano tiles · Phím đàn', category: 'arcade', players: '1 người', badge: 'MỚI', supports3d: true,
       description: 'Chạm bốn phím, để giai điệu dần ngân lên.', keywords: 'piano tiles âm nhạc nhịp điệu đàn music',
       intro: 'Những nốt nhạc rơi qua bốn cột. Giữ nhịp, nối chuỗi và hoàn thành một trong ba giai điệu.',
       instructions: ['Dùng D F J K hoặc chạm đúng cột khi tâm nốt tới vạch vàng.', 'Nhịp rất chuẩn +100 điểm, đúng nhịp +60. Chuỗi 10 nốt tăng hệ số, tối đa ×4.', 'Bỏ lỡ hoặc chạm sai mất một trong 3 cơ hội. Hoàn thành bài trước khi hết cơ hội.', 'Chọn 3 giai điệu và tốc độ 60/90/120 BPM. Hai giây đầu để chuẩn bị. Tạm dừng dừng cả nhạc và nốt; có thể tắt âm thanh.'],
       variant: 'Âm đàn tổng hợp bằng WebAudio. Giai điệu Ode to Joy, giai điệu dân gian Ngôi sao nhỏ và Gió bên hiên viết riêng. Không sử dụng bản thu hay lời bài hát.',
     },
     {
-      id: 'jigsaw', title: 'Xếp hình jigsaw', category: 'puzzle', players: '1 người', badge: 'MỚI', supports3d: false,
+      id: 'jigsaw', title: 'Xếp hình jigsaw', category: 'puzzle', players: '1 người', badge: 'MỚI', supports3d: true,
       description: 'Ghép từng mảnh nhỏ, tìm lại một chiều yên.', keywords: 'xep hinh jigsaw ghép tranh thư giãn puzzle',
       intro: 'Hồ sen buổi sớm, phố đèn lồng và đại dương đang chờ được ghép lại. Chọn một bức tranh và chơi theo nhịp của mình.',
       instructions: ['Chọn một mảnh ở khay, rồi chạm ô trong khung; hoặc kéo mảnh vào vị trí.', 'Mảnh đúng tự khớp và khóa, mảnh sai trở lại khay. Không xoay mảnh.', 'Ba tranh có các mức 9, 16 và 25 mảnh. Không giới hạn thời gian.', 'Xem ảnh mẫu miễn phí. Gợi ý chỉ mảnh và vị trí đúng: −50 điểm; đặt sai −10. Hoàn thành nhận tối thiểu 100 điểm.'],
       variant: 'Tranh SVG tạo riêng trong dự án, mảnh có ngàm khớp nhau, chơi offline. Đổi tranh hoặc số mảnh bắt đầu lượt mới.',
     },
     {
-      id: 'draughts', title: 'Cờ đam', category: 'board', players: '1–2 người', badge: 'MỚI', supports3d: false,
+      id: 'draughts', title: 'Cờ đam', category: 'board', players: '1–2 người', badge: 'MỚI', supports3d: true,
       description: 'Đi chéo, ăn liên tiếp và tiến lên phong vua.', keywords: 'co dam draughts checkers quân tròn cờ gia đình',
       intro: 'Bàn cờ 8 × 8, mười hai quân mỗi bên. Một nước bắt đúng lúc có thể mở đường tới hàng phong vua.',
       instructions: ['Chọn quân rồi chọn ô sáng để đi chéo. Đỏ đi trước; khi đấu máy bạn cầm Đỏ.', 'Có nước bắt thì bắt buộc ăn. Nếu còn ăn được bằng quân vừa đi, phải tiếp tục chuỗi.', 'Quân thường chỉ đi và bắt tiến. Đến hàng cuối được phong vua và kết thúc lượt; vua đi một ô chéo cả hai hướng.', 'Hết quân hoặc hết nước đi là thua. Có gợi ý, hoàn tác, máy Dễ/Vừa và chế độ 2 người chung thiết bị.'],
       variant: 'Luật Anh 8 × 8. Tự hòa khi lặp thế 3 lần hoặc 80 lượt chỉ đi vua không bắt quân. Không dùng vua bay.',
     },
     {
-      id: 'match3', title: 'Kim cương · Ghép 3', category: 'puzzle', players: '1 người', badge: 'MỚI', supports3d: false,
+      id: 'match3', title: 'Kim cương · Ghép 3', category: 'puzzle', players: '1 người', badge: 'MỚI', supports3d: true,
       description: 'Ghép ba viên, nối chuỗi lấp lánh cả khu vườn.', keywords: 'kim cuong ghep 3 match-3 match3 đá quý puzzle',
       intro: 'Ba mươi lượt, sáu loại đá quý. Đổi chỗ hai ô để tạo những chuỗi rơi nối tiếp và tìm kỷ lục mới.',
       instructions: ['Chạm hai ô cạnh nhau theo chiều ngang hoặc dọc để đổi chỗ.', 'Ghép từ 3 viên cùng loại thành hàng để ghi điểm. Các viên phía trên rơi xuống và bổ sung viên mới.', 'Chuỗi liên tiếp nhân điểm. Mỗi viên 10 điểm nhân số chuỗi.', 'Đổi sai không mất lượt. Có gợi ý; hết nước tự tạo bàn mới giữ điểm. Kết thúc sau 30 lượt hợp lệ.'],
       variant: 'Bàn 8 × 8 sinh ngẫu nhiên, có sẵn nước đi. Một ván khoảng 3–5 phút, không giới hạn số ván.',
     },
     {
-      id: 'phom', title: 'Phỏm', category: 'card', players: 'Bạn đấu 3 máy', badge: 'MỚI', supports3d: false,
+      id: 'phom', title: 'Phỏm', category: 'card', players: 'Bạn đấu 3 máy', badge: 'MỚI', supports3d: true,
       description: 'Giữ cạ, ghép phỏm, tìm lá rác để về nhất.', keywords: 'phom tá lả ta la bài bắc bộ rummy',
       intro: 'Bàn bài bốn người quen thuộc. Ăn hoặc bốc, ghép phỏm và giảm điểm bài rác trước lúc hạ.',
       instructions: ['Bạn có 10 lá và đánh trước; mỗi máy có 9 lá. Chọn lá rác rồi bấm Đánh lá chọn.', 'Các lượt sau: ăn lá người trước để tạo phỏm, hoặc bốc nọc, rồi đánh 1 lá.', 'Phỏm là 3–4 lá cùng số hoặc từ 3 lá liên tiếp cùng chất. A thấp, không nối K–A. Lá ăn được bảo vệ trong phỏm.', 'Sau 4 lượt tự hạ phỏm và gửi vào phỏm đã hạ trước. Ít điểm rác nhất thắng, móm xếp sau người có phỏm; bằng điểm ưu tiên người hạ trước. Hết rác là ù.'],
       variant: 'Bàn gia đình 4 vòng cố định, tự hạ/gửi, không tái hay đền. A=1, J=11, Q=12, K=13. Mỗi phỏm tối đa 1 lá ăn. Không cược tiền.',
     },
     {
-      id: 'penalty', title: 'Sút bóng luân lưu', category: 'sport', players: '1–2 người', badge: 'MỚI', supports3d: false,
+      id: 'penalty', title: 'Sút bóng luân lưu', category: 'sport', players: '1–2 người', badge: 'MỚI', supports3d: true,
       description: 'Chọn góc sút, đoán hướng và giữ bình tĩnh.', keywords: 'sut bong luan luu penalty football bóng đá thủ môn',
       intro: 'Năm quả mỗi đội, luân phiên sút bóng và bắt gôn. Một chạm quyết định góc sút của bạn.',
       instructions: ['Chọn một trong sáu vùng khung thành để sút hoặc đổ người bắt bóng.', 'Thủ môn đoán đúng vùng thì cản phá, khác vùng thì ghi bàn. Máy chọn kín trước khi bạn bấm.', 'Hai đội đá luân phiên 5 quả. Kết thúc sớm nếu đội kia không thể gỡ; hòa thì đá từng cặp lượt quyết định.', 'Chế độ 2 người: thủ môn chọn kín rồi chuyển thiết bị cho người sút. Bấm Sẵn sàng để tiếp tục.'],
       variant: 'Luân lưu theo vùng, điều khiển một chạm. Hai người chơi chung thiết bị, chuyền máy để giữ kín lựa chọn.',
     },
     {
-      id: 'wordchain', title: 'Nối chữ tiếng Việt', category: 'puzzle', players: '1 người', badge: 'MỚI', supports3d: false,
+      id: 'wordchain', title: 'Nối chữ tiếng Việt', category: 'puzzle', players: '1 người', badge: 'MỚI', supports3d: true,
       description: 'Học sinh, sinh nhật… nối mãi một câu chuyện.', keywords: 'noi chu tiếng việt từ vựng giáo dục gia đình',
       intro: 'Nối tiếng cuối thành tiếng đầu, khám phá từ vựng quen thuộc cùng máy trong 90 giây.',
       instructions: ['Nhập từ có dấu, bắt đầu bằng tiếng cuối của từ máy vừa đưa: học sinh → sinh nhật.', 'Không lặp lại từ đã dùng. Chỉ nhận từ thuộc kho từ được chọn sẵn của bàn.', 'Mỗi từ đúng +10 điểm. Máy hết từ +50 điểm. Hết giờ hoặc hết từ thì kết thúc.', 'Có 3 gợi ý, mỗi lần trừ 5 điểm. Nhấn Nối từ hoặc Enter để gửi. Tạm dừng dừng cả đồng hồ.'],
       variant: 'Kho từ/cụm từ lưu sẵn, chơi offline. Từ điển có giới hạn, không nhận mọi từ tiếng Việt.',
     },
     {
-      id: 'fishing', title: 'Câu cá thư giãn', category: 'arcade', players: '1 người', badge: 'MỚI', supports3d: false,
+      id: 'fishing', title: 'Câu cá thư giãn', category: 'arcade', players: '1 người', badge: 'MỚI', supports3d: true,
       description: 'Một chiều bên hồ, một bộ sưu tập nho nhỏ.', keywords: 'cau ca thu gian fishing chill hồ sưu tập',
       intro: 'Canh lực thả câu, chờ phao rung và đưa cá vào bờ. Một buổi chơi chậm rãi, không giới hạn thời gian.',
       instructions: ['Bấm Thả câu rồi bấm lần nữa khi kim ở vùng xanh để thả mồi.', 'Chờ phao rung rồi bấm Giật cần trong 2,5 giây.', 'Giữ nút kéo hoặc Space để tăng lực, thả để giảm. Giữ kim trong vùng xanh; chạm hai đầu thanh thì cá thoát.', 'Sưu tập sáu loài cá. Bộ sưu tập lưu trên trình duyệt; chơi lại đặt lại điểm buổi câu và giữ bộ sưu tập.'],
       variant: 'Không giới hạn thời gian hay lượt. Cá có trọng số xuất hiện và độ khó kéo khác nhau. Lưu cục bộ khi trình duyệt cho phép.',
     },
     {
-      id: 'neon', title: 'Neon Survivors', category: 'arcade', players: '1 người', badge: 'MỚI', supports3d: false,
+      id: 'neon', title: 'Neon Survivors', category: 'arcade', players: '1 người', badge: 'MỚI', supports3d: true,
       frameSrc: 'Neon Survivors.html',
       description: 'Né bầy quái, tiến hóa vũ khí, sống sót giữa ánh neon.', keywords: 'neon survivors sinh tồn bắn súng quái boss',
       intro: 'Chọn một trong ba chiến binh, thu thập ngọc kinh nghiệm và phối hợp vũ khí để đối đầu Neon Overlord.',
@@ -113,49 +113,49 @@
       variant: 'Game 2D từ file Neon Survivors của bạn. Kỷ lục thư viện tính theo số hạ gục; tiến trình cửa hàng được lưu trên thiết bị. Có thể xóa tiến trình trong cài đặt game.',
     },
     {
-      id: 'battleship', title: 'Hải chiến', category: 'board', players: 'Bạn đấu máy', badge: 'MỚI', supports3d: false,
+      id: 'battleship', title: 'Hải chiến', category: 'board', players: 'Bạn đấu máy', badge: 'MỚI', supports3d: true,
       description: 'Giấu đội tàu, dò mục tiêu và làm chủ mặt biển.', keywords: 'hai chien battleship tàu chiến bắn tọa độ',
       intro: 'Hai hạm đội, một vùng biển bí mật. Xếp tàu của bạn rồi tìm đội tàu đối phương qua từng phát bắn.',
       instructions: ['Xếp đội tàu trên biển của bạn; có thể xoay tàu hoặc dùng cách xếp ngẫu nhiên.', 'Khi đã sẵn sàng, chọn ô trên biển đối phương để bắn. Trúng hoặc trượt đều được đánh dấu.', 'Dựa vào các ô đã bắn để tìm và đánh chìm toàn bộ tàu đối phương trước khi mất hạm đội.', 'Chọn độ khó để thay đổi cách máy dò tìm. Vị trí tàu chưa bị bắn của đối thủ được giữ kín.'],
       variant: 'Bản 2D một người đấu máy, chơi tại chỗ. Không cần kết nối máy chủ.',
     },
     {
-      id: 'minesweeper', title: 'Dò mìn', category: 'puzzle', players: '1 người', badge: 'MỚI', supports3d: false,
+      id: 'minesweeper', title: 'Dò mìn', category: 'puzzle', players: '1 người', badge: 'MỚI', supports3d: true,
       description: 'Đọc những con số, tìm lối đi an toàn.', keywords: 'do min minesweeper logic cắm cờ suy luận',
       intro: 'Mỗi con số cho biết số mìn xung quanh. Mở các ô an toàn và đánh dấu những vị trí bạn đã suy luận ra.',
       instructions: ['Chạm ô để mở. Số trong ô là số mìn ở tám ô xung quanh.', 'Dùng chế độ Cắm cờ trên điện thoại, hoặc nhấp phải trên máy tính.', 'Mở hết các ô không có mìn để thắng. Ô mở đầu an toàn; bàn được kiểm tra giải bằng suy luận.', 'Chọn một trong ba mức khó hoặc thử thách ngày. Tạm dừng cũng dừng đồng hồ.'],
       variant: 'Ba kích thước bàn, sinh đề có kiểm chứng suy luận. Thử thách ngày dùng ngày hiển thị trên thiết bị.',
     },
     {
-      id: 'tower', title: 'Thủ thành', category: 'strategy', players: '1 người', badge: 'MỚI', supports3d: false,
+      id: 'tower', title: 'Thủ thành', category: 'strategy', players: '1 người', badge: 'MỚI', supports3d: true,
       description: 'Dựng tháp, giữ đường và chặn từng đợt quái.', keywords: 'thu thanh tower defense phòng thủ xây tháp quái boss',
       intro: 'Chọn vị trí xây tháp và phối hợp các loại vũ khí. Mỗi đợt quái là một bài toán mới về tầm bắn và ngân quỹ.',
       instructions: ['Chọn bản đồ, chọn vị trí xây rồi chọn loại tháp phù hợp với số xu đang có.', 'Tháp tên, băng và pháo có vai trò khác nhau. Chọn tháp để xem, nâng cấp hoặc bán.', 'Bấm bắt đầu đợt khi đã chuẩn bị xong. Hạ quái nhận xu; quái lọt đường làm mất mạng.', 'Vượt qua 12 đợt để thắng. Có thể đổi tốc độ và tạm dừng để quan sát.'],
       variant: 'Ba bản đồ, đường đi cố định và 12 đợt quái. Xu chỉ dùng để xây dựng trong ván.',
     },
     {
-      id: 'onet', title: 'Nối thú', category: 'puzzle', players: '1 người', badge: 'MỚI', supports3d: false,
+      id: 'onet', title: 'Nối thú', category: 'puzzle', players: '1 người', badge: 'MỚI', supports3d: true,
       description: 'Tìm một cặp, nối một đường, dọn sạch bàn.', keywords: 'noi thu onet nối hình ghép cặp thú',
       intro: 'Các cặp thú đang chờ được nối lại. Tìm đường đi qua khoảng trống để dọn sạch bàn trước khi hết giờ.',
       instructions: ['Chọn hai hình giống nhau. Đường nối đi ngang/dọc và rẽ tối đa hai lần.', 'Đường có thể vòng ra ngoài mép bàn nhưng không đi xuyên ô còn hình hoặc ô bị chặn.', 'Dùng gợi ý hoặc xáo trộn khi cần. Theo dõi mục tiêu và ô khóa ở mỗi màn.', 'Dọn hết các cặp để qua màn; thời gian và bố trí thay đổi theo độ khó.'],
       variant: '24 cấp, ba kích thước bàn, ô đóng băng, gợi ý, xáo trộn và thử thách thời gian.',
     },
     {
-      id: 'blocks', title: 'Xếp gạch rơi', category: 'arcade', players: '1 người', badge: 'MỚI', supports3d: false,
+      id: 'blocks', title: 'Xếp gạch rơi', category: 'arcade', players: '1 người', badge: 'MỚI', supports3d: true,
       description: 'Xoay đúng khối, lấp đầy hàng và nối combo.', keywords: 'xep gach roi blocks tetris khối xếp hình',
       intro: 'Các khối rơi nhanh dần. Sắp xếp khoảng trống, giữ một khối để dành và hoàn thành nhiều hàng cùng lúc.',
       instructions: ['Di chuyển và xoay khối bằng bàn phím hoặc các nút cảm ứng trên màn hình.', 'Bóng mờ cho biết vị trí đáp. Dùng thả nhanh để đặt khối ngay.', 'Có thể giữ một khối để dùng sau. Xếp kín hàng ngang để xóa hàng và ghi điểm.', 'Liên tiếp xóa hàng tạo combo. Ván kết thúc khi không còn chỗ cho khối mới.'],
       variant: 'Bản xếp khối 2D, túi bảy loại khối, giữ khối, bóng vị trí rơi và tốc độ tăng dần.',
     },
     {
-      id: 'reversi', title: 'Cờ lật', category: 'board', players: '1–2 người', badge: 'MỚI', supports3d: false,
+      id: 'reversi', title: 'Cờ lật', category: 'board', players: '1–2 người', badge: 'MỚI', supports3d: true,
       description: 'Kẹp một hàng quân, đổi thế cả bàn cờ.', keywords: 'co lat reversi othello đen trắng chiến thuật',
       intro: 'Mỗi nước đặt quân có thể lật ngược thế trận. Giữ góc, hạn chế nước của đối phương và giành nhiều quân khi kết thúc.',
       instructions: ['Đặt quân vào ô trống để kẹp quân đối phương giữa quân mới và quân của bạn.', 'Các quân bị kẹp theo hàng ngang, dọc hoặc chéo sẽ đổi màu.', 'Không có nước hợp lệ phải bỏ lượt. Khi cả hai cùng hết nước, bên nhiều quân hơn thắng.', 'Chọn đấu máy hoặc hai người cùng thiết bị. Dùng gợi ý để xem nước đi và lý do.'],
       variant: 'Luật Othello trên bàn 8 × 8, có bỏ lượt, hòa và nhiều mức máy.',
     },
     {
-      id: 'jungle', title: 'Cờ Thú', category: 'board', players: '1–2 người', badge: 'MỚI', supports3d: false,
+      id: 'jungle', title: 'Cờ Thú', category: 'board', players: '1–2 người', badge: 'MỚI', supports3d: true,
       description: 'Vượt sông, đặt bẫy và tiến vào hang đối thủ.', keywords: 'co thu jungle dou shou qi động vật chuột voi hổ sư tử',
       intro: 'Tám loài thú với sức mạnh và khả năng riêng. Phối hợp địa hình để mở đường vào hang đối phương.',
       instructions: ['Chọn một quân rồi chọn ô được đánh dấu để đi hoặc bắt quân.', 'Quân mạnh bắt quân yếu hoặc bằng cấp; Chuột và Voi có quy tắc đặc biệt.', 'Chuột có thể xuống sông. Hổ và Sư tử nhảy qua sông nếu không có Chuột chắn đường.', 'Vào hang đối thủ hoặc khiến đối thủ hết nước hợp lệ để thắng. Xem luật trong game để hiểu bẫy và bắt quân ở bờ nước.'],
@@ -226,7 +226,7 @@
       title: 'Cờ vua',
       category: 'board',
       players: '1–2 người',
-      supports3d: false,
+      supports3d: true,
       badge: 'MỚI',
       description: 'Tính một nước, mở cả thế cờ.',
       keywords: 'chess cờ vua quốc tế vua hậu xe tượng mã tốt chiến thuật',
@@ -246,7 +246,7 @@
       title: 'Cờ tướng',
       category: 'board',
       players: '1–2 người',
-      supports3d: false,
+      supports3d: true,
       badge: 'MỚI',
       description: 'Bày thế chiếu bí, hoặc thử vận cờ với Cờ úp.',
       keywords: 'xiangqi cờ tướng trung hoa tướng sĩ tượng xe pháo mã tốt chốt co up cờ úp jieqi',
@@ -306,7 +306,7 @@
       title: 'Domino',
       category: 'board',
       players: 'Bạn + 3 máy',
-      supports3d: false,
+      supports3d: true,
       badge: 'MỚI',
       description: 'Nối hai đầu, giữ đường đi, hết quân trước.',
       keywords: 'domino đô mi nô nối quân chấm block',
@@ -324,7 +324,7 @@
       title: 'Cờ tỷ phú',
       category: 'board',
       players: 'Bạn + 3 máy',
-      supports3d: false,
+      supports3d: true,
       badge: 'MỚI',
       description: 'Mua một góc phố, xây cả cơ ngơi.',
       keywords: 'monopoly cờ tỷ phú mua đất bất động sản xúc xắc',
@@ -343,7 +343,7 @@
       title: 'Tiến lên miền Nam',
       category: 'card',
       players: 'Bạn + 3 máy',
-      supports3d: false,
+      supports3d: true,
       badge: 'MỚI',
       description: 'Giữ đôi thông, chờ thời cơ chặt heo.',
       keywords: 'tiến lên miền nam tien len bài 52 lá heo đôi thông tứ quý',
@@ -362,7 +362,7 @@
       title: 'Xì dách',
       category: 'card',
       players: 'Bạn đấu nhà cái',
-      supports3d: false,
+      supports3d: true,
       badge: 'MỚI',
       description: 'Rút thêm hay dằn? Cân nhắc trước mốc 21.',
       keywords: 'xì dách xi dach xì lát blackjack xì bàn ngũ linh 21',
@@ -380,7 +380,7 @@
       title: 'Ma sói',
       category: 'social',
       players: 'Bạn + 7 máy',
-      supports3d: false,
+      supports3d: true,
       badge: 'MỚI',
       description: 'Lắng nghe ngôi làng, tìm kẻ ẩn trong đêm.',
       keywords: 'ma sói werewolf nhập vai suy luận tiên tri bảo vệ dân làng',
@@ -398,7 +398,7 @@
       title: 'UNO',
       category: 'card',
       players: 'Bạn + 3 máy',
-      supports3d: false,
+      supports3d: true,
       badge: 'MỚI',
       description: 'Đổi màu, đảo chiều, hô UNO và về nhất!',
       keywords: 'uno bài thẻ card đổi màu đảo chiều rút bài skip reverse wild',
@@ -471,7 +471,7 @@
       title: 'Sudoku',
       category: 'puzzle',
       players: '1 người',
-      supports3d: false,
+      supports3d: true,
       badge: 'MỚI',
       description: 'Chín con số, một khoảng lặng để suy nghĩ.',
       keywords: 'sudoku giải đố số logic 9x9 ghi chú',
@@ -490,7 +490,7 @@
       title: 'Xếp cún',
       category: 'puzzle',
       players: '1 người',
-      supports3d: false,
+      supports3d: true,
       badge: 'MỚI',
       description: 'Mỗi vùng một cún, tìm đúng chỗ cho cả đàn.',
       keywords: 'xếp cún chó puppy dog queens vùng màu giải đố logic',
@@ -706,7 +706,7 @@
     $('.dimension-banner').hidden = !exploring;
     document.body.classList.toggle('library-is-3d', libraryEdition === '3d');
     document.querySelectorAll('.edition-switch [data-library-edition]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.libraryEdition === libraryEdition)));
-    $('#edition-library-note').textContent = libraryEdition === '3d' ? `${games.filter(game => game.supports3d !== false).length} game có bản 3D · ${games.filter(game => game.supports3d === false).map(game => game.title).join(', ')} chơi 2D` : `${games.length} game · Giữ trọn bản nguyên bản`;
+    $('#edition-library-note').textContent = libraryEdition === '3d' ? `${games.filter(game => game.supports3d !== false).length} game có bản 3D · Chọn game để khám phá` : `${games.length} game · Giữ trọn bản nguyên bản`;
     document.querySelectorAll('[data-view]').forEach((button) => {
       const selected = button.dataset.view === view;
       button.classList.toggle('active', selected);
@@ -896,7 +896,7 @@
         const record = $('#game-best'); if (record) record.textContent = score.toLocaleString('vi-VN');
       }
     };
-    if (edition === '3d' || !game.frameSrc) {
+    if ((edition === '3d' && game.id !== 'neon') || !game.frameSrc) {
       stage.innerHTML = `<div class="three-loading" role="status"><div class="loading-cube">${Art.icon(edition === '3d' ? 'cube' : 'gamepad', 52)}</div><h3>${edition === '3d' ? 'Đang dựng không gian 3D…' : 'Đang mở game…'}</h3><p>Chờ một chút, trò chơi đang được chuẩn bị.</p>${edition === '3d' ? `<button class="button button-secondary" data-play="${game.id}" data-edition="2d">Chơi 2D thay thế</button>` : ''}</div>`;
       try {
         await window.ArcadeLoader.load(game, edition);
@@ -923,7 +923,7 @@
       loadingGame = false;
       const frame = document.createElement('iframe');
       frame.title = game.id === 'delivery' ? 'Delivery Dash — game giao báo nguyên bản' : game.title;
-      frame.src = game.frameSrc; frame.allow = 'fullscreen'; stage.append(frame);
+      frame.src = game.frameSrc + (edition === '3d' ? '?renderer=3d' : ''); frame.allow = 'fullscreen'; stage.append(frame);
       frame.addEventListener('load', () => { if (token === mountGeneration) iframeControl(frame, 'pause', paused); }, { once: true });
       instance = { frame, onScore, restart: () => iframeControl(frame, 'restart'), setPaused: value => iframeControl(frame, 'pause', value), destroy: () => frame.remove() };
       frame.focus({ preventScroll: true });
@@ -1170,6 +1170,11 @@
     if (event.data.type === 'tramchoi:score' && active?.frameSrc)
       instance.onScore(event.data.score);
     if (event.data.type === 'tramchoi:pause-request') setPaused(true);
+    if (event.data.type === 'tramchoi:3d-error' && activeEdition === '3d') {
+      instance.destroy(); instance = null;
+      paused = false; stage.inert = false; $('#pause-screen').hidden = true;
+      show3DError(event.data.message || 'Chưa thể dựng cảnh 3D. Hãy thử lại hoặc chơi bản 2D.');
+    }
     if (event.data.type === 'tramchoi:shortcut') {
       if (event.data.action === 'pause') setPaused(!paused);
       if (event.data.action === 'restart') restartGame();

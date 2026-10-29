@@ -223,14 +223,17 @@ async function desktop(browser, engine) {
     await page.goto(base);
     await page.locator('.edition-switch [data-library-edition="3d"]').click();
     const card = page.locator('.game-card[data-game="sudoku"]');
-    assert.equal(await card.locator('[data-edition="3d"]').count(), 0, 'Sudoku offers only its supported 2D edition');
-    await card.locator('.cover-play').click();
+    assert.equal(await card.locator('[data-edition="3d"]').count(), 1, 'Sudoku offers a 3D edition');
+    await card.locator('[data-edition="2d"]').click();
     await page.locator('.sudoku-cell').last().waitFor();
-    assert.equal(await page.locator('#game-stage').getAttribute('data-edition'), '2d', 'library 3D preference still opens Sudoku in 2D');
-    assert.equal(await page.locator('.player-edition-switch').isVisible(), false, 'Sudoku has no unsupported player edition switch');
-    await page.goto(`${base}/#play/sudoku/3d`);
-    await page.waitForFunction(() => location.hash === '#play/sudoku');
-    assert.equal(await page.locator('.sudoku-cell').count(), 81, 'unsupported 3D deep link normalizes to working Sudoku');
+    assert.equal(await page.locator('#game-stage').getAttribute('data-edition'), '2d', 'explicit 2D choice overrides the library preference');
+    assert.equal(await page.locator('.player-edition-switch').isVisible(), true, 'Sudoku offers both editions');
+    if(engine==='chromium'){
+      await page.evaluate(()=>{location.hash='#play/sudoku/3d';});
+      await page.locator('.three-canvas[data-rendered="true"]').waitFor();
+      assert.equal(await page.locator('#game-stage').getAttribute('data-edition'),'3d');
+      assert.equal(await page.locator('.sudoku-cell').count(),81,'3D preserves all accessible cells');
+    }
     assert.deepEqual(errors, [], `${engine}: no browser exceptions`);
     console.log(`PASS ${engine} desktop: unique puzzles at three levels, givens, keyboard, notes, undo, check, hint, reload, pause, restart, completion, edition routing`);
   } finally { await context.close(); }

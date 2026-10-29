@@ -34,7 +34,8 @@
     "test:culture": "node --test tests/culture.test.cjs",
     "test:culture:browser": "node tests/browser-culture.cjs",
     "test:extras": "node --test tests/extras.test.cjs",
-    "test:extras:browser": "node tests/browser-extras.cjs"
+    "test:extras:browser": "node tests/browser-extras.cjs",
+    "test:3d:expanded": "node tests/browser-extended-3d.cjs"
   },
   "engines": {
     "node": ">=18"

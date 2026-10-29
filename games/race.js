@@ -23,6 +23,15 @@
     const info = document.createElement('div'); info.className = 'race-info';
     info.innerHTML = '<div class="race-road-readout"><span data-race-terrain>Đường nhựa</span><span data-race-grade>Đường bằng</span><span data-race-draft>Đạp đều</span></div><div class="race-settings"><button class="control-button" data-race-sound></button><button class="control-button" data-race-motion></button></div>';
     ui.controls.after(info);
+    const tactics = document.createElement('div'); tactics.className = 'race-tactics';
+    tactics.innerHTML = '<div class="race-guidance-row"><span class="race-draft-indicator" data-draft-indicator><b aria-hidden="true">≋</b><span data-draft-help>Bám sau đối thủ để núp gió</span></span><span class="race-lookahead" data-road-ahead></span></div><div class="race-gaps"><span data-gap-ahead></span><span data-gap-behind></span></div><div class="race-pack" aria-label="Tiến trình bốn tay đua"><i class="race-rider-marker is-player" data-pack="player">Bạn</i><i class="race-rider-marker" data-pack="0">1</i><i class="race-rider-marker" data-pack="1">2</i><i class="race-rider-marker" data-pack="2">3</i></div>';
+    info.prepend(tactics);
+    const draftIndicator = tactics.querySelector('[data-draft-indicator]');
+    const draftHelp = tactics.querySelector('[data-draft-help]');
+    const roadAhead = tactics.querySelector('[data-road-ahead]');
+    const gapAhead = tactics.querySelector('[data-gap-ahead]'), gapBehind = tactics.querySelector('[data-gap-behind]');
+    const packMarkers = [...tactics.querySelectorAll('[data-pack]')];
+    let guidanceAt = -1;
     const visual = options.renderer === '3d' ? window.Arcade3D.createView('race', ui, scope) : window.createRace2D(ui);
     const sound = window.createRaceAudio(scope);
     const input = S.heldInput(scope, ui, {
@@ -61,6 +70,21 @@
       const modeNames = { idle: 'Sẵn sàng', paused: 'Tạm dừng', finished: 'Đã kết thúc', pedal: 'Đạp đều', coast: 'Đang thả trôi', brake: 'Đang phanh', sprint: 'Nước rút' };
       draftLabel.textContent = state.drafting && mode !== 'finished' ? 'Núp gió · tiết kiệm sức' : modeNames[mode];
       draftLabel.classList.toggle('is-drafting', state.drafting && started && !finished);
+      if (state.time >= guidanceAt || scope.paused || !started || finished) {
+        guidanceAt = state.time + .15;
+        const guidance = R.raceGuidance(state), activeDraft = guidance.drafting && started && !scope.paused;
+        draftIndicator.classList.toggle('is-active', activeDraft);
+        draftHelp.textContent = scope.paused ? 'Tạm dừng' : finished ? 'Đã kết thúc' : activeDraft ? 'Đang núp gió · tiết kiệm sức' : 'Bám sau đối thủ để núp gió';
+        roadAhead.textContent = guidance.warnings.map(w => `${w.label} · ${w.meters < 1 ? 'hiện tại' : `${Math.ceil(w.meters)} m`}`).join(' / ') || (finished ? 'Chặng đua đã kết thúc' : 'Đường phía trước thông thoáng');
+        const meters = g => g.meters < 1 ? '<1' : Math.round(g.meters);
+        gapAhead.textContent = finished ? `Kết quả: hạng ${state.place} / 4` : guidance.ahead ? `Trước bạn: #${guidance.ahead.id + 1} · ${meters(guidance.ahead)} m${guidance.ahead.finished ? ' · đã về đích' : ''}` : 'Bạn đang dẫn đầu';
+        gapBehind.textContent = guidance.behind ? `Sau bạn: #${guidance.behind.id + 1} · ${meters(guidance.behind)} m` : 'Chưa có tay đua phía sau';
+        for (const marker of packMarkers) {
+          const rider = marker.dataset.pack === 'player' ? state : state.rivals.find(r => String(r.id) === marker.dataset.pack);
+          marker.style.left = `${Math.max(0, Math.min(100, rider.distance / state.length * 100))}%`;
+          marker.setAttribute('aria-label', `${marker.dataset.pack === 'player' ? 'Bạn' : `Đối thủ ${rider.id + 1}`}: ${Math.floor(rider.distance)} m`);
+        }
+      }
       Object.assign(ui.workspace.dataset, {
         time: state.time.toFixed(3), speed: state.speed.toFixed(3), distance: state.distance.toFixed(3), energy: state.energy.toFixed(3),
         x: state.x.toFixed(3), mode, drafting: String(state.drafting),
@@ -71,6 +95,7 @@
     function restart() {
       scope.clearTimers(); S.clearOverlays(ui); input.clear(); sound.silence();
       state = R.createRace(); started = false; finished = false; lastEvent = 0; eventUntil = 0; mode = 'idle';
+      guidanceAt = -1;
       visual.reset?.(); ui.message(instructions);
       S.intro(ui, scope, {
         title: 'Đường đua xanh', symbol: 'bike',

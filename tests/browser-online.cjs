@@ -2,7 +2,7 @@
 /* Optional real-browser integration: install Playwright and run npm start first. */
 'use strict';
 const assert = require('node:assert/strict');
-const { existsSync, mkdirSync } = require('node:fs');
+const { existsSync, mkdirSync, writeFileSync } = require('node:fs');
 const { join } = require('node:path');
 const { chromium, webkit } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 
@@ -57,16 +57,20 @@ async function openOnline(page, name, url = `${base}/#play/caro`) {
 
 (async () => {
   const browser = await browserType.launch({ headless: true, ...(engine === 'chromium' ? { executablePath } : {}) });
+  let peerBrowser = browser;
   const errors = [];
   const watch = (page, label) => page.on('pageerror', (error) => errors.push(`${label}: ${error.message}`));
   try {
+    if (process.env.PEER_BROWSER_PATH) {
+      peerBrowser = await chromium.launch({ headless: true, executablePath: process.env.PEER_BROWSER_PATH });
+    }
     // Separate contexts deliberately give each person independent cookies,
     // localStorage and sessionStorage, as on two different devices.
     const desktopContext = await browser.newContext({
       viewport: { width: 1280, height: 900 },
       reducedMotion: 'reduce',
     });
-    const tabletContext = await browser.newContext({
+    const tabletContext = await peerBrowser.newContext({
       viewport: { width, height },
       deviceScaleFactor: 2,
       hasTouch: true,
@@ -233,8 +237,16 @@ async function openOnline(page, name, url = `${base}/#play/caro`) {
     console.log('Online browser checks passed: independent desktop/tablet players, invite, full room, readiness, synchronized moves, turn guards, reload, offline recovery, win, consented rematch, switched marks, pause and forfeit.');
     console.log(`Screenshots: ${shots}`);
     console.log(`Engine: ${engine} ${browser.version()}; touch viewport: ${width}x${height}, DPR 2`);
+    console.log(`Peer: ${peerBrowser.version()}; separate browser process: ${peerBrowser !== browser}`);
+    if (process.env.CARO_REPORT) writeFileSync(process.env.CARO_REPORT, JSON.stringify({
+      primary: { executablePath, version: browser.version() },
+      peer: { executablePath: process.env.PEER_BROWSER_PATH || executablePath, version: peerBrowser.version() },
+      separateProcesses: peerBrowser !== browser, viewport: { width, height },
+      tested3D: process.env.ONLINE_TEST_3D === '1', errors, verdict: 'pass',
+    }, null, 2) + '\n');
     await Promise.all([desktopContext.close(), tabletContext.close(), outsiderContext.close()]);
   } finally {
+    if (peerBrowser !== browser) await peerBrowser.close();
     await browser.close();
   }
 })().catch((error) => {

@@ -18,6 +18,18 @@
 .race-workspace [data-hold] { touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 .race-workspace [data-hold]:focus-visible, .race-settings button:focus-visible { outline: 2px solid #d1eb9c; outline-offset: 3px; }
 .race-info { width: min(100%, 720px); margin: 0 auto; }
+.race-tactics { padding: 10px 12px; margin-bottom: 9px; border: 1px solid #aac99130; border-radius: 12px; background: #17261c; font-size: 11px; }
+.race-guidance-row, .race-gaps { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 7px 12px; }
+.race-draft-indicator { display: inline-flex; align-items: center; gap: 7px; color: #b6c5b5; }
+.race-draft-indicator b { font-size: 24px; line-height: 20px; }
+.race-draft-indicator.is-active { color: #d9f5a4; font-weight: 700; }
+.race-lookahead { color: #ecd5a7; }
+.race-gaps { margin-top: 8px; color: #becbbc; font-variant-numeric: tabular-nums; }
+.race-pack { position: relative; height: 50px; margin: 25px 17px 0; background: linear-gradient(#73937360,#73937360) center / 100% 2px no-repeat; }
+.race-rider-marker { position: absolute; top: 0; min-width: 15px; padding: 2px 3px; border-radius: 4px; font: 700 9px/12px sans-serif; text-align: center; transform: translateX(-50%); background: #d49b80; color: #16241c; }
+.race-rider-marker[data-pack="1"] { top: 17px; background: #8fb8d0; }
+.race-rider-marker[data-pack="2"] { top: 34px; background: #d7bd7e; }
+.race-rider-marker.is-player { top: -17px; z-index: 1; background: #d9f5a4; outline: 1px solid #263d27; }
 .race-road-readout { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px 15px; font-size: 11px; color: #aebdaf; font-variant-numeric: tabular-nums; }
 .race-road-readout span { padding: 3px 0; }
 .race-road-readout .is-drafting { color: #d3ed99; font-weight: 700; }

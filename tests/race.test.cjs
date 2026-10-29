@@ -4,6 +4,42 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const R = require('../games/race-logic.js');
 
+test('race guidance finds nearest riders without reordering or mutating the race', () => {
+  const state = R.createRace(() => 0);
+  state.distance = 100;
+  state.rivals[0].distance = 160; state.rivals[1].distance = 108; state.rivals[2].distance = 93;
+  const before = JSON.stringify(state), guidance = R.raceGuidance(state);
+  assert.deepEqual(guidance.ahead, { id: 1, meters: 8, finished: false });
+  assert.equal(guidance.behind.meters, 7);
+  assert.equal(JSON.stringify(state), before);
+  state.distance = 170;
+  assert.equal(R.raceGuidance(state).ahead, null);
+});
+
+test('race guidance anticipates wet road using the actual track seed and stops at the finish', () => {
+  const state = R.createRace(() => 0);
+  state.distance = 174;
+  const wet = R.raceGuidance(state).warnings.find(w => w.kind === 'wet');
+  assert.ok(wet); assert.equal(wet.meters, 6);
+  assert.equal(R.trackAt(state.distance + wet.meters, state.trackSeed).surface, 'wet');
+  state.distance = 997;
+  assert.ok(R.raceGuidance(state).warnings.every(w => w.meters <= 3));
+  state.status = 'won'; state.drafting = true;
+  assert.deepEqual(R.raceGuidance(state).warnings, []);
+  assert.equal(R.raceGuidance(state).drafting, false);
+});
+
+test('race guidance reports the simulation drafting state and signed bends', () => {
+  const state = R.createRace(() => 0);
+  state.distance = 40; state.drafting = true;
+  assert.equal(R.raceGuidance(state).drafting, true);
+  const curve = R.raceGuidance(state).warnings.find(w => ['left', 'right'].includes(w.kind));
+  assert.ok(curve);
+  assert.equal(curve.kind, R.trackAt(state.distance + curve.meters, state.trackSeed).curvature < 0 ? 'left' : 'right');
+  state.drafting = false;
+  assert.equal(R.raceGuidance(state).drafting, false);
+});
+
 const STEP = 1 / 120;
 function solo() {
   const state = R.createRace(() => 0);

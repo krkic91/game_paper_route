@@ -44,7 +44,7 @@ async function preview(page,name){
     const context=await browser.newContext({viewport:{width:1440,height:950},reducedMotion:'reduce'});
     const page=await context.newPage();watch(page);await page.goto(base);await page.locator('.game-card').first().waitFor();
     assert.equal(await page.evaluate(()=>typeof window.TramThree),'undefined','3D library is lazy, not loaded by 2D home');
-    assert.equal(await page.locator('.card-editions [data-edition="3d"]').count(),10);
+    assert.equal(await page.locator('.card-editions [data-edition="3d"]').count(),41);
     await page.locator('.library-edition-row [data-library-edition="3d"]').click();
     assert.equal(await page.locator('body').evaluate(el=>el.classList.contains('library-is-3d')),true);
     await page.screenshot({path:join(shots,'library.png'),fullPage:true});
