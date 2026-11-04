@@ -23,7 +23,7 @@
       phase: 'night', day: 1, maxDays: Math.max(1, Math.min(30, Math.floor(Number(maxDays)) || 12)),
       winner: null, reason: '', turn: 0, actions: {}, knowledge: Array.from({ length: 8 }, () => ({})),
       guardLast: null, history: [{ day: 1, text: 'Đêm đầu tiên. Cả làng đi ngủ.' }],
-      discussion: [], lastVotes: [],
+      discussion: [], lastVotes: [], voteHistory: [], statements: [],
     };
     randoms.set(state, random);
     return state;
@@ -43,6 +43,7 @@
       guardLast: self.role === 'guard' ? state.guardLast : null,
       submitted: Boolean(state.actions[player]),
       history: copy(state.history), discussion: copy(state.discussion), lastVotes: copy(state.lastVotes),
+      voteHistory: copy(state.voteHistory), statements: copy(state.statements),
     };
   }
 
@@ -73,28 +74,143 @@
     return { ok: true };
   }
 
+  // Public facts only. A claimed role or inspection is never verified against hidden roles.
+  function evidence(snapshot, id) {
+    const facts = [];
+    for (const round of snapshot.voteHistory || []) {
+      const vote = round.votes.find(item => item.voter === id);
+      const target = vote && snapshot.players[vote.target];
+      if (!target || target.alive || !target.role) continue;
+      const wolf = target.role === 'wolf';
+      facts.push({ id: `vote-${round.day}`, kind: wolf ? 'defend' : 'suspect', weight: wolf ? -3 : 1,
+        text: `Ngày ${round.day}, người này bỏ phiếu cho ${target.name}, nay đã lộ vai ${ROLES[target.role]}. Một lá phiếu chưa đủ kết luận phe.` });
+    }
+    const claims = (snapshot.statements || []).filter(item => item.speaker === id && item.kind === 'claim');
+    const last = claims[claims.length - 1];
+    if (last) {
+      const changed = claims.find(item => item.role !== last.role);
+      const reports = claims.filter(item => item.role === 'seer' && Number.isInteger(item.target));
+      const conflict = reports.find((item, index) => reports.slice(0, index).some(old => old.target === item.target && old.verdict !== item.verdict));
+      const disproved = reports.find(item => {
+        const person = snapshot.players[item.target];
+        return person && !person.alive && person.role && item.verdict !== (person.role === 'wolf');
+      });
+      const text = changed ? `Lời nhận vai đã đổi từ ${ROLES[changed.role]} sang ${ROLES[last.role]}.`
+        : conflict ? `Hai lời công bố soi về ${snapshot.players[conflict.target].name} mâu thuẫn nhau.`
+          : disproved ? `Lời công bố soi về ${snapshot.players[disproved.target].name} trái với vai ${ROLES[snapshot.players[disproved.target].role]} đã công khai.` : '';
+      if (text) facts.push({ id: 'contradiction', kind: 'suspect', weight: 5, text });
+      if (last.role !== 'villager') {
+        const others = snapshot.players.filter(person => person.alive && person.id !== id).filter(person => {
+          const list = (snapshot.statements || []).filter(item => item.speaker === person.id && item.kind === 'claim');
+          return list[list.length - 1]?.role === last.role;
+        });
+        if (others.length) facts.push({ id: 'counterclaim', kind: 'suspect', weight: 1,
+          text: `${others.map(person => person.name).join(', ')} cũng nhận vai ${ROLES[last.role]}; bàn chỉ có một vai này. Chưa biết ai nói thật.` });
+      }
+    }
+    return facts;
+  }
+
+  function speechReasons(snapshot, kind, target) {
+    if (!['suspect', 'defend'].includes(kind) || !snapshot.players[target]) return [];
+    return [{ id: 'intuition', text: kind === 'suspect' ? 'Cảm nhận cá nhân, chưa có bằng chứng chắc chắn.' : 'Tạm tin người này; vẫn cần thêm bằng chứng.' },
+      ...evidence(snapshot, target).filter(item => item.kind === kind)];
+  }
+
+  function speechesLeft(snapshot) {
+    if (snapshot.phase !== 'day' || !snapshot.players[snapshot.self].alive || snapshot.submitted) return 0;
+    return Math.max(0, 2 - (snapshot.statements || []).filter(item => item.day === snapshot.day && item.speaker === snapshot.self).length);
+  }
+
+  function statementText(snapshot, item) {
+    const name = snapshot.players[item.speaker].name, target = snapshot.players[item.target]?.name;
+    if (item.kind === 'claim') return `${name}: Tôi nhận vai ${ROLES[item.role]}.${item.role === 'seer' && target ? ` Tôi công bố đã soi ${target}: ${item.verdict ? 'là sói' : 'không phải sói'}.` : ''} (Lời tự nhận, chưa xác thực.)`;
+    return `${name}: Tôi ${item.kind === 'defend' ? 'tạm bênh vực' : 'nghi'} ${target}. ${item.reasonText}`;
+  }
+
+  function recordStatement(state, item) {
+    const entry = { ...item, day: state.day };
+    entry.text = statementText(view(state, item.speaker), entry);
+    state.statements.push(entry); state.discussion.push(copy(entry)); log(state, entry.text);
+  }
+
+  function voteScore(snapshot, id) {
+    const role = snapshot.players[snapshot.self].role;
+    // Private knowledge outranks all public claims and peer pressure.
+    if (role === 'wolf' && snapshot.players[id].role === 'wolf') return -10000;
+    if (snapshot.knowledge[id] === true) return 10000;
+    if (snapshot.knowledge[id] === false) return -5000;
+    let score = evidence(snapshot, id).reduce((sum, item) => sum + item.weight, 0);
+    const opinions = new Map();
+    for (const item of snapshot.discussion || []) {
+      if (item.speaker !== snapshot.self && ['suspect', 'defend'].includes(item.kind)) opinions.set(item.speaker, item);
+    }
+    for (const item of opinions.values()) if (item.target === id) score += item.kind === 'suspect' ? 0.75 : -0.5;
+    // At most one report per speaker/target; repeated claims cannot stack influence.
+    for (const person of snapshot.players) {
+      if (person.id === snapshot.self) continue;
+      const claims = (snapshot.statements || []).filter(item => item.speaker === person.id && item.kind === 'claim');
+      if (claims[claims.length - 1]?.role !== 'seer' || evidence(snapshot, person.id).some(item => item.id === 'contradiction')) continue;
+      if (!person.alive && person.role !== 'seer') continue;
+      const reports = claims.filter(item => item.role === 'seer' && item.target === id);
+      const last = reports[reports.length - 1];
+      if (last) score += (last.verdict ? 2 : -1) * (!person.alive && person.role === 'seer' ? 2 : 1);
+    }
+    return score;
+  }
+
+  function speak(state, player, statement) {
+    if (!Number.isInteger(player) || !state.players[player]) return fail('Người phát biểu không hợp lệ.');
+    const snapshot = view(state, player);
+    if (!speechesLeft(snapshot)) return fail('Chỉ phát biểu khi còn sống, vào ban ngày và trước khi bỏ phiếu; tối đa 2 lần mỗi ngày.');
+    if (!statement || !['suspect', 'defend', 'claim'].includes(statement.kind)) return fail('Chọn một cách phát biểu.');
+    const item = { speaker: player, kind: statement.kind };
+    if (item.kind === 'claim') {
+      if (!['villager', 'seer', 'guard'].includes(statement.role)) return fail('Vai tự nhận không hợp lệ.');
+      item.role = statement.role;
+      if (statement.target != null) {
+        if (item.role !== 'seer' || !Number.isInteger(statement.target) || !snapshot.players[statement.target] || statement.target === player || typeof statement.verdict !== 'boolean') return fail('Lời công bố soi không hợp lệ.');
+        item.target = statement.target; item.verdict = statement.verdict;
+      }
+    } else {
+      if (!Number.isInteger(statement.target) || !snapshot.players[statement.target]?.alive || statement.target === player) return fail('Chọn một người khác còn sống.');
+      const reason = speechReasons(snapshot, item.kind, statement.target).find(option => option.id === statement.reason);
+      if (!reason) return fail('Lý do này chưa có bằng chứng công khai.');
+      item.target = statement.target; item.reason = reason.id; item.reasonText = reason.text;
+    }
+    if (snapshot.statements.some(old => old.day === snapshot.day && old.speaker === player && old.kind === item.kind && old.target === item.target && old.role === item.role && old.verdict === item.verdict && old.reason === item.reason)) return fail('Bạn đã phát biểu ý này hôm nay.');
+    recordStatement(state, item);
+    // Two replies keep the exchange readable; replies do not amplify voting influence.
+    const listeners = state.players.filter(person => person.alive && person.id !== player && person.id !== 0);
+    listeners.sort((a, b) => Number(b.id === item.target) - Number(a.id === item.target) || a.id - b.id);
+    for (const listener of listeners.slice(0, 2)) {
+      const own = view(state, listener.id);
+      const facts = evidence(own, item.kind === 'claim' ? player : item.target);
+      let response;
+      if (item.kind === 'claim') {
+        response = facts.find(fact => fact.id === 'contradiction' || fact.id === 'counterclaim')?.text || 'Tôi ghi nhận lời nhận vai, nhưng cần đối chiếu với kết quả công khai; chưa thể coi đó là sự thật.';
+      } else if (item.target === listener.id) {
+        response = facts.find(fact => fact.kind === 'defend')?.text || (item.kind === 'suspect' ? 'Tôi phản đối kết luận vội. Hãy đối chiếu các lá phiếu và vai đã công khai.' : 'Cảm ơn, nhưng vẫn nên kiểm tra tôi qua các lá phiếu tiếp theo.');
+      } else {
+        const fact = facts.find(f => f.id === item.reason);
+        response = fact ? `${fact.text} Tôi sẽ cân nhắc điều này khi bỏ phiếu.` : 'Đó mới là nhận định cá nhân. Tôi cần thêm bằng chứng công khai trước khi kết luận.';
+      }
+      const reply = { speaker: listener.id, kind: 'reply', day: state.day, text: `${listener.name}: ${response}` };
+      state.discussion.push(reply); log(state, reply.text);
+    }
+    return { ok: true };
+  }
+
   // This function intentionally accepts ONLY a player's filtered view, never game state.
   function botAction(snapshot, random = Math.random) {
     const type = actionType(snapshot), available = targets(snapshot);
     if (!type || !available.length) return null;
-    const role = snapshot.players[snapshot.self].role;
     let choices = available;
     if (type === 'inspect') {
       const unknown = choices.filter(id => snapshot.knowledge[id] === undefined);
       if (unknown.length) choices = unknown;
     } else if (type === 'vote') {
-      const scored = choices.map(id => {
-        let score = 0;
-        if (role === 'wolf' && snapshot.players[id].role === 'wolf') score -= 100;
-        if (snapshot.knowledge[id] === true) score += 100;
-        if (snapshot.knowledge[id] === false) score -= 20;
-        for (const vote of snapshot.lastVotes) {
-          const target = snapshot.players[vote.target];
-          if (vote.voter === id && target.role === 'wolf' && !target.alive) score -= 3;
-        }
-        for (const claim of snapshot.discussion) if (claim.target === id && claim.speaker !== snapshot.self) score += 0.25;
-        return { id, score };
-      });
+      const scored = choices.map(id => ({ id, score: voteScore(snapshot, id) }));
       const best = Math.max(...scored.map(item => item.score));
       choices = scored.filter(item => item.score === best).map(item => item.id);
     }
@@ -126,12 +242,11 @@
       const action = botAction(snapshot, random);
       const target = action?.target;
       if (target === undefined) return null;
-      const evidence = snapshot.knowledge[target] === true
-        ? 'Tôi nghi người này là sói. Hãy cân nhắc lá phiếu của tôi.'
-        : 'Chưa đủ bằng chứng chắc chắn. Tôi đang nghi người này.';
-      return { speaker: person.id, target, text: `${person.name}: Tôi nghi ${state.players[target].name}. ${evidence}` };
+      if (snapshot.players[person.id].role === 'seer' && snapshot.knowledge[target] === true) return { speaker: person.id, kind: 'claim', role: 'seer', target, verdict: true };
+      const reason = speechReasons(snapshot, 'suspect', target).slice(1).sort((a, b) => b.weight - a.weight)[0];
+      return { speaker: person.id, kind: 'suspect', target, reason: reason?.id || 'intuition', reasonText: reason?.text || 'Chưa đủ bằng chứng công khai. Đây mới là phỏng đoán, tôi có thể đổi ý sau thảo luận.' };
     }).filter(Boolean);
-    state.discussion = claims;
+    for (const claim of claims) recordStatement(state, claim);
   }
 
   function advance(state) {
@@ -172,6 +287,7 @@
       for (const vote of votes) counts.set(vote.target, (counts.get(vote.target) || 0) + 1);
       const maximum = Math.max(...counts.values());
       const leaders = [...counts].filter(([, amount]) => amount === maximum).map(([id]) => id);
+      state.voteHistory.push({ day: state.day, votes: copy(votes), eliminated: leaders.length === 1 ? leaders[0] : null, maximum });
       log(state, `Bỏ phiếu: ${votes.map(vote => `${state.players[vote.voter].name} → ${state.players[vote.target].name}`).join('; ')}.`);
       if (leaders.length === 1) eliminate(state, leaders[0], `do nhận ${maximum} phiếu`);
       else log(state, `Hòa phiếu cao nhất (${maximum} phiếu): hôm nay không loại ai.`);
@@ -189,5 +305,5 @@
     return { ok: true };
   }
 
-  return Object.freeze({ ROLES, createGame, view, actionType, legalTargets, act, botAction, advance });
+  return Object.freeze({ ROLES, createGame, view, actionType, legalTargets, act, botAction, advance, speak, speechReasons, speechesLeft, evidence });
 });

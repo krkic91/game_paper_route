@@ -3,6 +3,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const M = require('../games/monopoly-logic.js');
+require('./monopoly-presentation.test.cjs');
 
 function seeded(seed) {
   return () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; };

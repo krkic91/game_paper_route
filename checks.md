@@ -1,4 +1,43 @@
-# Checks — giao báo / đua xe, 29/10/2026
+# Checks — Cờ tỷ phú, 01/11/2026
+
+| step | requirement | verdict | evidence |
+| --- | --- | --- | --- |
+| Plan | Đã duyệt 4 đề xuất đầu | pass | Yêu cầu mới nhất, plan.md; baseline hash đã lưu. |
+| Unit | Preview/portfolio/flow, luật và adapter | pass | baseline-unit 21/21, implementation-unit 30/30; bản cuối các test này đều đạt trong suite-recheck. Có 300 ván có seed, read-only/không đọc thẻ kín, receipt không tính tiền hoàn hai lần. |
+| Browser | 2D/3D desktop/mobile và vòng đời | pass | feature-browser 6/6; owner-badges-browser 3/3 bản 3D cuối, errors=[]; đã xem ảnh 320/390 px. Tổng 6 cấu hình; có chạm/Enter, mua/xây/bỏ qua/thanh lý/phá sản, pause/restart/close và dispose. |
+| Suite | Toàn suite | pass | final-suite 442/443, fail duy nhất test Caro resource-limit; cô lập đạt 1/1; suite-recheck đạt 443/443, exit 0. Cả hai lần dùng npm.cmd test -- --test-concurrency=1 --test-timeout=250000, không bỏ test hoặc sửa Caro. |
+| Syntax / lint | Cú pháp; lint nếu có | pass | final-syntax: npm.cmd run check exit 0; package không có script lint. |
+| Handoff | Report, phạm vi, bảo toàn dữ liệu, cleanup | pass | docs/monopoly-verification.md; final-audit.json: 25 hash giữ nguyên, adapter game khác không đổi, không ngoài scope, output/liên kết/diff check đạt; không Node test/Edge Playwright/listener 4173. Ledger tổng 361.771 ms, 1/3 vòng chỉnh giao diện. |
+
+## Domino / Bida, 30/10/2026
+
+| step | requirement | verdict | evidence |
+| --- | --- | --- | --- |
+| Plan | Đã duyệt, gợi ý chỉ khi bấm nút riêng | pass | Yêu cầu mới nhất của người dùng; plan.md. |
+| Unit | Domino, hướng ngắm Bida, luật cũ, adapter Ma sói | pass | baseline-unit 66/66; implementation-unit 77/77, exit 0. Log tại test-results/domino-pool-verification/. |
+| Browser | 2D/3D desktop/mobile, vòng đời | pass | Domino 6/6 tại feature-browser; Bida 5/6 tại pool-browser-round1 + 320px 3D đạt tại pool-mobile-round2. Tổng hợp 12 cấu hình, errors=[], không tràn ngang, dispose cảnh khi đóng. Hai lỗi của bài test và cách sửa được ghi trong report. |
+| Suite | Toàn suite tuần tự | pass | final-suite.log: npm.cmd test -- --test-concurrency=1 --test-timeout=250000, 434/434, exit 0. |
+| Syntax / lint | Cú pháp; lint nếu có | pass | final-syntax.log: npm.cmd run check, exit 0; package không có script lint. |
+| Handoff | OUTPUT, bảo toàn Ma sói, ngân sách/cleanup | pass | docs/domino-pool-verification.md; final-audit.json xác minh 9 hash Ma sói, adapter chỉ đổi một dòng Domino, không ngoài phạm vi, output/liên kết hợp lệ, diff check exit 0; không test Node/Edge/listener 4173. Ledger tổng 221.690 ms, 2/3 vòng. |
+
+## Ma sói, 30/10/2026
+
+| step | requirement | verdict | evidence |
+| --- | --- | --- | --- |
+| Plan | Đợt 1 đã duyệt | pass | “ok sửa giúp tôi nhé”; plan.md. |
+| Baseline | Luật cũ, tái hiện adapter | pass | baseline-unit.log 14/14; baseline-adapter.log fail đúng 8 mô hình thay vì 7; fixed-adapter.log đạt 1/1 sau sửa. |
+| Logic | Phát biểu, phiếu, thông tin kín, máy và ván hoàn chỉnh | pass | feature-unit.log 23/23, exit 0, 2.768 giây; gồm 400 ván có seed. |
+| Browser | 2D/3D, desktop/mobile, vòng đời | pass | feature-browser/results.json 6/6, 37.879 giây; 1280/390/320 px, pageErrors=[]; đã xem ảnh mobile. |
+| Suite | npm test tuần tự | pass | `npm test -- --test-concurrency=1 --test-timeout=250000`: final-serial-recheck.log 423/423, không skip, exit 0, 106.733 giây. Giữ final-serial.log lần đầu 422/423, exit 1, 108.668 giây. Không chạy npm test mặc định trong task này. |
+| Chẩn đoán | Chạy riêng đúng test Caro không đạt | pass | online-isolated.log: 1/1, exit 0, 0.711 giây. Chưa xác định chắc chắn nguyên nhân; không sửa server hoặc tests Caro. |
+| Syntax | npm run check | pass | final-syntax.log: exit 0, 30.481 giây. |
+| Lint | npm run lint nếu có | pass | Điều kiện không áp dụng: package.json không có script lint. |
+| Scope | Chỉ sửa phần đã duyệt | pass | Git baseline sạch; 14 tệp thay đổi đều thuộc plan; git diff --check đạt. Không sửa server/test Caro, package hoặc AGENTS.md. |
+| Budget | Tối đa 3 vòng sửa và 30 phút kiểm thử | pass | 1 vòng sửa lỗi 3D đã tái hiện; 9 lượt trong runs.json tổng 289.286 giây + cleanup 2.082 = 291.368/1.800 giây. |
+| Cleanup | Không để test/browser/server chạy nền | pass | final-cleanup.json: processes=[], listeners=[]; đã kiểm tra cổng 4173/4174/3000/8080. Browser dùng file://; chỉ unit online dùng loopback tạm. |
+| Handoff | OUTPUT và metadata đọc được | pass | docs/werewolf-verification.md, hướng dẫn và plan/checks/progress/CLAUDE đã chốt; CLAUDE-werewolf.diff tồn tại; các liên kết bằng chứng hợp lệ. |
+
+## Giao báo / đua xe, 29/10/2026
 
 | step | requirement | verdict | evidence |
 | --- | --- | --- | --- |

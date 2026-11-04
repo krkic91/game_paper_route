@@ -128,5 +128,20 @@
     return moves.reduce((best, move) => evaluate(move) > evaluate(best) ? move : best);
   }
 
-  return { createTiles, findOpener, createGame, handPips, legalMoves, playTile, passTurn, applyAction, chooseBotAction };
+  function suggestMove(state, player = state && state.current) {
+    const action = chooseBotAction(state, player);
+    if (!action) return null;
+    if (action.type === 'pass') return { action, explanation: 'Không có quân nào nối được vào hai đầu. Bạn cần bỏ lượt.' };
+    const tile = state.hands[player].find(item => item.id === action.tileId);
+    if (!state.chain.length) return { action, explanation: 'Bạn giữ đôi 6. Theo luật, quân 6 – 6 phải mở bàn.' };
+    const target = action.end === 'left' ? state.chain[0].left : state.chain[state.chain.length - 1].right;
+    const exposed = tile.a === target ? tile.b : tile.a;
+    const support = state.hands[player].filter(item => item.id !== tile.id && (item.a === exposed || item.b === exposed)).length;
+    return {
+      action,
+      explanation: `Nối ${tile.a} – ${tile.b} vào đầu ${action.end === 'left' ? 'trái' : 'phải'} (${target}): giảm ${tile.a + tile.b} chấm, để lộ số ${exposed}. Bạn còn ${support} quân nối được số này. Đây là gợi ý, không đảm bảo thắng.`,
+    };
+  }
+
+  return { createTiles, findOpener, createGame, handPips, legalMoves, playTile, passTurn, applyAction, chooseBotAction, suggestMove };
 });

@@ -104,7 +104,7 @@
   };
 
   A.views.pool=function(ui,scope){
-    const e=A.createScene(ui,scope,{id:'pool',width:20.3,depth:12.6,height:1.4,label:'Bida 3D. Di chuột hoặc chạm mặt bàn để ngắm.',yaw:.1,elevation:.79,cursor:'crosshair'});
+    const e=A.createScene(ui,scope,{id:'pool',width:18.8,depth:10.8,height:1.4,label:'Bida 3D. Di chuột hoặc chạm mặt bàn để ngắm.',yaw:0,elevation:1.1,cursor:'crosshair'});
     M.table(e,18,10,'#836b52');
     M.rounded(e,0,.02,0,17.6,.25,9.6,'#b29567',.3);
     M.rounded(e,0,.28,0,16.4,.07,8.45,'#3d7658',.15);
@@ -129,7 +129,8 @@
     }
     const cue=e.group();e.cylinder(0,0,0,.046,.029,3.4,'#cdb087',cue,10).rotation.x=Math.PI/2;
     e.cylinder(0,0,1.2,.049,.047,.94,'#775f49',cue,10).rotation.x=Math.PI/2;
-    const dashes=Array.from({length:25},()=>{const m=e.box(0,.4,0,.024,.018,.12,'#dce3a7');m.castShadow=false;return m;});
+    const dashes=Array.from({length:70},()=>{const m=e.box(0,.4,0,.024,.018,.12,'#dce3a7');m.castShadow=false;return m;});
+    const targetDashes=Array.from({length:12},()=>{const m=e.box(0,.4,0,.05,.018,.14,'#ffe18a');m.castShadow=false;return m;});
     const ghost=e.torus(0,.405,0,.22,.014,'#a3c79c');ghost.castShadow=false;
     function point(event){const p=e.point(event,.39);return p?L.worldToTable(p.x,p.z,900,500,50):null;}
     function draw(state,meta={},dt=1/60){
@@ -137,12 +138,15 @@
       const white=state.balls[0],angle=meta.angle||0,power=meta.power||65,dx=Math.cos(angle),dz=Math.sin(angle),[x,z]=L.tableToWorld(white.x,white.y,900,500,50);
       cue.visible=state.status==='ready';cue.rotation.y=Math.PI/2-angle;
       const pull=.65+power*.003;cue.position.set(x-dx*(pull+1.7),.6,z-dz*(pull+1.7));
-      let distance=370;
-      for(const ball of state.balls.slice(1))if(ball.active){const bx=ball.x-white.x,by=ball.y-white.y,dot=bx*dx+by*dz,cross=Math.abs(bx*dz-by*dx);if(dot>0&&cross<22)distance=Math.min(distance,Math.max(0,dot-Math.sqrt(484-cross*cross)));}
-      for(const[axis,dir,min,max]of[[white.x,dx,67,833],[white.y,dz,67,433]])if(dir)distance=Math.min(distance,(dir>0?max-axis:min-axis)/dir);
-      distance=Math.max(0,distance)/50;
-      dashes.forEach((dash,i)=>{const at=.35+i*.27;dash.visible=cue.visible&&at<distance;dash.position.set(x+dx*at,.405,z+dz*at);dash.rotation.y=Math.PI/2-angle;});
-      ghost.visible=cue.visible;ghost.position.set(x+dx*distance,.405,z+dz*distance);
+      const guide=meta.guide===undefined?window.ArcadeLogic.poolAim(state,angle):meta.guide;
+      const distance=guide?Math.hypot(guide.cue.to.x-white.x,guide.cue.to.y-white.y)/50:0;
+      dashes.forEach((dash,i)=>{const at=.35+i*.27;dash.visible=cue.visible&&Boolean(guide)&&at+.06<distance;dash.position.set(x+dx*at,.405,z+dz*at);dash.rotation.y=Math.PI/2-angle;});
+      ghost.visible=cue.visible&&Boolean(guide);ghost.position.set(x+dx*distance,.405,z+dz*distance);
+      const target=meta.showTarget!==false?guide?.target:null;
+      const targetAngle=target?Math.atan2(target.to.y-target.from.y,target.to.x-target.from.x):0;
+      const targetLength=target?Math.hypot(target.to.x-target.from.x,target.to.y-target.from.y)/50:0;
+      const [tx,tz]=target?L.tableToWorld(target.from.x,target.from.y,900,500,50):[0,0];
+      targetDashes.forEach((dash,i)=>{const at=.28+i*.24;dash.visible=cue.visible&&Boolean(target)&&at+.07<targetLength;dash.position.set(tx+Math.cos(targetAngle)*at,.405,tz+Math.sin(targetAngle)*at);dash.rotation.y=Math.PI/2-targetAngle;});
       e.render(dt,true);
     }
     return {draw,point,canvas:e.canvas,engine:e};

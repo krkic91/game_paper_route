@@ -1797,3 +1797,12 @@
     font-size: 20px;
   }
 }
+
+/* Keep the pool controls close to the table on short and narrow screens. */
+.game-workspace.pool-workspace .game-board-area { flex: 0 0 auto; min-height: 0; width: 100%; max-width: 1000px; }
+.pool-workspace.three-pool .three-viewport { flex: none; width: 100%; height: auto; min-height: 280px; aspect-ratio: 1.65; }
+.pool-workspace .pool-aim-controls { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; flex: 1 0 100%; }
+.pool-aim-controls .control-button { min-height: 44px; min-width: 60px; touch-action: none; }
+.pool-aim-controls output { min-width: 65px; text-align: center; font: 12px var(--font-mono, monospace); }
+.pool-aim-controls [aria-pressed="true"] { outline: 2px solid #d8bc79; outline-offset: 1px; }
+.pool-aim-help { flex: 1 0 100%; margin: 0; text-align: center; font-size: 11px; line-height: 1.6; color: var(--muted, #aab9ab); }

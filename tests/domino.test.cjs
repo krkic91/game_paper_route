@@ -2,6 +2,47 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const L = require('../games/domino-logic.js');
+
+test('hint is read-only, legal and explains the visible move without reading opponents', () => {
+  const state = fixture([[tile(2, 6), tile(4, 5), tile(3, 6)], [], [], []]);
+  const before = JSON.stringify(state);
+  const hands = state.hands;
+  state.hands = new Proxy(hands, { get(target, key) {
+    if (['1', '2', '3'].includes(String(key))) throw Error('Hint inspected a hidden hand');
+    return Reflect.get(target, key);
+  } });
+  const hint = L.suggestMove(state, 0);
+  assert.deepEqual(hint.action, { type: 'play', tileId: '2-6', end: 'left' });
+  assert.match(hint.explanation, /giảm 8 chấm.*số 6.*còn 1 quân/);
+  assert.ok(L.legalMoves(state, 0).some(move => JSON.stringify(move) === JSON.stringify(hint.action)));
+  state.hands = hands;
+  assert.equal(JSON.stringify(state), before);
+});
+
+test('hint handles forced opening and pass without applying either action', () => {
+  const opening = fixture([[tile(6, 6), tile(1, 2)], [], [], []], []);
+  assert.equal(L.suggestMove(opening).action.tileId, '6-6');
+  assert.match(L.suggestMove(opening).explanation, /phải mở bàn/);
+  assert.equal(opening.chain.length, 0);
+  const blocked = fixture([[tile(1, 3)], [], [], []]);
+  assert.deepEqual(L.suggestMove(blocked).action, { type: 'pass' });
+  assert.equal(blocked.passes, 0);
+});
+
+test('hint is unavailable out of turn or after the game finishes', () => {
+  const state = fixture([[tile(2, 6)], [], [], []]);
+  assert.equal(L.suggestMove(state, 1), null);
+  state.phase = 'finished';
+  assert.equal(L.suggestMove(state, 0), null);
+  assert.equal(L.suggestMove(null), null);
+});
+
+test('hint selects a concrete legal end when a tile fits both ends', () => {
+  const state = fixture([[tile(2, 4), tile(2, 6)], [], [], []], [{ id: '2-2', left: 2, right: 2, player: 3 }]);
+  const hint = L.suggestMove(state);
+  assert.ok(['left', 'right'].includes(hint.action.end));
+  assert.equal(L.applyAction(state, 0, hint.action).ok, true);
+});
 const tile = (a, b) => ({ id: `${Math.min(a, b)}-${Math.max(a, b)}`, a: Math.min(a, b), b: Math.max(a, b) });
 const fixture = (hands, chain = [{ id: '2-4', left: 2, right: 4, player: 3 }]) => ({
   hands, chain, current: 0, openingId: '6-6', phase: 'play', passes: 0,

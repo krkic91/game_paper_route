@@ -27,6 +27,29 @@ Mở **Cờ tỷ phú**, bấm **Bắt đầu chơi**, rồi **Gieo xúc xắc**
 
 Các nhóm đất có cả chữ A–G và màu; quân của bốn người có số 1–4. Phần chi tiết dùng chữ lớn và nút cảm ứng, không cần đọc chữ nhỏ trên ô để ra quyết định. Có lịch sử 24 sự kiện gần nhất và phần luật rút gọn ngay trong game. Tạm dừng áp dụng cả thời gian máy suy nghĩ và hiệu ứng gieo xúc xắc; chơi lại hoặc đóng game hủy các tác vụ đang chờ.
 
+### Xem trước mua và xây
+
+Đề nghị mua hiển thị số xu trước mua, giá mua, số xu còn lại và tiền thuê sau mua. Khi mua ô cuối cùng của nhóm, game báo hoàn thành nhóm và mở quyền xây. Phần thông tin đất có xem trước tương tự khi đủ nhóm và chưa đạt cấp tối đa: chi phí xây, tiền còn lại và tiền thuê hiện tại → sau xây.
+
+Còn dưới **160 xu** sau giao dịch sẽ có cảnh báo dự phòng. Đây là mốc tham khảo bằng tiền qua Khởi hành, không bảo đảm đủ trả mọi khoản thuê/phí và không cấm một giao dịch hợp lệ. Nếu không đủ xu, số thiếu được ghi rõ, nút mua/xây vẫn khóa theo luật cũ. Xem trước hoặc chọn đất không tự mua/xây; người chơi xác nhận bằng nút hành động.
+
+### Đất của tôi
+
+Mở **Đất của tôi** bên dưới bàn và các bảng hành động. Tiêu đề cho biết số đất đang có và số ô có thể xây ngay trong lượt. Danh sách gồm cả 7 nhóm A–G, số ô của bạn trong mỗi nhóm (0/2, 1/2, 2/2), tên chủ đất còn thiếu hoặc Ngân hàng và cấp công trình.
+
+Các nút **Xem nâng cấp…** chỉ xuất hiện với ô đang được phép xây theo luật (đúng lượt, đúng giai đoạn, đủ nhóm, đủ xu, chưa đạt cấp 2). Bấm nút hoặc chọn ô trong nhóm sẽ chuyển đến phần thông tin để xem trước và xác nhận; không xây ngay. Có thể xem đất của máy trong lúc chờ lượt.
+
+### Bàn 3D và dòng tiền
+
+- Vòng, lượt, hai xúc xắc và tổng bước đi nằm ngoài bàn 3D thu gọn, nên không cần mở bảng điều khiển phụ để xem.
+- Đất có chủ có dải màu và huy hiệu số kể cả khi chưa xây: **1 = Bạn, 2 = Máy 1, 3 = Máy 2, 4 = Máy 3**. Chú giải luôn có phía trên bàn 3D. Chủ đất cũng được ghi bằng tên trong phần thông tin và bảng Đất của tôi.
+- Sau giao dịch, số xu nhận/chi xuất hiện cạnh người chơi khoảng 3 giây thời gian game; tạm dừng cũng dừng bộ đếm. Nếu vừa bán tài sản vừa trả nợ, game hiển thị riêng phần nhận và chi, kể cả khi tổng số xu không đổi.
+- **Giao dịch gần nhất** nêu số xu thực trả, tên đất/phí và người nhận tiền thuê. Thiếu tiền đến mức phá sản thì ghi số thực trả và số còn thiếu; không cộng khoản nợ chưa thu được vào tiền của chủ đất.
+- **Tài sản đã tự bán gần nhất** liệt kê từng cấp công trình/ô đất và tiền hoàn 50%. Bảng này được giữ tới lần thanh lý tiếp theo hoặc chơi lại. Tiền hoàn đã nằm trong giao dịch, không được cộng hai lần.
+- Các thông báo chi tiết vẫn còn sau khi số xu nổi cạnh người chơi biến mất. Diễn biến ván giữ 24 sự kiện gần nhất như trước. Chơi lại xóa các thông báo và danh sách thanh lý cũ.
+
+Đợt cải tiến này giữ nguyên thanh lý tự động, số vòng, luật và AI; chưa bổ sung lựa chọn tài sản bán hoặc lưu ván. Xem [báo cáo xác minh](monopoly-verification.md).
+
 ## API dành cho tích hợp và kiểm thử
 
 `games/monopoly-logic.js` là UMD: `window.ArcadeMonopoly` ở trình duyệt, `require(...)` trong Node. Không phụ thuộc DOM.
@@ -42,6 +65,9 @@ const result = M.act(state, state.current, { type: 'roll' });
 - Hành động: `roll`, `buy`, `decline`, `end`, `bail`, `upgrade` (thêm `tile`, chỉ số ô 0–23).
 - Hàm trực tiếp: `roll(state, player)`, `buy`, `decline`, `endTurn`, `payBail`; `upgrade(state, player, tile)`.
 - Truy vấn: `rent(state, tile)`, `ownsGroup(state, player, group)`, `netWorth(state, player)`, `legalUpgrades(state, player)`.
+- Truy vấn trình bày chỉ đọc: `investmentPreview(state, player, {type:'buy'})` hoặc `{type:'upgrade', tile}` trả chi phí, tiền trước/sau, tiền thuê trước/sau, đủ nhóm, dự phòng và quyền thực hiện theo state; trả `null` khi không có giao dịch phù hợp. UI còn kiểm tra bắt đầu/tạm dừng/đang gieo.
+- `portfolio(state, player)` trả 7 nhóm với chủ/cấp/thuê/quyền xây của từng ô. Hai truy vấn này không đọc bộ thẻ hoặc nguồn ngẫu nhiên.
+- `cashFlow(events)` trả `received`, `paid`, `deltas` theo người chơi, `entries` và `sales`. Chỉ `credit`/`payment` làm thay đổi tổng xu; `liquidation` chỉ mô tả việc bán với `asset: 'level'|'land'` và `amount` hoàn lại. Không cộng thêm tiền từ event thanh lý.
 - `botAction(state)` chỉ đề xuất hành động từ thông tin công khai; không gieo trước hay đọc trước thẻ Cơ hội. `act` vẫn kiểm tra đầy đủ hành động đó.
 - Trạng thái: `current`, `phase` (`roll`, `buy`, `end`, `over`), `round`, `maxRounds`, `turn`, `dice`, `pending`, `players`, `properties`, `winner`, `winners`, `ranking`, `reason`.
 - `players[id]`: `cash`, `position`, `jailed`, `jailAttempts`, `bankrupt`. `properties[index]`: `owner` (null hoặc 0–3), `level` (0–2).
@@ -63,6 +89,12 @@ Selectors cho kiểm thử trình duyệt:
 | `[data-monopoly-upgrade]` | Nâng cấp ô đang xem |
 | `[data-monopoly-fast]` | Bật máy đi nhanh |
 | `[data-monopoly-player="0"]` | Thông tin người chơi |
+| `[data-monopoly-buy-preview]`, `[data-monopoly-upgrade-preview]` | Xem trước giao dịch |
+| `[data-monopoly-portfolio-summary]`, `[data-monopoly-groups]` | Tóm tắt tài sản và các nhóm đất |
+| `[data-monopoly-open-tile="1"]` | Mở thông tin ô từ danh sách; không giao dịch |
+| `[data-monopoly-finance]`, `[data-monopoly-sales]` | Giao dịch và tài sản đã tự bán gần nhất |
+| `[data-monopoly-delta="0"]` | Số xu nhận/chi ngắn hạn của người chơi |
+| `[data-monopoly-dice-total]` | Tổng số bước của lần gieo gần nhất |
 | `[data-start]`, `[data-again]` | Bắt đầu, chơi lại theo shared UI |
 
 ## Kiểm thử
@@ -74,5 +106,7 @@ node --check games/monopoly.js
 ```
 
 Bộ kiểm thử kiểm tra giao dịch, cân bằng sổ xu, giá thuê/đủ nhóm/cấp xây, lương qua Khởi hành, tạm giữ và phí rời, thẻ Cơ hội, thanh lý/phá sản, giới hạn vòng, đồng hạng và hành động không hợp lệ. Ngoài các ca cụ thể, chạy 300 ván máy có seed tới khi hoàn tất, kiểm tra tiền không âm, quyền sở hữu và giới hạn cấp xây sau từng hành động.
+
+`tests/monopoly-presentation.test.cjs` được nạp từ `tests/monopoly.test.cjs`, nên các test preview/portfolio/flow/adapter chạy cả trong `npm test`. Runner có ngân sách riêng: `node tests/monopoly-harness.cjs unit|browser|serial|check <nhãn-mới>`. Browser mới kiểm tra qua file://, không cần mở server.
 
 Kiểm tra trình duyệt cần bao gồm bắt đầu → gieo → mua/bỏ qua → máy đi → về lượt người; chọn ô và nâng cấp; tạm dừng giữa lúc gieo/máy nghĩ; chơi lại/đóng khi có timer; kích thước điện thoại hẹp, iPad và desktop trên Chromium/WebKit. Mô phỏng viewport/touch không thay cho kiểm thử trên thiết bị Apple thật.

@@ -1,3 +1,84 @@
+# Plan — Cờ tỷ phú, đợt 1 · 01/11/2026
+
+Trạng thái: **ĐÃ TRIỂN KHAI — CÁC KIỂM TRA ĐẠT** theo “ok làm cho tôi nhé”.
+Kết quả: 30 unit, 6 cấu hình browser; 3 cấu hình 3D chạy lại sau một vòng chỉnh
+huy hiệu. Toàn suite cuối 443/443 và cú pháp đạt. Một lỗi test Caro ở lượt suite
+đầu được cô lập rồi kiểm tra lại đạt; không thay đổi Caro. Audit phạm vi/cleanup đạt,
+tổng 361.771 ms gồm audit, 1/3 vòng chỉnh giao diện. Report: `docs/monopoly-verification.md`.
+
+- TASK: triển khai 4 đề xuất đầu: xem trước mua/xây, bảng Đất của tôi, chủ đất/xúc xắc/vòng dễ thấy ở 3D và dòng tiền/thanh lý rõ ràng.
+- OUTPUT: `docs/monopoly-verification.md`, cập nhật hướng dẫn game và mã đã kiểm tra.
+- SCOPE: `games/monopoly-logic.js`, `games/monopoly.js`, `games/monopoly.css`, riêng adapter Monopoly trong `games/3d/extended-boards.js`; tests, docs/monopoly, các tài liệu harness/CLAUDE. Bảo toàn thay đổi Ma sói, Domino/Bida hiện có. Engine/shared/backend/assets/index chỉ đọc.
+- SOURCES: README.md, docs/monopoly.md, mã Monopoly, adapter/engine 3D và tests liên quan.
+- CHECKS: baseline/unit (gồm 300 ván có seed); kiểm tra preview/portfolio/dòng tiền/adapter; browser 2D/3D ở 1280/390/320 px, bàn phím/chạm, mua/xây/thanh lý, pause/restart/close; full `npm test -- --test-concurrency=1 --test-timeout=250000`, `npm run check`, lint nếu có; ảnh mobile, hash/diff/phạm vi và cleanup.
+- LIMIT mặc định: 3 vòng hiệu chỉnh sau kiểm tra, 30 phút tổng chạy kiểm thử; ledger riêng tại `test-results/monopoly-verification/runs.json`. Không mở server phát triển, không cài gói/commit/triển khai.
+- Giữ nguyên luật, AI, tiền, điểm, số vòng và thanh lý tự động. Chưa làm chọn tài sản bán, chọn độ dài ván hoặc lưu ván. Cảnh báo dự phòng dưới 160 xu là thông tin tham khảo, không cấm hành động hợp lệ.
+
+| Bước | Đọc / ghi | Đầu ra | Check | Song song |
+| --- | --- | --- | --- | --- |
+| 1. Baseline | Status, sources, snapshot/runner | Lưu hash thay đổi có trước | Unit luật hiện tại | Không |
+| 2. Dữ liệu/UI | Monopoly logic/UI/CSS; tests | Preview chỉ đọc, nhóm đất, báo dòng tiền và chi tiết bán tự động | Giá thuê/chi phí đúng luật, xem không làm đổi state, mua/xây vẫn qua act | Không |
+| 3. 3D/mobile | Adapter Monopoly, CSS, UI ngoài bàn | Dấu chủ đất cả cấp 0, vòng/xúc xắc ngoài nguồn bị ẩn; thao tác gần thông tin | Adapter + browser/picking 2D/3D | Không |
+| 4. Xác minh | Tests/browser/ảnh, docs và metadata | Báo cáo có bằng chứng, giữ phạm vi và cleanup | Tất cả checks có verdict, thời gian dưới giới hạn | Không |
+
+---
+
+# Plan — Domino và Bida, đợt 1 · 30/10/2026
+
+Trạng thái: **ĐÃ TRIỂN KHAI — CÁC KIỂM TRA ĐẠT**. Người dùng yêu cầu thực hiện đề xuất,
+riêng Domino phải bấm nút Gợi ý mới hiện nước đề xuất và lời giải thích.
+
+Kết quả: 77/77 unit, 12 cấu hình browser tổng hợp, 434/434 toàn suite tuần tự,
+cú pháp đạt; không có script lint. Hai vòng hiệu chỉnh test/bố cục, 221.690 ms
+gồm kiểm thử và audit cuối. Cleanup/phạm vi đạt. Bàn giao: `docs/domino-pool-verification.md`.
+
+- TASK: Domino có chỉ báo hai đầu/số quân luôn nhìn thấy, quân trên tay dễ chạm cả 3D, nút gợi ý riêng và xác nhận riêng. Bida có camera/bố cục mobile gọn, nút ngắm tinh, khóa ngắm, hướng bi mục tiêu dự kiến dùng cùng logic ở 2D/3D.
+- OUTPUT: `docs/domino-pool-verification.md`, hướng dẫn game và mã đã kiểm tra.
+- SCOPE: `games/domino.js`, `games/domino-logic.js`, `games/domino.css`, phần Domino của `games/3d/extended-tables.js`; phần Bida trong `games/action.js`, `games/logic.js`, `games/3d/action-views.js`, CSS tương ứng; tests và tài liệu harness/CLAUDE. Giữ các thay đổi Ma sói đang có.
+- SOURCES: docs/domino.md, README (Bida luyện tập), các nguồn và tests Domino/arcade, engine/camera/shared chỉ đọc.
+- CHECKS: unit Domino/arcade, browser cả hai game × 2D/3D ở 1280/390/320 px; pause/restart/close, tương tác chạm/bàn phím, Ma sói adapter để bảo vệ tệp chung; `npm test -- --test-concurrency=1 --test-timeout=250000`, `npm run check`, lint nếu có, diff và cleanup.
+- LIMIT mặc định: 3 vòng sửa sau kiểm tra, tổng kiểm thử tối đa 30 phút; ledger riêng `test-results/domino-pool-verification/runs.json`. Không mở server để kiểm tra browser, không cài gói hoặc triển khai.
+- Không thêm trận nhiều ván, độ khó AI mới, 8-ball, thử lại cú đánh hoặc màn tập trong đợt này. Không đổi vật lý/điểm hay luật thắng thua.
+
+| Bước | Đọc / ghi | Đầu ra | Check | Song song |
+| --- | --- | --- | --- | --- |
+| 1. Baseline | Sources, diff, tests; ghi snapshot/runner/log | Bảo toàn Ma sói, luật đang đạt | Unit trước sửa | Không |
+| 2. Domino | Logic/UI/CSS và adapter Domino; tests | Gợi ý chỉ xuất hiện khi bấm, chưa đánh cho tới xác nhận, tự xóa khi ván đổi | Không đổi state, không xem quân kín, hiển thị public và quân tay thật ở 3D | Không |
+| 3. Bida | Helper hình học chung, input/UI/renderers/CSS; tests | Ngắm tinh/khóa, dự đoán ngắn dừng ở vật cản, camera mobile | Hướng chạm đúng, không đột biến trạng thái, pointer hủy/pause không kẹt | Không |
+| 4. Xác minh | Browser/tests/cú pháp; docs/metadata | Báo cáo và bằng chứng cuối | Các check có verdict, phạm vi đúng, cleanup | Không |
+
+---
+
+# Plan — Ma sói, cải tiến đợt 1 · 30/10/2026
+
+Trạng thái: **ĐÃ TRIỂN KHAI VÀ BÀN GIAO**. Người dùng: “ok sửa giúp tôi nhé”.
+Kết quả cuối: 423/423 test toàn suite tuần tự; 23/23 unit Ma sói; 1/1 adapter;
+6/6 lượt browser; syntax đạt. Một vòng sửa lỗi 3D đã tái hiện (1/3), không cần
+vòng sửa bổ sung sau triển khai. Tổng kiểm thử + cleanup: **291,368/1.800 giây**.
+Giữ bằng chứng một test Caro không đạt ở lượt suite đầu; chạy riêng và lượt suite
+xác nhận đều đạt, chưa xác định chắc chắn nguyên nhân lần không đạt.
+
+- TASK: sửa nhận diện người bị loại trong 3D; bảng phiếu theo ngày; phát biểu Nghi ngờ/Bênh vực/Nhận vai; máy phản hồi và bỏ phiếu theo bằng chứng được phép biết.
+- OUTPUT: mã hai renderer, `docs/werewolf-verification.md` và hướng dẫn `docs/werewolf.md`.
+- SOURCES: `games/werewolf-logic.js`, `games/werewolf.js`, `games/werewolf.css`, adapter Ma sói trong `games/3d/extended-tables.js`, tests Ma sói và vòng đời shared.
+- SCOPE: các nguồn trên, tests Ma sói/runner, tài liệu harness và CLAUDE. Không thêm vai, online, dịch vụ AI hay thay luật thắng/thua.
+- CHECKS: unit Ma sói (kể cả các ván có seed), hồi quy adapter 3D, browser 2D/3D tại 1280/390/320 px, `npm test -- --test-concurrency=1 --test-timeout=250000`, `npm run check`, lint nếu có, diff và cleanup. Chọn chạy toàn suite tuần tự từ đầu theo bằng chứng timeout cũ; không báo lệnh mặc định đã chạy.
+- LIMIT mặc định cho lượt này: 3 vòng sửa theo phản hồi kiểm thử; 30 phút tổng chạy kiểm thử. Ledger riêng `test-results/werewolf-verification/runs.json`; không đặt lại các ledger cũ.
+- Baseline: Git sạch khi tiếp nhận; không tìm thấy AGENTS.md. Chỉ chạy local/file:// và dùng công cụ đã cài.
+
+| Bước | Đọc / ghi | Đầu ra | Check | Song song |
+| --- | --- | --- | --- | --- |
+| 1. Baseline | Nguồn/tests, ghi runner và log | Luật cũ và lỗi adapter có bằng chứng | Unit baseline, test tái hiện adapter | Không |
+| 2. Logic | werewolf-logic.js, tests/werewolf.test.cjs | Phát biểu giới hạn 2 lần/ngày, lý do có căn cứ, nhận vai chưa xác thực; lưu phiếu sau khi chốt | Lệnh sai không đổi state, thông tin kín không rò rỉ, phát biểu tác động bot, nhiều ván kết thúc đúng | Không |
+| 3. UI / 3D | werewolf.js/css, extended-tables.js, browser test | Nút phát biểu, bảng phiếu đọc được trên mobile, nhân vật bị loại đúng | Browser thao tác thật, pause/restart/close, cùng trạng thái 2D/3D | Không |
+| 4. Handoff | docs, plan/checks/progress/CLAUDE | Báo cáo có bằng chứng và giới hạn | Toàn suite tuần tự, syntax, diff/scope, đóng tài nguyên | Không |
+
+Phát biểu là tùy chọn trước bỏ phiếu. Lời nhận vai/kết quả soi do người chơi công bố
+không được đánh dấu đúng/sai bằng vai bí mật. Lý do dựa trên phiếu phải trỏ tới vòng
+phiếu đã công khai; máy chỉ nhận `view` của chính mình. Giữ lịch sử các task trước bên dưới.
+
+---
+
 # Plan — Kiểm tra và sửa game giao báo, game đua xe đạp
 
 Trạng thái: **ĐÃ TRIỂN KHAI VÀ BÀN GIAO ĐỢT 1**; còn timeout `npm test` mặc định.

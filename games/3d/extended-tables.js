@@ -69,7 +69,7 @@
     },
   });
   A.editions.domino=()=>{
-    let report;return{source:'.domino-table',hide:['.domino-table','.domino-hand'],camera:{width:18,depth:15,height:2,elevation:1.17},
+    let report;return{source:'.domino-table',hide:['.domino-table'],camera:{width:18,depth:15,height:2,elevation:1.17},
       setup(w){w.table(16,13);report=caption(w,['[data-domino-turn]','[data-domino-last]']);},
       read(w){
         report();const out=[];
@@ -87,10 +87,10 @@
   A.editions.werewolf=()=>({source:'.werewolf-seats',camera:{width:18,depth:16,height:3,elevation:.95},
     setup(w){w.table(16,14,'#43535c');const e=w.e;e.cylinder(0,.25,0,1.3,1.4,.4,'#65534a');for(let n=0;n<5;n++)e.ball(Math.cos(n)*.6,.6,Math.sin(n)*.6,.35,'#df965b');},
     read(w){const out=[];w.all('[data-ww-target]').forEach((el,i)=>{
-      const angle=i*Math.PI/4,x=Math.sin(angle)*5.5,z=Math.cos(angle)*4.7,dead=el.matches('.is-dead');
+      const angle=i*Math.PI/4,x=Math.sin(angle)*5.5,z=Math.cos(angle)*4.7,dead=el.matches('.is-eliminated');
       out.push({key:`villager-${i}`,x,z,y:.3,w:1.7,d:1.7,h:.16,color:H.selected(el)?'#f1cb74':'#6a7370',element:el});
       if(!dead)out.push({key:`person-${i}`,x,z,y:.4,model:'person',w:1.15,color:i?'#7c9da0':'#b78063'});
-      out.push({key:`name-${i}`,x,z:z+1,y:.3,w:3.5,d:1.1,model:'label',text:`${i?'Máy '+i:'Bạn'}\n${H.text(el.querySelector('[data-ww-identity]'))||H.text(el.querySelector('small'))}`,ink:dead?'#acaaa0':'#f5e9c9',font:64});
+      out.push({key:`name-${i}`,x,z:z+1,y:.3,w:3.5,d:1.1,model:'label',text:`${i?'Máy '+i:'Bạn'}${dead?' · Đã bị loại':''}\n${H.text(el.querySelector('[data-ww-identity]'))||H.text(el.querySelector('small'))}`,ink:dead?'#acaaa0':'#f5e9c9',font:64});
     });return out;},
   });
 })();

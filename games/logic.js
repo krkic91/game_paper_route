@@ -672,6 +672,47 @@
       }
     return { balls, shots: 0, scratches: 0, potted: 0, status: 'ready' };
   }
+  // Shared, read-only aiming geometry. The short target segment shows direction,
+  // not final travel distance: power, spin and later rebounds are not predicted.
+  function poolAim(state, angle) {
+    const white = state?.balls?.[0];
+    if (state?.status !== 'ready' || !white?.active || !Number.isFinite(angle)) return null;
+    const radius = POOL.radius;
+    function trace(from, dx, dy, limit, ignored) {
+      let distance = limit, hit = 'range', ball = null;
+      const accept = (at, kind, object = null) => {
+        if (at >= 0 && at < distance) { distance = at; hit = kind; ball = object; }
+      };
+      for (const [axis, dir, low, high] of [
+        [from.x, dx, POOL.left + radius, POOL.right - radius],
+        [from.y, dy, POOL.top + radius, POOL.bottom - radius],
+      ]) if (Math.abs(dir) > 1e-9) accept(Math.max(0, (dir > 0 ? high - axis : low - axis) / dir), 'rail');
+      function circle(x, y, r) {
+        const bx = x - from.x, by = y - from.y, dot = bx * dx + by * dy;
+        const cross = bx * dy - by * dx, discriminant = r * r - cross * cross;
+        if (dot <= 0 || discriminant < 0) return Infinity;
+        return Math.max(0, dot - Math.sqrt(discriminant));
+      }
+      for (const [x, y] of POCKETS) accept(circle(x, y, POOL.pocket), 'pocket');
+      for (const candidate of state.balls) {
+        if (candidate.active && !ignored.includes(candidate.id)) accept(circle(candidate.x, candidate.y, radius * 2), 'ball', candidate);
+      }
+      return { to: { x: from.x + dx * distance, y: from.y + dy * distance }, hit, ball };
+    }
+    const dx = Math.cos(angle), dy = Math.sin(angle);
+    const contact = trace(white, dx, dy, 900, [white.id]);
+    let target = null;
+    if (contact.ball) {
+      const ball = contact.ball, nx = ball.x - contact.to.x, ny = ball.y - contact.to.y;
+      const length = Math.hypot(nx, ny);
+      if (length > 1e-9 && dx * nx + dy * ny > 1e-6) {
+        const projected = trace(ball, nx / length, ny / length, 140, [white.id, ball.id]);
+        target = { id: ball.id, from: { x: ball.x, y: ball.y }, to: projected.to, hit: projected.hit };
+      }
+    }
+    return { cue: { from: { x: white.x, y: white.y }, to: contact.to }, hit: contact.hit, target };
+  }
+
   function shootPool(state, angle, power) {
     if (state.status !== 'ready' || !Number.isFinite(angle) || !Number.isFinite(power))
       return false;
@@ -908,6 +949,7 @@
     createRace,
     stepRace,
     createPool,
+    poolAim,
     shootPool,
     stepPool,
     POOL,

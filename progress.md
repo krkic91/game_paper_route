@@ -1,4 +1,45 @@
-# Tiến độ harness — giao báo/đua xe, Caro và 2048
+# Tiến độ harness
+
+## Cờ tỷ phú — đợt 1 đã hoàn tất, 01/11/2026
+
+- Đã duyệt 4 đề xuất đầu. Đã đọc sources và skill harness; không có AGENTS.md trong repo. Đã lưu hash các thay đổi có trước và snapshot adapter/CLAUDE.
+- Thiết kế: preview chỉ đọc dùng cùng luật thuê, cảnh báo dự phòng dưới 160 xu không chặn mua/xây; bảng A–G dẫn tới phần xem/xác nhận; thông tin lượt nằm ngoài nguồn 3D bị ẩn; thông báo lấy từ giao dịch thực tế, không tính thanh lý hai lần.
+- Baseline 21/21 đạt; implementation-unit 30/30 đạt, gồm 300 ván cũ và test query/receipt/adapter mới. Browser feature-browser đạt 6/6 cấu hình 1280/390/320 × 2D/3D, errors=[].
+- Đã xem ảnh mobile: preview mua/xây và nút xác nhận rõ; nhãn chủ đất 3D còn nhỏ. Vòng hiệu chỉnh 1/3 đổi chữ dài sang huy hiệu số 1–4 có chú giải ngoài bàn. Chỉ chạy lại browser 3D bị ảnh hưởng; luật/tiền/AI không đổi.
+- owner-badges-browser đạt 3/3 cấu hình 3D cuối (34.644 ms), errors=[]; đã xem ảnh 320 px của huy hiệu, chú giải và bảng thanh lý. Giao diện 2D không thay đổi hành vi trong vòng hiệu chỉnh này.
+- Đã cập nhật docs/monopoly.md và quy tắc CLAUDE. Đang chạy full suite, tiếp theo cú pháp/report/audit. Ledger riêng, không mở server phát triển.
+- Full suite lần đầu: 442/443 đạt; lỗi duy nhất ở tests/online-server.test.cjs:249, expected SERVER_BUSY, actual undefined, với fixture idleMs=100. Lỗi cùng dạng từng xuất hiện ở harness Ma sói; không sửa backend hoặc test Caro. Chạy riêng test resource-limit để xác định khả năng tái hiện, rồi kiểm tra lại full suite trong ngân sách.
+- Cô lập Caro đạt 1/1 (540 ms); full suite lần hai đạt 443/443, exit 0 (107.649 ms). Cú pháp cuối đạt, exit 0 (30.956 ms); không có script lint. Tổng kiểm thử 358.179 ms trước audit, 1 vòng chỉnh giao diện; đã viết docs/monopoly-verification.md. Đang chốt hash/phạm vi/cleanup cuối.
+- Audit cuối đạt: 25 file từ các task trước giữ nguyên hash, adapter các game khác giữ nguyên; không ngoài phạm vi, mọi output/liên kết tồn tại, diff check exit 0; không Node kiểm thử/Edge Playwright/listener 4173. Tổng gồm audit 361.771 ms (~6 phút 2 giây), 1/3 vòng chỉnh giao diện. Hoàn tất và bàn giao docs/monopoly-verification.md; không tạo/sửa AGENTS.md.
+
+## Domino / Bida — đợt 1 đã triển khai, 30/10/2026
+
+- Đã duyệt, đặc biệt nút Gợi ý Domino là thao tác chủ động; không gợi ý tự động hoặc tự đánh.
+- Giữ thay đổi Ma sói, ledger cũ. Baseline đạt; unit sau triển khai 77/77 (gồm 300 ván Domino, hình học Bida và adapter Ma sói).
+- Domino: nút gợi ý/xác nhận riêng, xóa khi đổi lượt hoặc chơi lại; thông tin công khai và quân tay 2D vẫn hiện trong 3D. Browser 6/6 ở 1280/390/320 đạt.
+- Bida: ngắm tinh/giữ nút, khóa hướng, hướng bi mục tiêu chung 2D/3D, bố cục gọn. Vòng sửa 1/3: browser dùng sai inputValue cho output (lỗi test); đổi sang textContent. Tăng specificity CSS để bố cục Bida không bị CSS 3D chung ghi đè.
+- Bida đạt 5/6 lượt browser; đã xem ảnh 3D 390 px và 2D 320 px, điều khiển sát bàn, không tràn ngang. Vòng sửa 2/3: ngưỡng đo góc của test quá chặt cho tọa độ chuột lượng tử theo pixel ở 320 px; dùng sai số góc tương đương 2 CSS pixel. Không đổi cách ngắm của game.
+- Bida 3D 320 px chạy lại đạt. Tổng hợp 12/12 cấu hình browser; errors=[] ở cả ba báo cáo, cảnh 3D được giải phóng khi đóng game.
+- Toàn suite cuối 434/434 đạt, exit 0, 106.111 ms; cú pháp exit 0, 26.291 ms. Không có script lint. Tổng kiểm thử 218.733 ms, 2/3 vòng hiệu chỉnh.
+- Đã viết docs/domino-pool-verification.md, docs/pool.md, cập nhật docs/domino.md và quy tắc CLAUDE (diff riêng trong evidence). Audit cuối đạt: 9 file Ma sói giữ nguyên hash; file adapter chỉ sửa một dòng Domino, không ngoài phạm vi; output/liên kết/diff check đạt; không còn test Node/Edge hoặc listener 4173. Tổng gồm audit 221.690 ms, 2/3 vòng; hoàn tất, không mở server phát triển.
+
+## Ma sói — đã bàn giao đợt 1, 30/10/2026
+
+- Người dùng đã duyệt triển khai bốn phần trong plan. Chưa có thay đổi trước khi phiên bị gián đoạn; đã xác nhận lại Git sạch rồi tiếp tục.
+- Nguồn xác nhận renderer dùng `is-eliminated`, adapter 3D kiểm tra `is-dead`.
+- Thiết kế: phát biểu tùy chọn, tối đa 2 lần/ngày, nhận vai chưa xác thực; bảng phiếu chỉ công khai sau chốt. Máy dùng góc nhìn riêng đã lọc.
+- Baseline 14/14 unit đạt. Adapter baseline fail đúng lỗi: vẫn có 8 mô hình khi một người bị loại; đã sửa và test đạt 1/1.
+- Logic mới đạt 23/23, gồm 300 ván cũ + 100 ván có phát biểu; kiểm tra fake claim không dò vai bí mật, lý do công khai, phiếu theo ngày và tác động đến máy.
+- Browser mới đạt 6/6 ở 1280/390/320 px × 2D/3D; thao tác nghi ngờ, nhận vai giả, bênh vực, giới hạn theo ngày, xem phiếu, pause/restart/close và chọn người trực tiếp trên canvas 3D. Đã xem ảnh mobile của phát biểu, bảng phiếu và cảnh người bị loại.
+- Đã cập nhật hướng dẫn và quy tắc bền vững trong CLAUDE. Một vòng sửa lỗi 3D đã tái hiện (1/3); không cần vòng sửa bổ sung sau triển khai.
+- Suite đầu đạt 422/423, fail ở test Caro giới hạn tài nguyên: kỳ vọng SERVER_BUSY nhưng phản hồi không có mã đó (online-server.test.cjs:249). Test cấu hình idle 100 ms; có thể nhạy thời điểm, chưa chứng minh nguyên nhân.
+- Chạy riêng đúng test này đạt 1/1 (0.711 giây). Không sửa Caro. Syntax đạt (30.481 giây). Sau gián đoạn, xác nhận ledger đã ghi kết quả; không chạy lại syntax.
+- Toàn suite xác nhận đạt 423/423, không skip, exit 0, 106.733 giây (`final-serial-recheck`). Không chạy npm test mặc định; dùng cờ tuần tự đã ghi trong plan. Lần không đạt đầu được giữ nguyên bằng chứng.
+- Tổng 9 lượt kiểm thử 289.286 giây; thêm cleanup 2.082 giây = 291.368/1.800 giây (4 phút 51.368 giây).
+- Đã chốt docs/werewolf-verification.md, metadata, hướng dẫn và diff CLAUDE. Git diff --check đạt; 14 tệp thay đổi đúng phạm vi; không sửa AGENTS.md.
+- final-cleanup.json không có tiến trình test/browser/server hoặc listener các cổng đã kiểm tra. Không còn công việc chạy nền. Giới hạn còn lại: chưa đánh giá cân bằng dài hạn, chưa thử điện thoại thật/engine ngoài Chromium; nguyên nhân test Caro lần đầu chưa được chứng minh.
+
+## Lịch sử các lượt trước
 
 ## Giao báo / đua xe — đã bàn giao cải tiến đợt 1
 

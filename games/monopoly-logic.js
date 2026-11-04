@@ -108,7 +108,7 @@
       while (deed.level > 0 && person.cash < target) {
         deed.level--;
         credit(state, player, tile.upgrade / 2, events, `do bán 1 cấp tại ${tile.name}`);
-        emit(events, 'liquidation', `Đã bán 1 cấp tại ${tile.name}.`, { player, tile: tile.index });
+        emit(events, 'liquidation', `Đã bán 1 cấp tại ${tile.name}.`, { player, tile: tile.index, asset: 'level', amount: tile.upgrade / 2 });
       }
     }
     for (const tile of owned) {
@@ -116,7 +116,7 @@
       // All improvements have been sold before any land needs to be sold.
       state.properties[tile.index] = { owner: null, level: 0 };
       credit(state, player, tile.price / 2, events, `do bán ${tile.name} về ngân hàng`);
-      emit(events, 'liquidation', `${tile.name} trở lại ngân hàng.`, { player, tile: tile.index });
+      emit(events, 'liquidation', `${tile.name} trở lại ngân hàng.`, { player, tile: tile.index, asset: 'land', amount: tile.price / 2 });
     }
   }
   function pay(state, player, amount, recipient, events, reason) {
@@ -291,6 +291,56 @@
     emit(events, 'turn', `Lượt ${state.players[next].name} · vòng ${state.round}/${state.maxRounds}.`, { player: next });
     return success(events);
   }
+  // Presentation queries read only public facts; they never execute a transaction
+  // or inspect the dice source/chance deck. Actual permissions stay in act().
+  function investmentPreview(state, player, action) {
+    if (!state || state.phase === 'over' || !validPlayer(player) || state.players[player].bankrupt || !action) return null;
+    const buying = action.type === 'buy', index = buying ? state.pending : action.tile;
+    const tile = BOARD[index], deed = state.properties[index];
+    if (!tile || tile.type !== 'property' || !deed) return null;
+    if (buying ? state.phase !== 'buy' || state.current !== player || deed.owner !== null :
+      action.type !== 'upgrade' || deed.owner !== player || deed.level >= MAX_LEVEL || !ownsGroup(state, player, tile.group)) return null;
+    const cost = buying ? tile.price : tile.upgrade, cashBefore = state.players[player].cash;
+    const projected = { players: state.players, properties: state.properties.map(item => ({ ...item })) };
+    projected.properties[index].owner = player;
+    if (!buying) projected.properties[index].level++;
+    const groupCompleted = buying && ownsGroup(projected, player, tile.group);
+    return {
+      tile: index, type: action.type, cost, cashBefore, cashAfter: cashBefore - cost,
+      affordable: cashBefore >= cost,
+      available: cashBefore >= cost && (buying || legalUpgrades(state, player).includes(index)),
+      reserve: SALARY, lowReserve: cashBefore >= cost && cashBefore - cost < SALARY,
+      rentBefore: buying ? tile.rent : rent(state, index), rentAfter: rent(projected, index), groupCompleted,
+      groupRents: BOARD.filter(item => item.group === tile.group).map(item => ({ tile: item.index, rent: rent(projected, item.index) })),
+    };
+  }
+  function portfolio(state, player) {
+    if (!state || !validPlayer(player)) return [];
+    const upgrades = legalUpgrades(state, player);
+    return GROUPS.map((group, index) => {
+      const tiles = BOARD.filter(tile => tile.group === index).map(tile => ({
+        tile: tile.index, owner: state.properties[tile.index].owner, level: state.properties[tile.index].level,
+        rent: rent(state, tile.index), canUpgrade: upgrades.includes(tile.index),
+      }));
+      return { group: index, code: group.code, owned: tiles.filter(tile => tile.owner === player).length, tiles };
+    });
+  }
+  function cashFlow(events) {
+    const received = [0, 0, 0, 0], paid = [0, 0, 0, 0];
+    for (const event of events) {
+      if (event.type === 'credit') received[event.player] += event.amount;
+      if (event.type === 'payment') {
+        paid[event.player] += event.amount;
+        if (event.recipient !== null) received[event.recipient] += event.amount;
+      }
+    }
+    return {
+      received, paid, deltas: received.map((amount, player) => amount - paid[player]),
+      // A liquidation event describes the sale; its credit already moved the cash.
+      sales: events.filter(event => event.type === 'liquidation').map(event => ({ ...event })),
+      entries: events.filter(event => ['credit', 'payment', 'bankrupt'].includes(event.type)).map(event => event.text),
+    };
+  }
   function botAction(state) {
     if (!state || state.phase === 'over') return null;
     const player = state.current, person = state.players[player];
@@ -318,5 +368,6 @@
     return fail('Hành động không hợp lệ.');
   }
   return Object.freeze({ BOARD, GROUPS, CHANCES, START_CASH, SALARY, BAIL, MAX_LEVEL,
-    createGame, ownsGroup, rent, netWorth, legalUpgrades, roll, buy, decline, upgrade, payBail, endTurn, botAction, act });
+    createGame, ownsGroup, rent, netWorth, legalUpgrades, investmentPreview, portfolio, cashFlow,
+    roll, buy, decline, upgrade, payBail, endTurn, botAction, act });
 });

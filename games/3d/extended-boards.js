@@ -105,6 +105,12 @@
       const x=(Number(el.style.gridColumn)-4)*2.15,z=(Number(el.style.gridRow)-4)*2.15;
       out.push({key:`property-${i}`,x,z,w:2.02,d:2.02,h:.2,color:H.selected(el)?'#f2ce78':'#efdfb8',text:H.text(el.querySelector('.monopoly-tile-name')),font:56,element:el});
       out.push({key:`district-${i}`,x,z:z-.8,y:.39,w:1.9,d:.22,h:.12,color:el.style.getPropertyValue('--district')||'#77937b'});
+      if(el.dataset.monopolyOwner !== undefined && el.dataset.monopolyOwner !== '') {
+        const color=el.style.getPropertyValue('--owner')||'#688d58';
+        out.push({key:`owner-band-${i}`,x,z:z+.76,y:.39,w:1.94,d:.43,h:.04,color});
+        out.push({key:`owner-badge-${i}`,x:x+.62,z:z+.62,y:.42,w:.72,d:.72,h:.03,color});
+        out.push({key:`owner-name-${i}`,x:x+.62,z:z+.62,y:.45,w:.7,d:.7,h:.01,model:'label',text:String(Number(el.dataset.monopolyOwner)+1),ink:'#172b20',font:210});
+      }
       [...el.querySelectorAll('.monopoly-tokens i')].forEach((token,n)=>out.push({key:`person-${token.textContent}`,x:x+(n-1.5)*.35,z:z+.35,y:.4,w:.5,model:'pawn',color:token.style.getPropertyValue('--player')||'#bb624b'}));
       const level=(H.text(el.querySelector('.monopoly-tile-value')).match(/▰/g)||[]).length;
       for(let n=0;n<level;n++)out.push({key:`house-${i}-${n}`,x:x-.5+n*.7,z:z-.5,y:.58,w:.5,d:.5,h:.45,color:el.style.getPropertyValue('--owner')||'#688d58'});

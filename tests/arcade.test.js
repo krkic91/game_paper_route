@@ -3,6 +3,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const L = require('../games/logic.js');
+require('./pool-aim.test.cjs');
 function rng(seed = 42) {
   return () => {
     seed = (seed * 1664525 + 1013904223) >>> 0;

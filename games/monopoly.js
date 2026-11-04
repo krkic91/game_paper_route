@@ -15,11 +15,15 @@
     const L = window.ArcadeMonopoly, scope = S.createScope();
     let state = L.createGame(), started = false, finished = false, busy = false, botPending = false;
     let selected = 0, fast = false, history = [], lastAction = 'Bốn người, một thành phố. Bạn đi trước!';
+    let finance = null, sales = [], deltaLeft = 0;
+    let renderedFinance, renderedSales;
     const ui = S.buildUI(host, {
       className: 'monopoly-workspace',
       toolbar: '<div class="monopoly-heading"><span>THÀNH PHỐ TRONG TAY</span><strong>Cờ tỷ phú<span>.</span></strong></div><div class="monopoly-mode"><strong>Ván ngắn · 30 vòng</strong><span>Bạn + 3 máy · Xu trong game</span></div>',
       board: `<div class="monopoly-layout">
-        <div class="monopoly-map-column"><div class="monopoly-board" role="group" aria-label="Bàn cờ 24 ô. Chọn ô để xem chi tiết.">
+        <div class="monopoly-map-column">
+          <div class="monopoly-live" aria-label="Vòng, lượt và xúc xắc"><span class="monopoly-round" data-monopoly-round></span><strong class="monopoly-current" data-monopoly-current></strong><div class="monopoly-dice" aria-label="Chưa gieo xúc xắc"><span>·</span><span>·</span></div><span data-monopoly-dice-total>Chưa gieo</span><div class="monopoly-owner-key" aria-label="Số chủ đất">${state.players.map(player => `<span><b style="--player:${playerColors[player.id]}">${player.id + 1}</b>${player.name}</span>`).join('')}</div></div>
+          <div class="monopoly-board" role="group" aria-label="Bàn cờ 24 ô. Chọn ô để xem chi tiết.">
           ${L.BOARD.map(tile => {
             const [row, column] = cellPosition(tile.index), group = L.GROUPS[tile.group];
             return `<button type="button" class="monopoly-tile monopoly-tile-${tile.type}" data-monopoly-tile="${tile.index}" style="grid-row:${row};grid-column:${column};--district:${group?.color || '#738770'}"><span class="monopoly-tile-group" aria-hidden="true">${group?.code || symbols[tile.type]}</span><span class="monopoly-tile-name">${tile.name}</span><span class="monopoly-tile-value"></span><span class="monopoly-tokens" aria-hidden="true"></span></button>`;
@@ -28,9 +32,6 @@
             <span class="monopoly-center-kicker">MỘT THÀNH PHỐ · BỐN ƯỚC MƠ</span>
             <div class="monopoly-city" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
             <strong class="monopoly-center-title">Xây phố.<br>Đón cơ hội.</strong>
-            <span class="monopoly-round" data-monopoly-round></span>
-            <div class="monopoly-dice" aria-label="Chưa gieo xúc xắc"><span>·</span><span>·</span></div>
-            <strong class="monopoly-current" data-monopoly-current></strong>
             <small>Mỗi lượt gieo 1 lần, kể cả gieo đôi.</small>
           </div>
         </div><p class="monopoly-board-note">Chọn một ô để xem giá và tiền thuê. A–G là các nhóm đất.</p></div>
@@ -38,6 +39,7 @@
           <div class="monopoly-players" aria-label="Tình hình người chơi"></div>
           <section class="monopoly-turn-panel" aria-label="Hành động trong lượt">
             <span class="monopoly-section-label">LƯỢT HIỆN TẠI</span><strong data-monopoly-prompt></strong><p data-monopoly-context></p>
+            <div class="monopoly-preview" data-monopoly-buy-preview hidden></div>
             <div class="monopoly-actions">
               <button type="button" class="control-button monopoly-primary" data-monopoly-action="roll" data-monopoly-roll>Gieo xúc xắc</button>
               <button type="button" class="control-button monopoly-primary" data-monopoly-action="buy" data-monopoly-buy>Mua đất</button>
@@ -50,9 +52,13 @@
             <label for="monopoly-inspect">XEM Ô TRÊN BÀN</label>
             <select id="monopoly-inspect" data-monopoly-inspect>${L.BOARD.map(tile => `<option value="${tile.index}">${tile.index + 1}. ${tile.name}</option>`).join('')}</select>
             <div data-monopoly-detail></div>
+            <div class="monopoly-preview" data-monopoly-upgrade-preview hidden></div>
             <button type="button" class="control-button" data-monopoly-action="upgrade" data-monopoly-upgrade>Nâng cấp</button>
           </section>
+          <section class="monopoly-finance" aria-label="Giao dịch gần nhất" hidden><strong>Giao dịch gần nhất</strong><ul data-monopoly-finance aria-live="polite"></ul></section>
+          <details class="monopoly-sales" hidden open><summary>Tài sản đã tự bán gần nhất</summary><p>Hoàn 50% chi phí để trả nợ; số xu này đã tính trong giao dịch.</p><ul data-monopoly-sales></ul></details>
         </div>
+        <details class="monopoly-portfolio"><summary data-monopoly-portfolio-summary>Đất của tôi</summary><p>Chọn một ô để xem chi tiết. Xem trước chi phí rồi xác nhận xây tại phần thông tin ô đất.</p><div class="monopoly-upgrade-list" data-monopoly-upgrade-list></div><div class="monopoly-groups" data-monopoly-groups></div></details>
         <p class="monopoly-last-action" aria-live="polite"></p>
       </div>`,
       controls: '<label class="monopoly-speed"><input type="checkbox" data-monopoly-fast> Máy đi nhanh</label><details class="monopoly-history"><summary>Diễn biến ván</summary><ol></ol></details><details class="monopoly-rules"><summary>Luật ván ngắn</summary><p>Mỗi người có 1.100 xu. Qua Khởi hành nhận 160 xu. Mua đủ 2 ô cùng nhóm để nhân đôi tiền thuê và xây tối đa 2 cấp. Tiền thuê cấp 1 / 2 bằng 4 / 7 lần giá thuê cơ bản. Hết 30 vòng, tổng tài sản cao nhất thắng; bằng điểm thì đồng hạng.</p><p>Mỗi lượt chỉ gieo một lần, kể cả gieo đôi. Khi bị tạm giữ, trả 50 xu trước khi gieo hoặc thử gieo đôi. Lần thử thứ hai không thành công: tự trả 50 xu rồi đi. Ghé ô Tạm giữ bình thường không bị giữ.</p><p>Thiếu tiền trả nợ: tự bán công trình trước, rồi bán đất về ngân hàng, hoàn lại 50% chi phí. Vẫn thiếu thì phá sản; chủ nợ chỉ nhận số xu thực trả. Không đấu giá, trao đổi hay thế chấp. Tổng tài sản tính theo giá mua đất và chi phí xây, cộng tiền đang có.</p></details>',
@@ -63,6 +69,9 @@
     const humanTurn = () => started && !finished && !busy && state.current === 0 && !state.players[0].bankrupt;
 
     function remember(events) {
+      const flow = L.cashFlow(events);
+      if (flow.entries.length) { finance = flow; deltaLeft = 3; }
+      if (flow.sales.length) sales = flow.sales;
       for (const event of events) if (event.text) history.push(event.text);
       history = history.slice(-24);
       if (events.length) lastAction = events[events.length - 1].text;
@@ -72,10 +81,38 @@
         return item;
       }));
     }
+    function renderPreview(element, preview) {
+      element.hidden = !preview;
+      if (!preview) { element.replaceChildren(); return; }
+      const buying = preview.type === 'buy', group = L.GROUPS[L.BOARD[preview.tile].group];
+      element.innerHTML = `<strong>${buying ? 'Sau khi mua' : 'Sau khi xây'}</strong><p>${money(preview.cashBefore)} − ${money(preview.cost)} = <b>${money(preview.cashAfter)} xu</b></p><p>Thuê ${buying ? 'cơ bản → sau mua' : 'hiện tại → sau xây'}: <b>${money(preview.rentBefore)} → ${money(preview.rentAfter)} xu</b></p>${preview.groupCompleted ? `<p class="monopoly-group-complete">Đủ nhóm ${group.code}! Cả hai ô nhân đôi thuê cơ bản và mở nâng cấp.</p>` : ''}${!preview.affordable ? `<p class="monopoly-reserve">Còn thiếu ${money(-preview.cashAfter)} xu; chưa thể thực hiện.</p>` : preview.lowReserve ? `<p class="monopoly-reserve">Còn dưới ${preview.reserve} xu dự phòng. Đây là mốc tham khảo; bạn vẫn có thể ${buying ? 'mua' : 'xây'}.</p>` : ''}`;
+    }
+    function renderPortfolio() {
+      const groups = L.portfolio(state, 0), upgrades = groups.flatMap(group => group.tiles.filter(tile => tile.canUpgrade));
+      const count = groups.reduce((total, group) => total + group.owned, 0);
+      $('[data-monopoly-portfolio-summary]').textContent = `Đất của tôi · ${count}/14 ô · ${upgrades.length} ô có thể xây`;
+      $('[data-monopoly-upgrade-list]').innerHTML = upgrades.length ? `<strong>Có thể xây trong lượt này</strong>${upgrades.map(item => `<button type="button" class="control-button" data-monopoly-open-tile="${item.tile}">Xem nâng cấp ${L.BOARD[item.tile].name} · ${L.BOARD[item.tile].upgrade} xu</button>`).join('')}` : '<p>Chưa có ô nâng cấp được lúc này. Cần đủ nhóm, đủ xu và đúng lượt.</p>';
+      $('[data-monopoly-groups]').innerHTML = groups.map(group => `<section class="monopoly-group" style="--district:${L.GROUPS[group.group].color}"><strong>Nhóm ${group.code} · ${group.owned}/2 ô${group.owned === 2 ? ' · Đủ nhóm' : ''}</strong>${group.tiles.map(item => `<button type="button" data-monopoly-open-tile="${item.tile}"><b>${L.BOARD[item.tile].name}</b><span>${item.owner === null ? 'Ngân hàng · Chưa có chủ' : `${state.players[item.owner].name} · Cấp ${item.level}/2`}</span></button>`).join('')}</section>`).join('');
+    }
+    function renderFinance() {
+      if (renderedFinance === finance && renderedSales === sales) return;
+      renderedFinance = finance; renderedSales = sales;
+      $('.monopoly-finance').hidden = !finance;
+      $('[data-monopoly-finance]').replaceChildren(...(finance?.entries || []).map(text => {
+        const item = document.createElement('li'); item.textContent = text; return item;
+      }));
+      $('.monopoly-sales').hidden = !sales.length;
+      $('[data-monopoly-sales]').replaceChildren(...sales.map(sale => {
+        const item = document.createElement('li');
+        item.textContent = `${state.players[sale.player].name}: ${sale.asset === 'level' ? 'bán 1 cấp công trình tại' : 'bán đất'} ${L.BOARD[sale.tile].name} · +${money(sale.amount)} xu`;
+        return item;
+      }));
+    }
     function renderDetail() {
       const tile = L.BOARD[selected], deed = state.properties[selected], group = L.GROUPS[tile.group];
       $('[data-monopoly-inspect]').value = String(selected);
       const detail = $('[data-monopoly-detail]');
+      renderPreview($('[data-monopoly-upgrade-preview]'), L.investmentPreview(state, 0, { type: 'upgrade', tile: selected }));
       if (tile.type === 'property') {
         const owner = deed.owner === null ? 'Chưa có chủ' : state.players[deed.owner].name;
         const full = deed.owner !== null && L.ownsGroup(state, deed.owner, tile.group);
@@ -115,15 +152,19 @@
       const glyphs = ['·', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
       [...dice.children].forEach((el, index) => { el.textContent = glyphs[state.dice[index]]; });
       dice.setAttribute('aria-label', state.dice[0] ? `Xúc xắc: ${state.dice[0]} và ${state.dice[1]}` : 'Chưa gieo xúc xắc');
+      $('[data-monopoly-dice-total]').textContent = busy ? 'Đang gieo…' : state.dice[0] ? `${state.dice[0]} + ${state.dice[1]} = ${state.dice[0] + state.dice[1]} ô` : 'Chưa gieo';
       $('.monopoly-players').innerHTML = state.players.map(player => {
         const count = state.properties.filter(deed => deed.owner === player.id).length;
-        return `<div class="monopoly-player ${player.id === state.current && started && !finished ? 'is-current' : ''} ${player.bankrupt ? 'is-bankrupt' : ''}" data-monopoly-player="${player.id}" style="--player:${playerColors[player.id]}"><span class="monopoly-player-marker" aria-hidden="true">${player.id + 1}</span><strong>${player.name}</strong><b>${money(player.cash)}<small> xu</small></b><span>${player.bankrupt ? 'Phá sản' : `${count} đất${player.jailed ? ' · Tạm giữ' : ''}`}</span><small>Tài sản ${money(L.netWorth(state, player.id))}</small></div>`;
+        const received = finance?.received[player.id] || 0, paid = finance?.paid[player.id] || 0;
+        const change = [received ? `+${money(received)}` : '', paid ? `−${money(paid)}` : ''].filter(Boolean).join(' / ');
+        return `<div class="monopoly-player ${player.id === state.current && started && !finished ? 'is-current' : ''} ${player.bankrupt ? 'is-bankrupt' : ''}" data-monopoly-player="${player.id}" style="--player:${playerColors[player.id]}"><span class="monopoly-player-marker" aria-hidden="true">${player.id + 1}</span><strong>${player.name}</strong><b>${money(player.cash)}<small> xu</small></b><span>${player.bankrupt ? 'Phá sản' : `${count} đất${player.jailed ? ' · Tạm giữ' : ''}`}</span><small>Tài sản ${money(L.netWorth(state, player.id))}</small><span class="monopoly-money-change" data-monopoly-delta="${player.id}" ${!change || deltaLeft <= 0 ? 'hidden' : ''} aria-label="Biến động xu gần nhất">${change} xu</span></div>`;
       }).join('');
       for (const tile of L.BOARD) {
         const button = tiles[tile.index], deed = state.properties[tile.index];
         const occupants = state.players.filter(player => !player.bankrupt && player.position === tile.index);
         button.classList.toggle('has-current', occupants.some(player => player.id === state.current) && started && !finished);
         button.style.setProperty('--owner', deed.owner === null ? 'transparent' : playerColors[deed.owner]);
+        button.dataset.monopolyOwner = deed.owner === null ? '' : String(deed.owner);
         button.querySelector('.monopoly-tile-value').textContent = tile.type === 'property' ? deed.owner === null ? `${tile.price}` : `${deed.level ? '▰'.repeat(deed.level) + ' ' : ''}${state.players[deed.owner].id + 1}` : tile.type === 'tax' ? `−${tile.amount}` : tile.type === 'start' ? '+160' : '';
         button.querySelector('.monopoly-tokens').innerHTML = occupants.map(player => `<i style="--player:${playerColors[player.id]}">${player.id + 1}</i>`).join('');
         button.setAttribute('aria-label', `${tile.index + 1}. ${tile.name}${tile.type === 'property' ? `, nhóm ${L.GROUPS[tile.group].code}, ${deed.owner === null ? `giá ${tile.price} xu, chưa có chủ` : `chủ ${state.players[deed.owner].name}, thuê ${L.rent(state, tile.index)} xu`}` : ''}${occupants.length ? `, ${occupants.map(player => player.name).join(', ')} đang ở đây` : ''}`);
@@ -139,8 +180,11 @@
       let context = !started ? 'Mua đất, xây phố và trở thành người có tổng tài sản cao nhất sau 30 vòng.' : finished ? 'Tổng tài sản = xu đang có + giá mua đất + chi phí đã xây.' : state.players[0].bankrupt ? 'Bạn đã phá sản. Các máy tiếp tục chơi để xác định người thắng; có thể bật Máy đi nhanh.' : state.current !== 0 ? `Bạn đang có ${money(state.players[0].cash)} xu. Có thể xem thông tin các ô trong lúc chờ.` : state.phase === 'buy' ? `Tiền thuê cơ bản ${L.BOARD[state.pending].rent} xu. Bạn có ${money(person.cash)} xu.${person.cash < L.BOARD[state.pending].price ? ' Chưa đủ tiền mua, hãy chọn Bỏ qua.' : ''}` : person.jailed && state.phase === 'roll' ? `Trả 50 xu để rời ngay hoặc thử gieo đôi. Đã thử ${person.jailAttempts}/2 lần.` : state.phase === 'end' ? 'Có thể nâng cấp đất đủ nhóm trước khi kết thúc lượt.' : 'Gieo 2 xúc xắc để di chuyển. Giữ xu dự phòng cho phí và tiền thuê.';
       $('[data-monopoly-prompt]').textContent = prompt;
       $('[data-monopoly-context]').textContent = context;
+      renderPreview($('[data-monopoly-buy-preview]'), L.investmentPreview(state, 0, { type: 'buy' }));
       $('.monopoly-last-action').textContent = lastAction;
       renderDetail();
+      renderPortfolio();
+      renderFinance();
       ui.message(!started ? 'Bản ván ngắn có 24 ô, 7 nhóm đất; không đấu giá, giao dịch hay thế chấp.' : finished ? 'Chọn Chơi thêm ván nữa để khởi đầu một thành phố mới.' : lastAction);
     }
     function showResult() {
@@ -194,11 +238,20 @@
       botPending = false;
       selected = 0;
       history = [];
+      finance = null; sales = []; deltaLeft = 0;
       lastAction = 'Thành phố đã sẵn sàng. Bạn đi trước!';
       remember([]);
       render();
     }
     scope.on(ui.workspace, 'click', event => {
+      const open = event.target.closest('[data-monopoly-open-tile]');
+      if (open) {
+        selected = Number(open.dataset.monopolyOpenTile);
+        renderDetail();
+        $('.monopoly-detail').scrollIntoView({ block: 'nearest' });
+        $('[data-monopoly-inspect]').focus({ preventScroll: true });
+        return;
+      }
       const tile = event.target.closest('[data-monopoly-tile]');
       if (tile) { selected = Number(tile.dataset.monopolyTile); renderDetail(); return; }
       const button = event.target.closest('[data-monopoly-action]');
@@ -210,6 +263,11 @@
       renderDetail();
     });
     scope.on($('[data-monopoly-fast]'), 'change', event => { fast = event.target.checked; });
+    scope.loop(dt => {
+      if (deltaLeft <= 0) return;
+      deltaLeft -= dt;
+      if (deltaLeft <= 0) ui.workspace.querySelectorAll('[data-monopoly-delta]').forEach(el => { el.hidden = true; });
+    });
     render();
     S.intro(ui, scope, {
       title: 'Xây một thành phố của riêng bạn', symbol: 'flag',

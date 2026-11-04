@@ -1,5 +1,26 @@
 # Quy tắc dự án ghi nhận từ harness
 
+## Cờ tỷ phú
+
+- Runner `node tests/monopoly-harness.cjs unit|browser|serial|check <nhãn-mới>` giữ ledger/log riêng ở `test-results/monopoly-verification/`, tổng tối đa 30 phút; browser chạy file://. Không dùng ngân sách các task cũ.
+- Preview mua/xây phải chỉ đọc và dùng cùng `rent`/`legalUpgrades` với luật giao dịch; không đọc thứ tự thẻ hoặc RNG. Cảnh báo dưới 160 xu chỉ là gợi ý ngân quỹ, không thêm điều kiện cấm mua/xây. Nút từ bảng tài sản chỉ mở thông tin; giao dịch vẫn qua `act`.
+- Dòng tiền chỉ cộng `credit`/`payment`. `liquidation.amount` là thông tin hóa đơn; tiền hoàn đã nằm trong `credit`, cộng lại sẽ sai sổ xu. Khi phá sản, chủ đất chỉ nhận `payment.amount`, không nhận `required` chưa được trả.
+- Thông tin vòng/xúc xắc phải ở ngoài nguồn DOM bị adapter 3D thu gọn. Chủ đất cấp 0 vẫn cần dấu nhận biết. Trên mobile dùng huy hiệu số 1–4 với chú giải tên ngoài bàn thay vì chữ dài rất nhỏ; kiểm tra ảnh 320 px và picking sau thay đổi mô hình.
+
+## Domino / Bida
+
+- Runner `node tests/domino-pool-harness.cjs unit|browser|serial|check <nhãn-mới>` giữ log và ledger riêng ở `test-results/domino-pool-verification/`, tối đa 30 phút. Browser dùng file://, không mở server.
+- Domino chỉ gọi `suggestMove` khi người dùng bấm nút Gợi ý; việc hiển thị gợi ý không được gọi `applyAction`. Xóa gợi ý khi chọn quân/đổi lượt/chơi lại. Không đọc quân đối thủ để giải thích nước đi.
+- Bida dùng chung `poolAim` cho 2D/3D. Đường bi mục tiêu là đoạn hướng ngắn bị chặn bởi bi/băng/lỗ, không phải quãng đường dừng theo lực. Giữ vật lý độc lập với hướng dẫn.
+- Browser: đọc `<output>` bằng textContent hoặc thuộc tính value, không dùng locator.inputValue. Khi đối chiếu góc ngắm ở viewport nhỏ, tính sai số góc từ số CSS pixel và khoảng cách chiếu; ngưỡng độ cố định có thể báo sai vì tọa độ pointer bị làm tròn.
+- CSS riêng của Bida phải có specificity cao hơn `.three-workspace .game-board-area` vì stylesheet 3D nạp sau. Kiểm tra chiều cao thực và tràn ngang ở 320/390 px.
+
+## Ma sói
+
+- Chạy `node tests/werewolf-harness.cjs unit|adapter|browser|serial|check <nhãn-mới>` để giữ ledger riêng tại `test-results/werewolf-verification/`, tổng tối đa 30 phút. Không ghi đè nhãn hoặc dùng lại ngân sách task cũ.
+- Lý do thảo luận chỉ lấy từ `view` đã lọc. Nhận vai/công bố soi là lời nói có thể sai, không xác thực bằng vai bí mật. Chỉ đưa phiếu vào lịch sử công khai sau khi chốt cả vòng.
+- Adapter Ma sói 3D đọc trạng thái `is-eliminated` từ UI. Khi sửa trạng thái hoặc nhãn ở UI, chạy cả unit adapter và browser 2D/3D; giữ thông tin người bị loại bằng chữ ngoài màu sắc.
+
 ## Giao báo / đua xe
 
 - `node tests/paper-route-harness.cjs unit|browser|test|serial|check <nhãn>` giữ

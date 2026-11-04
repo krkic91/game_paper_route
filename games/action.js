@@ -163,13 +163,21 @@
         S.stat('BI ĐÃ VÀO LỖ', 'potted', '0 / 15') +
         S.stat('CÚ ĐÁNH', 'shots', 0) +
         S.stat('LỖI BI TRẮNG', 'scratch', 0),
-      controls: `<label class="power-control"><span>Lực đánh</span><input type="range" min="10" max="100" value="65" step="1" aria-label="Lực đánh bi" /><output>65%</output></label><button class="button button-primary" data-shoot>${icon('arrow-up-right')}Đánh bi</button>`,
+      controls: `<label class="power-control"><span>Lực đánh</span><input type="range" min="10" max="100" value="65" step="1" aria-label="Lực đánh bi" /><output>65%</output></label><button class="button button-primary" data-shoot>${icon('arrow-up-right')}Đánh bi</button>
+        <div class="pool-aim-controls" role="group" aria-label="Chỉnh hướng ngắm"><button type="button" class="control-button" data-pool-aim="-1" aria-label="Xoay hướng ngắm trái 0,25 độ">↶ Trái</button><output data-pool-angle aria-label="Góc ngắm">0,00°</output><button type="button" class="control-button" data-pool-aim="1" aria-label="Xoay hướng ngắm phải 0,25 độ">Phải ↷</button><button type="button" class="control-button" data-pool-lock aria-pressed="false">Khóa hướng</button><button type="button" class="control-button" data-pool-guide aria-pressed="true">Hướng bi: bật</button></div>
+        <p class="pool-aim-help">Chạm bàn để ngắm · giữ Trái/Phải để chỉnh · khóa hướng rồi chỉnh lực.<br>Vạch vàng: hướng bi mục tiêu dự kiến, không phải quãng đường dừng.</p>`,
     });
     const { ctx } = ui,
       power = ui.controls.querySelector('input'),
       output = ui.controls.querySelector('output'),
       shootButton = ui.controls.querySelector('[data-shoot]');
     const visual = options.renderer === '3d' ? window.Arcade3D.createView('pool', ui, scope) : null;
+    const aimButtons = [...ui.controls.querySelectorAll('[data-pool-aim]')];
+    const lockButton = ui.controls.querySelector('[data-pool-lock]');
+    const guideButton = ui.controls.querySelector('[data-pool-guide]');
+    const angleOutput = ui.controls.querySelector('[data-pool-angle]');
+    let locked = false, showTarget = true, heldAim = null;
+    const fineStep = Math.PI / 720;
     let state,
       angle = 0,
       finished = false;
@@ -192,7 +200,8 @@
       '#aa6e77',
     ];
     function draw() {
-      if (visual) return visual.draw(state, { angle, power: Number(power.value) });
+      const guide = L.poolAim(state, angle);
+      if (visual) return visual.draw(state, { angle, power: Number(power.value), guide, showTarget });
       ctx.fillStyle = '#21372b';
       ctx.fillRect(0, 0, 900, 500);
       S.roundRect(ctx, 14, 14, 872, 472, 36, '#7e6950', '#bda77b');
@@ -250,38 +259,31 @@
       ctx.stroke();
       S.text(ctx, 'TRẠM CHƠI · BILLIARDS', 450, 269, 13, '#d3e5ae18', 'center', 700);
       const cue = state.balls[0];
-      if (state.status === 'ready' && !finished) {
+      if (guide && !finished) {
         const dx = Math.cos(angle),
           dy = Math.sin(angle);
-        let distance = 370;
-        for (const ball of state.balls.slice(1)) {
-          if (!ball.active) continue;
-          const bx = ball.x - cue.x,
-            by = ball.y - cue.y,
-            dot = bx * dx + by * dy,
-            cross = Math.abs(bx * dy - by * dx);
-          if (dot > 0 && cross < 22)
-            distance = Math.min(distance, Math.max(0, dot - Math.sqrt(484 - cross * cross)));
-        }
-        for (const [axis, component, min, max] of [
-          [cue.x, dx, 67, 833],
-          [cue.y, dy, 67, 433],
-        ])
-          if (component)
-            distance = Math.min(distance, (component > 0 ? max - axis : min - axis) / component);
-        distance = Math.max(0, distance);
         ctx.strokeStyle = '#e2ecc1a8';
         ctx.lineWidth = 1.5;
         ctx.setLineDash([5, 6]);
         ctx.beginPath();
         ctx.moveTo(cue.x + dx * 14, cue.y + dy * 14);
-        ctx.lineTo(cue.x + dx * distance, cue.y + dy * distance);
+        ctx.lineTo(guide.cue.to.x, guide.cue.to.y);
         ctx.stroke();
         ctx.setLineDash([]);
         ctx.strokeStyle = '#e2ecc155';
         ctx.beginPath();
-        ctx.arc(cue.x + dx * distance, cue.y + dy * distance, 11, 0, TAU);
+        ctx.arc(guide.cue.to.x, guide.cue.to.y, 11, 0, TAU);
         ctx.stroke();
+        if (showTarget && guide.target) {
+          ctx.strokeStyle = '#ffe18a';
+          ctx.lineWidth = 2.5;
+          ctx.setLineDash([7, 5]);
+          ctx.beginPath();
+          ctx.moveTo(guide.target.from.x, guide.target.from.y);
+          ctx.lineTo(guide.target.to.x, guide.target.to.y);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
         const pull = 23 + Number(power.value) * 0.18;
         ctx.strokeStyle = '#372f22';
         ctx.lineWidth = 6;
@@ -344,15 +346,22 @@
       ui.setStat('scratch', state.scratches);
       shootButton.disabled = state.status !== 'ready' || finished;
       power.disabled = state.status !== 'ready' || finished;
+      aimButtons.forEach(button => { button.disabled = power.disabled || locked; });
+      lockButton.disabled = power.disabled;
+      lockButton.setAttribute('aria-pressed', String(locked));
+      lockButton.textContent = locked ? 'Mở khóa hướng' : 'Khóa hướng';
+      angleOutput.value = `${((angle * 180 / Math.PI % 360 + 360) % 360).toFixed(2).replace('.', ',')}°`;
     }
     function shoot() {
       if (L.shootPool(state, angle, Number(power.value) / 100)) {
+        locked = false;
+        heldAim = null;
         ui.message('Bi đang lăn… Chờ tất cả bi dừng lại để đánh tiếp.');
         updateStats();
       }
     }
     function aim(event) {
-      if (state.status !== 'ready' || finished) return;
+      if (state.status !== 'ready' || finished || locked || event.shiftKey || (event.buttons & 2)) return;
       const p = visual ? visual.point(event) : ui.point(event);
       if (!p) return;
       const cue = state.balls[0];
@@ -373,6 +382,38 @@
       shoot();
       ui.workspace.focus({ preventScroll: true });
     });
+    function nudge(direction, amount = fineStep) {
+      if (state.status === 'ready' && !finished && !locked) angle += direction * amount;
+    }
+    for (const button of aimButtons) {
+      scope.on(button, 'pointerdown', event => {
+        if (event.button !== 0 || button.disabled || heldAim) return;
+        event.preventDefault();
+        button.setPointerCapture(event.pointerId);
+        button.focus({ preventScroll: true });
+        heldAim = { id: event.pointerId, direction: Number(button.dataset.poolAim), time: 0 };
+        nudge(heldAim.direction);
+      });
+      // Keyboard activation emits a click with detail 0; pointer activation was handled above.
+      scope.on(button, 'click', event => { if (event.detail === 0) nudge(Number(button.dataset.poolAim)); });
+      for (const name of ['pointerup', 'pointercancel', 'lostpointercapture']) scope.on(button, name, event => {
+        if (heldAim?.id === event.pointerId) heldAim = null;
+      }, true);
+    }
+    scope.on(window, 'blur', () => { heldAim = null; }, true);
+    scope.on(document, 'visibilitychange', () => { if (document.hidden) heldAim = null; }, true);
+    scope.onPause(() => { heldAim = null; });
+    scope.on(lockButton, 'click', () => {
+      if (state.status !== 'ready' || finished) return;
+      locked = !locked;
+      heldAim = null;
+      updateStats();
+    });
+    scope.on(guideButton, 'click', () => {
+      showTarget = !showTarget;
+      guideButton.setAttribute('aria-pressed', String(showTarget));
+      guideButton.textContent = `Hướng bi: ${showTarget ? 'bật' : 'tắt'}`;
+    });
     scope.on(window, 'keydown', (event) => {
       const key = S.gameKey(event);
       if (
@@ -381,8 +422,8 @@
       )
         return;
       event.preventDefault();
-      if (key === 'arrowleft') angle -= 0.04;
-      if (key === 'arrowright') angle += 0.04;
+      if (key === 'arrowleft') nudge(-1);
+      if (key === 'arrowright') nudge(1);
       if (key === 'arrowup') power.value = Math.min(100, Number(power.value) + 5);
       if (key === 'arrowdown') power.value = Math.max(10, Number(power.value) - 5);
       output.value = `${power.value}%`;
@@ -393,6 +434,8 @@
       S.clearOverlays(ui);
       state = L.createPool();
       angle = 0;
+      locked = false;
+      heldAim = null;
       finished = false;
       power.value = 65;
       output.value = '65%';
@@ -403,6 +446,10 @@
       draw();
     }
     scope.loop((dt) => {
+      if (heldAim) {
+        heldAim.time += dt;
+        if (heldAim.time > 0.3) nudge(heldAim.direction, dt * 0.35);
+      }
       const before = state.status,
         potted = state.potted,
         scratches = state.scratches;

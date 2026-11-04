@@ -242,3 +242,140 @@ test('300 seeded complete games preserve roles, legal actions, privacy and bound
   assert.equal(humanRoles.size, 4);
   assert.ok(outcomes.has('village') && outcomes.has('wolves'));
 });
+
+test('vote history is published only after resolution, retains every day and returns detached copies', () => {
+  const state = fixture(); state.phase = 'day';
+  submit(state, 0, 'vote', 1);
+  assert.deepEqual(L.view(state, 5).voteHistory, []);
+  for (const p of state.players.slice(1)) submit(state, p.id, 'vote', p.id === 1 ? 0 : 1);
+  L.advance(state);
+  const first = L.view(state).voteHistory[0];
+  assert.equal(first.day, 1); assert.equal(first.maximum, 7); assert.equal(first.eliminated, 1);
+  assert.equal(first.votes.length, 8);
+  first.votes[0].target = 99;
+  assert.equal(state.voteHistory[0].votes[0].target, 1);
+  state.phase = 'day'; tieVotes(state); L.advance(state);
+  assert.deepEqual(state.voteHistory.map(round => round.day), [1, 2]);
+  assert.equal(state.voteHistory[1].eliminated, null);
+  assert.equal(state.voteHistory[0].votes.length, 8);
+});
+
+test('public speech rejects invalid timing, targets, duplicate and fabricated reasons without changing state', () => {
+  const state = fixture();
+  const statement = { kind: 'suspect', target: 6, reason: 'intuition' };
+  const rejected = (player, input) => {
+    const before = JSON.stringify(state);
+    assert.equal(L.speak(state, player, input).ok, false);
+    assert.equal(JSON.stringify(state), before);
+  };
+  rejected(0, statement); state.phase = 'day';
+  rejected(-1, statement); rejected(0, null);
+  rejected(0, { ...statement, target: 0 }); rejected(0, { ...statement, target: 99 });
+  rejected(0, { ...statement, reason: 'vote-1' });
+  rejected(0, { kind: 'claim', role: 'wolf' });
+  rejected(0, { kind: 'claim', role: 'guard', target: 1, verdict: true });
+  rejected(0, { kind: 'claim', role: 'seer', target: 1, verdict: 'true' });
+  state.players[6].alive = false; rejected(0, statement); state.players[6].alive = true;
+  assert.equal(L.speak(state, 0, statement).ok, true); rejected(0, statement);
+  assert.equal(L.speak(state, 0, { kind: 'defend', target: 7, reason: 'intuition' }).ok, true);
+  assert.equal(L.speechesLeft(L.view(state)), 0);
+  rejected(0, { kind: 'claim', role: 'seer' });
+  state.day++; assert.equal(L.speechesLeft(L.view(state)), 2);
+  submit(state, 0, 'vote', 1); rejected(0, statement);
+  state.actions = {}; state.players[0].alive = false; rejected(0, statement);
+  state.players[0].alive = true; state.phase = 'over'; rejected(0, statement);
+});
+
+test('a human suspicion and defense change bot decisions, replies do not stack influence', () => {
+  const state = fixture(); state.phase = 'day';
+  assert.equal(L.botAction(L.view(state, 5), () => 0).target, 0);
+  assert.equal(L.speak(state, 0, { kind: 'suspect', target: 6, reason: 'intuition' }).ok, true);
+  assert.equal(state.discussion.filter(item => item.kind === 'reply').length, 2);
+  assert.equal(L.botAction(L.view(state, 5), () => 0).target, 6);
+  const before = L.botAction(L.view(state, 5), () => 0);
+  state.discussion.push(...Array.from({ length: 20 }, () => ({ kind: 'reply', speaker: 2, target: 7 })));
+  assert.deepEqual(L.botAction(L.view(state, 5), () => 0), before);
+  assert.equal(L.speak(state, 0, { kind: 'defend', target: 6, reason: 'intuition' }).ok, true);
+  assert.notEqual(L.botAction(L.view(state, 5), () => 0).target, 6);
+  assert.deepEqual(state.actions, {}); assert.equal(state.turn, 0);
+});
+
+test('reasons use resolved votes and publicly revealed roles, never a living hidden role', () => {
+  const state = fixture(); state.phase = 'day';
+  state.voteHistory.push({ day: 1, votes: [{ voter: 6, target: 1 }], eliminated: null, maximum: 1 });
+  state.knowledge[0][1] = true;
+  assert.equal(L.speechReasons(L.view(state), 'defend', 6).length, 1);
+  state.players[1].alive = false;
+  const options = L.speechReasons(L.view(state), 'defend', 6);
+  assert.equal(options.length, 2); assert.equal(options[1].id, 'vote-1');
+  assert.match(options[1].text, /Ngày 1.*Máy 1/);
+  assert.equal(L.speak(state, 0, { kind: 'defend', target: 6, reason: 'vote-1' }).ok, true);
+  assert.ok(state.discussion.some(item => item.kind === 'reply' && item.text.includes('Ngày 1')));
+  const snapshot = L.view(state, 5); snapshot.statements[0].reasonText = 'tampered';
+  assert.notEqual(state.statements[0].reasonText, 'tampered');
+});
+
+test('fake seer reports stay unverified and do not leak the actual role through validation or bot replies', () => {
+  const a = fixture(), b = fixture(); a.phase = b.phase = 'day';
+  [b.players[1].role, b.players[7].role] = [b.players[7].role, b.players[1].role];
+  const statement = { kind: 'claim', role: 'seer', target: 7, verdict: true };
+  assert.deepEqual(L.speak(a, 0, statement), L.speak(b, 0, statement));
+  assert.deepEqual(L.view(a), L.view(b));
+  assert.match(a.statements[0].text, /chưa xác thực/);
+  assert.equal(L.evidence(L.view(a, 5), 0).length, 0);
+  assert.equal(L.botAction(L.view(a, 5), () => 0).target, 7);
+  a.players[7].alive = false;
+  assert.ok(L.evidence(L.view(a, 5), 0).some(item => item.id === 'contradiction'));
+});
+
+test('contradictions can be cited from role changes or conflicting reports without inspecting hidden roles', () => {
+  const state = fixture(); state.phase = 'day';
+  assert.ok(L.speak(state, 0, { kind: 'claim', role: 'seer', target: 6, verdict: true }).ok);
+  assert.ok(L.speak(state, 0, { kind: 'claim', role: 'seer', target: 6, verdict: false }).ok);
+  assert.ok(L.speechReasons(L.view(state, 5), 'suspect', 0).some(item => item.id === 'contradiction'));
+  state.day++;
+  assert.ok(L.speak(state, 0, { kind: 'claim', role: 'guard' }).ok);
+  assert.match(L.evidence(L.view(state, 5), 0).find(item => item.id === 'contradiction').text, /đổi từ/);
+});
+
+test('private seer knowledge and wolf allies override false public reports and suspicions', () => {
+  const state = fixture(); state.phase = 'day';
+  state.knowledge[3][1] = true; state.knowledge[3][6] = false;
+  L.speak(state, 0, { kind: 'claim', role: 'seer', target: 6, verdict: true });
+  L.speak(state, 0, { kind: 'suspect', target: 2, reason: 'intuition' });
+  assert.equal(L.botAction(L.view(state, 3), () => 0).target, 1);
+  assert.notEqual(L.botAction(L.view(state, 1), () => 0).target, 2);
+  assert.deepEqual(L.view(state, 5).knowledge, {});
+});
+
+test('bot discussion cites public evidence and a seer may deliberately publish a discovered wolf', () => {
+  const state = fixture(); state.day = 2;
+  state.players[7].alive = false;
+  state.voteHistory.push({ day: 1, votes: [{ voter: 6, target: 7 }], eliminated: 7, maximum: 1 });
+  submit(state, 1, 'kill', 5); submit(state, 2, 'kill', 5);
+  submit(state, 3, 'inspect', 1); submit(state, 4, 'protect', 5);
+  assert.ok(L.advance(state).ok);
+  assert.ok(state.discussion.some(item => item.text.includes('Ngày 1') && item.target === 6));
+  assert.ok(state.discussion.some(item => item.speaker === 3 && item.kind === 'claim' && item.role === 'seer' && item.target === 1));
+  assert.equal(L.view(state, 0).players[3].role, null);
+});
+
+test('100 complete games with human speeches retain legal votes, hidden roles and bounded termination', () => {
+  for (let seed = 1; seed <= 100; seed++) {
+    const random = seeded(seed), state = L.createGame({ random });
+    let phases = 0;
+    while (state.phase !== 'over') {
+      if (state.phase === 'day' && state.players[0].alive) {
+        const target = L.legalTargets(state, 0)[0];
+        assert.ok(L.speak(state, 0, { kind: 'suspect', target, reason: 'intuition' }).ok);
+        assert.ok(L.speak(state, 0, { kind: 'claim', role: 'seer', target, verdict: true }).ok);
+      }
+      const action = L.botAction(L.view(state), random);
+      if (action) assert.ok(L.act(state, 0, action).ok);
+      assert.ok(L.advance(state).ok); assert.ok(++phases <= 24);
+      const rounds = L.view(state).voteHistory;
+      assert.equal(new Set(rounds.map(item => item.day)).size, rounds.length);
+      assert.ok(state.statements.filter(item => item.speaker === 0).length <= 24);
+    }
+  }
+});
